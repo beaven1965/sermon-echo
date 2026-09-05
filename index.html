@@ -813,7 +813,6 @@
   // ---- Recording ----
   recordBtn.addEventListener('click', async () => {
     if(!isRecording){
-      if(!ensureKeys()) return;
       errorBox.style.display = 'none';
       downloadNowBtn.style.display = 'none';
       try{
@@ -938,7 +937,6 @@
 
   // ---- Upload an existing recording ----
   uploadBtn.addEventListener('click', () => {
-    if(!ensureKeys()) return;
     fileInput.click();
   });
   fileInput.addEventListener('change', async () => {
@@ -952,93 +950,50 @@
     await saveThenProcess(file);
   });
 
-  // ---- OpenAI Whisper transcription ----
-  async function transcribeAudio(blob){
-    const key = localStorage.getItem('se_openai_key');
-    const formData = new FormData();
-    const ext = (blob && blob.type && blob.type.includes('wav')) ? 'wav' : 'webm';
-    formData.append('file', blob, 'recording.' + ext);
-    formData.append('model', 'whisper-1');
-    formData.append('language', 'en');
-    formData.append('temperature', '0');
-
-    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + key },
-      body: formData
+  // Converts a Blob to a base64 string (without the "data:...;base64," prefix)
+  function blobToBase64(blob){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(String(reader.result).split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
     });
-
-    if(!res.ok){
-      const errText = await res.text();
-      throw new Error('Transcription failed. Please check your OpenAI API key in Settings. (' + res.status + ')');
-    }
-    const data = await res.json();
-    return data.text;
   }
 
-  // ---- Claude summary ----
-  async function summarizeTranscript(transcript){
-    const key = localStorage.getItem('se_anthropic_key');
-
-    const systemPrompt = `You turn raw transcripts of spoken audio (sermons, lectures, meetings, or similar talks) into a short, shareable takeaway and a set of highlight bullets.
-The transcript may be imperfect: spoken language, filler words, or transcription errors. Read past the noise to the intent.
-First, quietly notice what kind of talk this is (sermon, lecture, meeting, class, etc.) and match your tone and content to it — don't force religious or academic framing onto content that isn't that.
-
-Respond with ONLY valid JSON, no other text, no markdown fences, in this exact shape:
-{"takeaway": "...", "bullets": ["...", "...", "..."]}
-
-For "takeaway": exactly 3 sentences someone could read in 10 seconds and want to share.
-- Sentence 1: the core point or theme of the talk, in plain, warm language.
-- Sentence 2: one vivid detail, example, story, or specific reference from the talk that makes it memorable.
-- Sentence 3: a practical, forward-looking takeaway — a next step, decision, or thing to remember or apply.
-Avoid jargon and generic summarizing. Tone: warm and conversational, like a friend texting you the one thing that stuck with them.
-
-For "bullets": 4-6 short highlight bullets in the order the talk unfolded (the main point, key examples or details, any decisions or action items). Plain language, one short sentence each. If the talk includes action items, assignments, or decisions (common in meetings), list those explicitly. Last bullet is the practical "so what" — what to do or remember from this.`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+  // ---- OpenAI Whisper transcription (via secure server function) ----
+  async function transcribeAudio(blob){
+    const audioBase64 = await blobToBase64(blob);
+    const res = await fetch('/.netlify/functions/transcribe', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [
-          { role: 'user', content: 'Transcript:\n\n' + transcript }
-        ]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ audioBase64, mimeType: blob.type })
     });
 
     if(!res.ok){
-      throw new Error('Could not generate the takeaway. Please check your Anthropic API key in Settings. (' + res.status + ')');
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || ('Transcription failed. (' + res.status + ')'));
     }
     const data = await res.json();
-    const raw = data.content.map(b => b.text || '').join('').trim();
-    let cleaned = raw.replace(/```json|```/g, '').trim();
+    return data.transcript;
+  }
 
-    // If the model added any stray text around the JSON, pull out just the {...} part.
-    const firstBrace = cleaned.indexOf('{');
-    const lastBrace = cleaned.lastIndexOf('}');
-    if(firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace){
-      cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+  // ---- Claude summary (via secure server function) ----
+  async function summarizeTranscript(transcript){
+    const res = await fetch('/.netlify/functions/summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transcript })
+    });
+
+    if(!res.ok){
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || ('Could not generate the takeaway. (' + res.status + ')'));
     }
-
-    try{
-      const parsed = JSON.parse(cleaned);
-      if(!parsed.takeaway || !Array.isArray(parsed.bullets)){
-        throw new Error('missing fields');
-      }
-      return parsed;
-    }catch(e){
-      if(transcript.trim().split(/\s+/).length < 15){
-        throw new Error('The recording was too short to summarize. Please record more of the sermon and try again.');
-      }
+    const data = await res.json();
+    if(!data.takeaway || !Array.isArray(data.bullets)){
       throw new Error('Received an unexpected response while preparing the takeaway. Please try again.');
     }
+    return data;
   }
 
   // ---- Results display ----
