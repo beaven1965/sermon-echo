@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sermon Echo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C2331;
+    --ink-deep:#151B26;
+    --surface:#262F40;
+    --surface-line:#3A4457;
+    --paper:#F3ECDD;
+    --paper-line:#DCD0B4;
+    --gold:#C9A227;
+    --gold-bright:#E0BB3D;
+    --ember:#B24C3B;
+    --ember-bright:#C85F4D;
+    --text:#EDE6D6;
+    --text-muted:#9AA3B5;
+    --ink-on-paper:#2A2013;
+    --ink-on-paper-muted:#6B5E45;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .shell{
+    width:100%;
+    max-width:520px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:24px 20px 60px;
+  }
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:8px 4px 32px;
+  }
+  .brand{
+    font-family:'Source Serif 4',serif;
+    font-size:20px;
+    font-weight:600;
+    letter-spacing:0.01em;
+    color:var(--text);
+  }
+  .gear-btn{
+    background:none;
+    border:none;
+    color:var(--text-muted);
+    cursor:pointer;
+    padding:8px;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background 0.15s, color 0.15s;
+  }
+  .gear-btn:hover{ background:var(--surface); color:var(--text); }
+  .gear-btn:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:2px;
+  }
+
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  /* ---- Record stage ---- */
+  .record-stage{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:28px;
+    width:100%;
+    padding:20px 0 40px;
+  }
+  .record-btn{
+    width:148px;
+    height:148px;
+    border-radius:50%;
+    border:none;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold));
+    box-shadow:0 0 0 8px rgba(201,162,39,0.12);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform 0.15s ease, box-shadow 0.3s ease;
+    position:relative;
+  }
+  .record-btn:hover{ transform:scale(1.03); }
+  .record-btn:active{ transform:scale(0.97); }
+  .record-btn.recording{
+    background:radial-gradient(circle at 35% 30%, var(--ember-bright), var(--ember));
+    animation:breathe 2.6s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ box-shadow:0 0 0 8px rgba(178,76,59,0.16); }
+    50%{ box-shadow:0 0 0 18px rgba(178,76,59,0.06); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .record-btn.recording{ animation:none; }
+  }
+  .record-icon{
+    width:40px;
+    height:40px;
+    border-radius:8px;
+    background:var(--ink-deep);
+  }
+  .record-btn.recording .record-icon{
+    border-radius:50%;
+    width:36px;
+    height:36px;
+    background:var(--ink-deep);
+  }
+  .record-label{
+    font-size:15px;
+    color:var(--text-muted);
+    letter-spacing:0.02em;
+  }
+  .timer{
+    font-family:'Source Serif 4',serif;
+    font-size:34px;
+    font-variant-numeric:tabular-nums;
+    color:var(--text);
+    min-height:44px;
+  }
+  .hint{
+    font-size:13px;
+    color:var(--text-muted);
+    text-align:center;
+    max-width:280px;
+    line-height:1.5;
+  }
+
+  /* ---- Status / processing ---- */
+  .status-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--text-muted);
+    font-size:14px;
+  }
+  .spinner{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    border:2px solid var(--surface-line);
+    border-top-color:var(--gold);
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .error-box{
+    background:rgba(178,76,59,0.14);
+    border:1px solid rgba(178,76,59,0.4);
+    color:#E8B9AF;
+    padding:14px 16px;
+    border-radius:10px;
+    font-size:14px;
+    line-height:1.5;
+    width:100%;
+  }
+
+  /* ---- Results ---- */
+  .results{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    padding-top:8px;
+  }
+  .result-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .result-meta .date{
+    font-size:13px;
+    color:var(--text-muted);
+  }
+  .new-recording-btn{
+    background:none;
+    border:1px solid var(--surface-line);
+    color:var(--text-muted);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    padding:7px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:border-color 0.15s, color 0.15s;
+  }
+  .new-recording-btn:hover{ border-color:var(--gold); color:var(--gold-bright); }
+
+  .pause-btn{
+    background:none;
+    border:1px solid var(--surface-line);
+    color:var(--text-muted);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    padding:7px 18px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:border-color 0.15s, color 0.15s;
+    margin-top:-8px;
+  }
+  .pause-btn:hover{ border-color:var(--gold); color:var(--gold-bright); }
+  .pause-btn.is-paused{ border-color:var(--ember); color:var(--ember-bright); }
+
+  .player-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .player-row audio{ flex:1; min-width:0; }
+  .skip-btn{
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    padding:8px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:border-color 0.15s, color 0.15s;
+  }
+  .skip-btn:hover{ border-color:var(--gold); color:var(--gold-bright); }
+
+  .upload-btn{
+    background:none;
+    border:none;
+    color:var(--text-muted);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .upload-btn:hover{ color:var(--gold-bright); }
+
+  .header-actions{
+    display:flex;
+    gap:4px;
+  }
+
+  .library{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .library-item{
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    border-radius:12px;
+    padding:16px;
+    cursor:pointer;
+    transition:border-color 0.15s;
+  }
+  .library-item:hover{ border-color:var(--gold); }
+  .library-item .lib-date{
+    font-size:12px;
+    color:var(--text-muted);
+    margin-bottom:6px;
+  }
+  .library-item .lib-takeaway{
+    font-size:14px;
+    line-height:1.5;
+    color:var(--text);
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .library-item .lib-delete{
+    float:right;
+    background:none;
+    border:none;
+    color:var(--text-muted);
+    font-size:12px;
+    cursor:pointer;
+    text-decoration:underline;
+  }
+  .library-item .lib-delete:hover{ color:var(--ember-bright); }
+
+  .paper-card{
+    background:var(--paper);
+    color:var(--ink-on-paper);
+    border-radius:6px;
+    padding:28px 26px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.28);
+  }
+  .paper-card .eyebrow{
+    font-size:12px;
+    color:var(--ink-on-paper-muted);
+    margin-bottom:10px;
+    font-weight:600;
+  }
+  .takeaway-text{
+    font-family:'Source Serif 4',serif;
+    font-size:19px;
+    line-height:1.55;
+    font-style:italic;
+  }
+  .divider{
+    height:1px;
+    background:var(--paper-line);
+    margin:22px 0;
+  }
+  .bullets{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .bullets li{
+    display:flex;
+    gap:10px;
+    font-size:15px;
+    line-height:1.5;
+  }
+  .bullets li::before{
+    content:'—';
+    color:var(--ink-on-paper-muted);
+    flex-shrink:0;
+  }
+
+  .transcript-toggle{
+    background:none;
+    border:none;
+    color:var(--text-muted);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    cursor:pointer;
+    padding:10px 2px;
+    text-align:left;
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+  .transcript-toggle:hover{ color:var(--text); }
+  .transcript-box{
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    border-radius:10px;
+    padding:18px;
+    font-size:14px;
+    line-height:1.6;
+    color:var(--text-muted);
+    max-height:320px;
+    overflow-y:auto;
+    white-space:pre-wrap;
+  }
+  audio{ width:100%; }
+
+  /* ---- Settings modal ---- */
+  .modal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(10,13,20,0.6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:10;
+  }
+  .modal{
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    border-radius:14px;
+    padding:28px;
+    width:100%;
+    max-width:420px;
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .modal h2{
+    font-family:'Source Serif 4',serif;
+    font-size:22px;
+    margin:0 0 6px;
+    font-weight:600;
+  }
+  .modal p.sub{
+    color:var(--text-muted);
+    font-size:13px;
+    margin:0 0 22px;
+    line-height:1.5;
+  }
+  .field{
+    margin-bottom:18px;
+  }
+  .field label{
+    display:block;
+    font-size:13px;
+    color:var(--text-muted);
+    margin-bottom:6px;
+  }
+  .field input{
+    width:100%;
+    background:var(--ink-deep);
+    border:1px solid var(--surface-line);
+    color:var(--text);
+    padding:11px 12px;
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+  }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    margin-top:8px;
+  }
+  .btn-primary{
+    flex:1;
+    background:var(--gold);
+    color:var(--ink-deep);
+    border:none;
+    padding:12px;
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .btn-primary:hover{ background:var(--gold-bright); }
+  .btn-secondary{
+    background:none;
+    border:1px solid var(--surface-line);
+    color:var(--text-muted);
+    padding:12px 16px;
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .btn-secondary:hover{ color:var(--text); border-color:var(--text-muted); }
+
+  .keys-note{
+    font-size:12px;
+    color:var(--text-muted);
+    line-height:1.5;
+    background:var(--ink-deep);
+    border-radius:8px;
+    padding:12px 14px;
+    margin-top:4px;
+  }
+  .keys-note a{ color:var(--gold-bright); }
+
+  .visually-hidden{
+    position:absolute;
+    width:1px;height:1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header>
+    <div class="brand">Sermon Echo</div>
+    <div class="header-actions">
+      <button class="gear-btn" id="libraryBtn" aria-label="Past sermons">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+      </button>
+      <button class="gear-btn" id="settingsBtn" aria-label="Settings">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- RECORD STAGE -->
+    <div class="record-stage" id="recordStage">
+      <button class="record-btn" id="recordBtn" aria-label="Start recording">
+        <span class="record-icon" id="recordIcon"></span>
+      </button>
+      <div class="timer" id="timer">00:00</div>
+      <div class="record-label" id="recordLabel">Tap to start recording</div>
+      <button class="pause-btn" id="pauseBtn" style="display:none;">Pause</button>
+      <div class="hint" id="hint">Place the phone near the pulpit, away from speakers, and switch on airplane mode to avoid interruptions.</div>
+      <button class="upload-btn" id="uploadBtn">Or upload an existing recording</button>
+      <input type="file" id="fileInput" accept="audio/*,video/*" class="visually-hidden">
+
+      <div class="status-row" id="statusRow" style="display:none;">
+        <div class="spinner"></div>
+        <span id="statusText">Transcribing…</span>
+      </div>
+      <div class="error-box" id="errorBox" style="display:none;"></div>
+      <button class="upload-btn" id="downloadNowBtn" style="display:none;">⬇ Download this recording</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results" id="results" style="display:none;">
+      <div class="result-meta">
+        <span class="date" id="resultDate"></span>
+        <button class="new-recording-btn" id="newRecordingBtn">New recording</button>
+      </div>
+
+      <div class="player-row">
+        <button class="skip-btn" id="skipBackBtn" aria-label="Rewind 15 seconds">⟲ 15</button>
+        <audio id="audioPlayback" controls></audio>
+        <button class="skip-btn" id="skipFwdBtn" aria-label="Forward 15 seconds">15 ⟳</button>
+        <button class="skip-btn" id="downloadBtn" aria-label="Download recording">⬇ Save</button>
+      </div>
+
+      <div class="paper-card">
+        <div class="eyebrow">Today's takeaway</div>
+        <div class="takeaway-text" id="takeawayText"></div>
+      </div>
+
+      <div class="paper-card">
+        <div class="eyebrow">Highlights</div>
+        <ul class="bullets" id="bulletsList"></ul>
+      </div>
+
+      <button class="transcript-toggle" id="transcriptToggle">Show full transcript</button>
+      <div class="transcript-box" id="transcriptBox" style="display:none;"></div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="library" id="libraryView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Past sermons</span>
+        <button class="new-recording-btn" id="closeLibraryBtn">Close</button>
+      </div>
+      <div id="libraryList"></div>
+      <div class="hint" id="libraryEmpty" style="display:none;">No saved sermons yet. Once you finish a recording, it'll show up here automatically.</div>
+    </div>
+  </main>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-backdrop" id="settingsModal" style="display:none;">
+  <div class="modal">
+    <h2>Settings</h2>
+    <p class="sub">These keys are saved only in this browser, on this device. They are never uploaded anywhere else.</p>
+
+    <div class="field">
+      <label for="openaiKey">OpenAI API key (for transcription)</label>
+      <input type="password" id="openaiKey" placeholder="sk-...">
+    </div>
+    <div class="field">
+      <label for="anthropicKey">Anthropic API key (for the takeaway)</label>
+      <input type="password" id="anthropicKey" placeholder="sk-ant-...">
+    </div>
+
+    <div class="keys-note">
+      Keep this link private. Anyone with your keys entered on their own device can't see yours — but don't share this page's link publicly while keys are set up this way.
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="closeSettingsBtn">Close</button>
+      <button class="btn-primary" id="saveSettingsBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const recordBtn = document.getElementById('recordBtn');
+  const recordIcon = document.getElementById('recordIcon');
+  const recordLabel = document.getElementById('recordLabel');
+  const timerEl = document.getElementById('timer');
+  const hint = document.getElementById('hint');
+  const statusRow = document.getElementById('statusRow');
+  const statusText = document.getElementById('statusText');
+  const errorBox = document.getElementById('errorBox');
+  const recordStage = document.getElementById('recordStage');
+  const results = document.getElementById('results');
+  const resultDate = document.getElementById('resultDate');
+  const takeawayText = document.getElementById('takeawayText');
+  const bulletsList = document.getElementById('bulletsList');
+  const transcriptToggle = document.getElementById('transcriptToggle');
+  const transcriptBox = document.getElementById('transcriptBox');
+  const audioPlayback = document.getElementById('audioPlayback');
+  const skipBackBtn = document.getElementById('skipBackBtn');
+  const skipFwdBtn = document.getElementById('skipFwdBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const downloadNowBtn = document.getElementById('downloadNowBtn');
+  let currentAudioBlob = null;
+
+  function downloadBlob(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+  function makeFileName(blob){
+    const d = new Date();
+    const stamp = d.toISOString().slice(0,10) + '-' + String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0');
+    const ext = (blob && blob.type && blob.type.includes('wav')) ? 'wav' : 'webm';
+    return 'sermon-echo-' + stamp + '.' + ext;
+  }
+  downloadBtn.addEventListener('click', () => {
+    if(currentAudioBlob) downloadBlob(currentAudioBlob, makeFileName(currentAudioBlob));
+  });
+  downloadNowBtn.addEventListener('click', () => {
+    if(currentAudioBlob) downloadBlob(currentAudioBlob, makeFileName(currentAudioBlob));
+  });
+
+  skipBackBtn.addEventListener('click', () => {
+    audioPlayback.currentTime = Math.max(0, audioPlayback.currentTime - 15);
+  });
+  skipFwdBtn.addEventListener('click', () => {
+    audioPlayback.currentTime = Math.min(audioPlayback.duration || Infinity, audioPlayback.currentTime + 15);
+  });
+  const newRecordingBtn = document.getElementById('newRecordingBtn');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const fileInput = document.getElementById('fileInput');
+  const libraryBtn = document.getElementById('libraryBtn');
+  const closeLibraryBtn = document.getElementById('closeLibraryBtn');
+  const libraryView = document.getElementById('libraryView');
+  const libraryList = document.getElementById('libraryList');
+  const libraryEmpty = document.getElementById('libraryEmpty');
+
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsModal = document.getElementById('settingsModal');
+  const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+  const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+  const openaiKeyInput = document.getElementById('openaiKey');
+  const anthropicKeyInput = document.getElementById('anthropicKey');
+
+  let mediaRecorder, chunks = [], startTime, timerInterval;
+  let isRecording = false;
+  let isPaused = false;
+  let isFinalizing = false;
+  let pausedElapsed = 0; // ms accumulated before the current pause/resume segment
+  let activeStream = null;
+  let segments = []; // separate audio blobs, one per record/pause cycle
+  let lastRecordingDurationMs = 0;
+  const pauseBtn = document.getElementById('pauseBtn');
+
+  // ---- Combining paused segments into one clean audio file ----
+  // Browsers can drop or corrupt audio when using MediaRecorder's built-in
+  // pause()/resume(), so instead we stop and start a fresh recorder for each
+  // segment, then stitch the raw audio together ourselves afterward.
+  function concatAudioBuffers(ctx, buffers){
+    const numberOfChannels = Math.max(...buffers.map(b => b.numberOfChannels));
+    const sampleRate = buffers[0].sampleRate;
+    const totalLength = buffers.reduce((sum, b) => sum + b.length, 0);
+    const result = ctx.createBuffer(numberOfChannels, totalLength, sampleRate);
+    for(let ch = 0; ch < numberOfChannels; ch++){
+      const channelData = result.getChannelData(ch);
+      let offset = 0;
+      for(const buf of buffers){
+        const src = buf.numberOfChannels > ch ? buf.getChannelData(ch) : buf.getChannelData(0);
+        channelData.set(src, offset);
+        offset += buf.length;
+      }
+    }
+    return result;
+  }
+  function writeString(view, offset, str){
+    for(let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+  }
+  function audioBufferToWav(buffer){
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    let samples;
+    if(numChannels === 2){
+      const left = buffer.getChannelData(0), right = buffer.getChannelData(1);
+      samples = new Float32Array(left.length + right.length);
+      for(let i = 0, j = 0; i < left.length; i++){
+        samples[j++] = left[i];
+        samples[j++] = right[i];
+      }
+    } else {
+      samples = buffer.getChannelData(0);
+    }
+    const bytesPerSample = 2, blockAlign = numChannels * bytesPerSample;
+    const dataSize = samples.length * bytesPerSample;
+    const arrBuf = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(arrBuf);
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + dataSize, true);
+    writeString(view, 8, 'WAVE');
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, 16, true);
+    writeString(view, 36, 'data');
+    view.setUint32(40, dataSize, true);
+    let offset = 44;
+    for(let i = 0; i < samples.length; i++, offset += 2){
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    }
+    return new Blob([view], { type: 'audio/wav' });
+  }
+  async function combineSegments(segs){
+    if(segs.length <= 1) return segs[0];
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC();
+    try{
+      const buffers = [];
+      for(const seg of segs){
+        const arrayBuffer = await seg.arrayBuffer();
+        buffers.push(await ctx.decodeAudioData(arrayBuffer));
+      }
+      const combined = concatAudioBuffers(ctx, buffers);
+      return audioBufferToWav(combined);
+    } finally {
+      ctx.close();
+    }
+  }
+
+  function startSegmentRecorder(){
+    chunks = [];
+    mediaRecorder = new MediaRecorder(activeStream);
+    mediaRecorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      segments.push(new Blob(chunks, { type: 'audio/webm' }));
+      if(isFinalizing){
+        activeStream.getTracks().forEach(t => t.stop());
+        finishRecording();
+      }
+    };
+    mediaRecorder.start(1000);
+  }
+
+  function withTimeout(promise, ms){
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Combining the recording took too long')), ms))
+    ]);
+  }
+
+  async function finishRecording(){
+    recordLabel.textContent = 'Processing…';
+    let audioBlob;
+    try{
+      audioBlob = await withTimeout(combineSegments(segments), 20000);
+    }catch(err){
+      console.error('Could not stitch recording segments together in time — using the largest segment instead', err);
+      // Fall back to whichever single segment has the most audio, so the
+      // user still gets something useful instead of getting stuck forever.
+      audioBlob = segments.reduce((biggest, s) => (s.size > (biggest ? biggest.size : 0) ? s : biggest), null) || segments[0];
+    }
+    segments = [];
+    isFinalizing = false;
+    await saveThenProcess(audioBlob, lastRecordingDurationMs);
+  }
+
+  // ---- Settings ----
+  function loadKeys(){
+    openaiKeyInput.value = localStorage.getItem('se_openai_key') || '';
+    anthropicKeyInput.value = localStorage.getItem('se_anthropic_key') || '';
+  }
+  function openSettings(){ loadKeys(); settingsModal.style.display = 'flex'; }
+  function closeSettings(){ settingsModal.style.display = 'none'; }
+
+  settingsBtn.addEventListener('click', openSettings);
+  closeSettingsBtn.addEventListener('click', closeSettings);
+  saveSettingsBtn.addEventListener('click', () => {
+    localStorage.setItem('se_openai_key', openaiKeyInput.value.trim());
+    localStorage.setItem('se_anthropic_key', anthropicKeyInput.value.trim());
+    closeSettings();
+  });
+
+  // Prompt for keys on first use if missing
+  function ensureKeys(){
+    const ok = localStorage.getItem('se_openai_key');
+    const ak = localStorage.getItem('se_anthropic_key');
+    if(!ok || !ak){
+      openSettings();
+      return false;
+    }
+    return true;
+  }
+
+  // ---- Timer ----
+  function formatTime(ms){
+    const totalSec = Math.floor(ms/1000);
+    const m = String(Math.floor(totalSec/60)).padStart(2,'0');
+    const s = String(totalSec%60).padStart(2,'0');
+    return m+':'+s;
+  }
+
+  // ---- Recording ----
+  recordBtn.addEventListener('click', async () => {
+    if(!isRecording){
+      if(!ensureKeys()) return;
+      errorBox.style.display = 'none';
+      downloadNowBtn.style.display = 'none';
+      try{
+        activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        segments = [];
+        isFinalizing = false;
+        startSegmentRecorder();
+        isRecording = true;
+        isPaused = false;
+        pausedElapsed = 0;
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+          timerEl.textContent = formatTime(pausedElapsed + (Date.now() - startTime));
+        }, 250);
+
+        recordBtn.classList.add('recording');
+        recordBtn.setAttribute('aria-label','Stop recording');
+        recordLabel.textContent = 'Recording — tap to stop';
+        hint.style.display = 'none';
+        pauseBtn.style.display = 'inline-block';
+        pauseBtn.textContent = 'Pause';
+        pauseBtn.classList.remove('is-paused');
+      }catch(err){
+        showError('Could not access the microphone. Please allow microphone access and try again.');
+      }
+    } else {
+      lastRecordingDurationMs = isPaused ? pausedElapsed : pausedElapsed + (Date.now() - startTime);
+      isRecording = false;
+      isPaused = false;
+      clearInterval(timerInterval);
+      recordBtn.classList.remove('recording');
+      recordBtn.setAttribute('aria-label','Start recording');
+      recordLabel.textContent = 'Processing…';
+      pauseBtn.style.display = 'none';
+
+      if(mediaRecorder && mediaRecorder.state !== 'inactive'){
+        isFinalizing = true;
+        mediaRecorder.stop(); // onstop pushes the final segment, then finishes since isFinalizing is true
+      } else {
+        // Was already paused (recorder already stopped) — just finish now.
+        finishRecording();
+      }
+    }
+  });
+
+  pauseBtn.addEventListener('click', () => {
+    if(!isRecording) return;
+    if(!isPaused){
+      isPaused = true;
+      pausedElapsed += Date.now() - startTime;
+      clearInterval(timerInterval);
+      mediaRecorder.stop(); // onstop pushes this segment into the array (isFinalizing is false, so it just waits)
+      pauseBtn.textContent = 'Resume';
+      pauseBtn.classList.add('is-paused');
+      recordLabel.textContent = 'Paused — tap Resume to continue';
+    } else {
+      isPaused = false;
+      startSegmentRecorder(); // starts a brand-new, clean segment
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        timerEl.textContent = formatTime(pausedElapsed + (Date.now() - startTime));
+      }, 250);
+      pauseBtn.textContent = 'Pause';
+      pauseBtn.classList.remove('is-paused');
+      recordLabel.textContent = 'Recording — tap to stop';
+    }
+  });
+
+  function showError(msg, audioBlob){
+    errorBox.textContent = msg;
+    errorBox.style.display = 'block';
+    statusRow.style.display = 'none';
+    recordLabel.textContent = 'Tap to start recording';
+    hint.style.display = 'block';
+
+    if(audioBlob){
+      currentAudioBlob = audioBlob;
+      downloadNowBtn.style.display = 'inline-block';
+      errorBox.textContent = msg + ' Your recording itself is safe — you can download it below.';
+    } else {
+      downloadNowBtn.style.display = 'none';
+    }
+  }
+
+  // Saves the raw audio to the local library right away (before transcription),
+  // so the recording is never lost even if transcription or the API keys fail.
+  async function saveThenProcess(audioBlob, durationMs){
+    let pendingId = null;
+    try{
+      pendingId = await saveSermon({
+        date: new Date().toISOString(),
+        takeaway: '',
+        bullets: [],
+        transcript: '',
+        audioBlob,
+        durationMs: durationMs || 0,
+        pending: true
+      });
+    }catch(err){
+      console.error('Could not save the raw recording', err);
+    }
+    await processAudio(audioBlob, pendingId);
+  }
+
+  async function processAudio(audioBlob, pendingId){
+    audioPlayback.src = URL.createObjectURL(audioBlob);
+    currentAudioBlob = audioBlob;
+
+    statusRow.style.display = 'flex';
+    statusText.textContent = 'Transcribing the recording…';
+
+    try{
+      const transcript = await transcribeAudio(audioBlob);
+      statusText.textContent = 'Preparing your takeaway…';
+      const summary = await summarizeTranscript(transcript);
+      showResults(transcript, summary, audioBlob, pendingId);
+    }catch(err){
+      console.error(err);
+      showError(err.message || 'Something went wrong while processing the recording. Please try again.', audioBlob);
+    }
+  }
+
+  // ---- Upload an existing recording ----
+  uploadBtn.addEventListener('click', () => {
+    if(!ensureKeys()) return;
+    fileInput.click();
+  });
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0];
+    fileInput.value = '';
+    if(!file) return;
+    errorBox.style.display = 'none';
+    statusRow.style.display = 'flex';
+    recordLabel.textContent = 'Processing…';
+    hint.style.display = 'none';
+    await saveThenProcess(file);
+  });
+
+  // ---- OpenAI Whisper transcription ----
+  async function transcribeAudio(blob){
+    const key = localStorage.getItem('se_openai_key');
+    const formData = new FormData();
+    const ext = (blob && blob.type && blob.type.includes('wav')) ? 'wav' : 'webm';
+    formData.append('file', blob, 'recording.' + ext);
+    formData.append('model', 'whisper-1');
+    formData.append('language', 'en');
+    formData.append('temperature', '0');
+
+    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + key },
+      body: formData
+    });
+
+    if(!res.ok){
+      const errText = await res.text();
+      throw new Error('Transcription failed. Please check your OpenAI API key in Settings. (' + res.status + ')');
+    }
+    const data = await res.json();
+    return data.text;
+  }
+
+  // ---- Claude summary ----
+  async function summarizeTranscript(transcript){
+    const key = localStorage.getItem('se_anthropic_key');
+
+    const systemPrompt = `You turn raw transcripts of spoken audio (sermons, lectures, meetings, or similar talks) into a short, shareable takeaway and a set of highlight bullets.
+The transcript may be imperfect: spoken language, filler words, or transcription errors. Read past the noise to the intent.
+First, quietly notice what kind of talk this is (sermon, lecture, meeting, class, etc.) and match your tone and content to it — don't force religious or academic framing onto content that isn't that.
+
+Respond with ONLY valid JSON, no other text, no markdown fences, in this exact shape:
+{"takeaway": "...", "bullets": ["...", "...", "..."]}
+
+For "takeaway": exactly 3 sentences someone could read in 10 seconds and want to share.
+- Sentence 1: the core point or theme of the talk, in plain, warm language.
+- Sentence 2: one vivid detail, example, story, or specific reference from the talk that makes it memorable.
+- Sentence 3: a practical, forward-looking takeaway — a next step, decision, or thing to remember or apply.
+Avoid jargon and generic summarizing. Tone: warm and conversational, like a friend texting you the one thing that stuck with them.
+
+For "bullets": 4-6 short highlight bullets in the order the talk unfolded (the main point, key examples or details, any decisions or action items). Plain language, one short sentence each. If the talk includes action items, assignments, or decisions (common in meetings), list those explicitly. Last bullet is the practical "so what" — what to do or remember from this.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [
+          { role: 'user', content: 'Transcript:\n\n' + transcript }
+        ]
+      })
+    });
+
+    if(!res.ok){
+      throw new Error('Could not generate the takeaway. Please check your Anthropic API key in Settings. (' + res.status + ')');
+    }
+    const data = await res.json();
+    const raw = data.content.map(b => b.text || '').join('').trim();
+    let cleaned = raw.replace(/```json|```/g, '').trim();
+
+    // If the model added any stray text around the JSON, pull out just the {...} part.
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if(firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace){
+      cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+    }
+
+    try{
+      const parsed = JSON.parse(cleaned);
+      if(!parsed.takeaway || !Array.isArray(parsed.bullets)){
+        throw new Error('missing fields');
+      }
+      return parsed;
+    }catch(e){
+      if(transcript.trim().split(/\s+/).length < 15){
+        throw new Error('The recording was too short to summarize. Please record more of the sermon and try again.');
+      }
+      throw new Error('Received an unexpected response while preparing the takeaway. Please try again.');
+    }
+  }
+
+  // ---- Results display ----
+  function showResults(transcript, summary, audioBlob, pendingId){
+    statusRow.style.display = 'none';
+    recordStage.style.display = 'none';
+    results.style.display = 'flex';
+
+    const dateObj = new Date();
+    resultDate.textContent = dateObj.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+    takeawayText.textContent = summary.takeaway;
+
+    bulletsList.innerHTML = '';
+    (summary.bullets || []).forEach(b => {
+      const li = document.createElement('li');
+      li.textContent = b;
+      bulletsList.appendChild(li);
+    });
+
+    transcriptBox.textContent = transcript;
+    currentAudioBlob = audioBlob || currentAudioBlob;
+
+    if(audioBlob){
+      const fields = {
+        date: dateObj.toISOString(),
+        takeaway: summary.takeaway,
+        bullets: summary.bullets || [],
+        transcript,
+        audioBlob,
+        pending: false
+      };
+      if(pendingId){
+        updateSermon(pendingId, fields).catch(err => console.error('Could not update sermon in library', err));
+      } else {
+        saveSermon(fields).catch(err => console.error('Could not save sermon to library', err));
+      }
+    }
+  }
+
+  transcriptToggle.addEventListener('click', () => {
+    const showing = transcriptBox.style.display === 'block';
+    transcriptBox.style.display = showing ? 'none' : 'block';
+    transcriptToggle.textContent = showing ? 'Show full transcript' : 'Hide full transcript';
+  });
+
+  newRecordingBtn.addEventListener('click', () => {
+    results.style.display = 'none';
+    recordStage.style.display = 'flex';
+    recordLabel.textContent = 'Tap to start recording';
+    hint.style.display = 'block';
+    timerEl.textContent = '00:00';
+    errorBox.style.display = 'none';
+    downloadNowBtn.style.display = 'none';
+  });
+
+  // ---- Library (saved sermons, stored locally on this device via IndexedDB) ----
+  const DB_NAME = 'sermon_echo_db';
+  const STORE_NAME = 'sermons';
+
+  function openDb(){
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if(!db.objectStoreNames.contains(STORE_NAME)){
+          db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function saveSermon(record){
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const req = tx.objectStore(STORE_NAME).add(record);
+      req.onsuccess = () => resolve(req.result);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function updateSermon(id, fields){
+    if(id === null || id === undefined) return;
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const getReq = store.get(id);
+      getReq.onsuccess = () => {
+        const record = getReq.result;
+        if(!record){ resolve(); return; }
+        Object.assign(record, fields);
+        store.put(record);
+      };
+      getReq.onerror = () => reject(getReq.error);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function getAllSermons(){
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function deleteSermon(id){
+    const db = await openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).delete(id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function renderLibrary(){
+    libraryList.innerHTML = '';
+    let sermons = [];
+    try{
+      sermons = await getAllSermons();
+    }catch(err){
+      console.error('Could not load library', err);
+    }
+    sermons.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if(sermons.length === 0){
+      libraryEmpty.style.display = 'block';
+      return;
+    }
+    libraryEmpty.style.display = 'none';
+
+    sermons.forEach(sermon => {
+      const item = document.createElement('div');
+      item.className = 'library-item';
+
+      const del = document.createElement('button');
+      del.className = 'lib-delete';
+      del.textContent = 'Delete';
+      del.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if(!confirm('Delete this saved sermon? This cannot be undone.')) return;
+        await deleteSermon(sermon.id);
+        renderLibrary();
+      });
+
+      const dateEl = document.createElement('div');
+      dateEl.className = 'lib-date';
+      const dateStr = new Date(sermon.date).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+      dateEl.textContent = sermon.durationMs ? dateStr + '  ·  ' + formatTime(sermon.durationMs) : dateStr;
+
+      const takeawayEl = document.createElement('div');
+      takeawayEl.className = 'lib-takeaway';
+      takeawayEl.textContent = sermon.pending
+        ? 'Recording saved — summary not available (tap to listen or download)'
+        : sermon.takeaway;
+
+      item.appendChild(del);
+      item.appendChild(dateEl);
+      item.appendChild(takeawayEl);
+
+      item.addEventListener('click', () => openSavedSermon(sermon));
+      libraryList.appendChild(item);
+    });
+  }
+
+  function openSavedSermon(sermon){
+    libraryView.style.display = 'none';
+    recordStage.style.display = 'none';
+    results.style.display = 'flex';
+
+    resultDate.textContent = new Date(sermon.date).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+
+    if(sermon.pending){
+      takeawayText.textContent = "This recording hasn't been summarized yet — the audio is saved safely below, but transcription or the takeaway didn't complete for it.";
+      bulletsList.innerHTML = '';
+      transcriptBox.textContent = sermon.transcript || '(No transcript available for this recording.)';
+    } else {
+      takeawayText.textContent = sermon.takeaway;
+      bulletsList.innerHTML = '';
+      (sermon.bullets || []).forEach(b => {
+        const li = document.createElement('li');
+        li.textContent = b;
+        bulletsList.appendChild(li);
+      });
+      transcriptBox.textContent = sermon.transcript;
+    }
+
+    currentAudioBlob = sermon.audioBlob || null;
+    audioPlayback.src = sermon.audioBlob ? URL.createObjectURL(sermon.audioBlob) : '';
+  }
+
+  let screenBeforeLibrary = 'record';
+
+  libraryBtn.addEventListener('click', () => {
+    screenBeforeLibrary = (results.style.display !== 'none') ? 'results' : 'record';
+    recordStage.style.display = 'none';
+    results.style.display = 'none';
+    libraryView.style.display = 'flex';
+    renderLibrary();
+  });
+
+  closeLibraryBtn.addEventListener('click', () => {
+    libraryView.style.display = 'none';
+    if(screenBeforeLibrary === 'results'){
+      results.style.display = 'flex';
+    } else {
+      recordStage.style.display = 'flex';
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>
