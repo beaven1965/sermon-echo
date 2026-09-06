@@ -604,6 +604,9 @@
   const downloadBtn = document.getElementById('downloadBtn');
   const downloadNowBtn = document.getElementById('downloadNowBtn');
   let currentAudioBlob = null;
+    const CHUNK_THRESHOLD_BYTES = 4 * 1024 * 1024; // ~4MB triggers splitting into chunks
+  const CHUNK_SECONDS = 90; // length of each chunk once shrunk down
+  const TARGET_SAMPLE_RATE = 16000; // matches what Whisper listens for anyway
 
   function downloadBlob(blob, filename){
     const url = URL.createObjectURL(blob);
@@ -722,6 +725,65 @@
     return new Blob([view], { type: 'audio/wav' });
   }
   async function combineSegments(segs){
+    async function decodeBlobToAudioBuffer(blob){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC();
+    try{
+      const arrayBuffer = await blob.arrayBuffer();
+      return await ctx.decodeAudioData(arrayBuffer);
+    } finally {
+      ctx.close();
+    }
+  }
+
+  async function resampleToMono(buffer, targetRate){
+    if(buffer.sampleRate === targetRate && buffer.numberOfChannels === 1){
+      return buffer;
+    }
+    let monoBuffer = buffer;
+    if(buffer.numberOfChannels > 1){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const tempCtx = new AC();
+      monoBuffer = tempCtx.createBuffer(1, buffer.length, buffer.sampleRate);
+      const out = monoBuffer.getChannelData(0);
+      const chData = [];
+      for(let ch = 0; ch < buffer.numberOfChannels; ch++) chData.push(buffer.getChannelData(ch));
+      for(let i = 0; i < buffer.length; i++){
+        let sum = 0;
+        for(let ch = 0; ch < chData.length; ch++) sum += chData[ch][i];
+        out[i] = sum / chData.length;
+      }
+      tempCtx.close();
+    }
+    const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const offline = new OfflineCtx(1, Math.ceil(buffer.duration * targetRate), targetRate);
+
+    const source = offline.createBufferSource();
+    source.buffer = monoBuffer;
+    source.connect(offline.destination);
+    source.start(0);
+    return await offline.startRendering();
+  }
+
+  function sliceBufferIntoChunks(buffer, chunkSeconds){
+    const chunkSamples = Math.floor(chunkSeconds * buffer.sampleRate);
+    const totalSamples = buffer.length;
+    const chunks = [];
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC();
+    try{
+      for(let start = 0; start < totalSamples; start += chunkSamples){
+        const end = Math.min(start + chunkSamples, totalSamples);
+        const length = end - start;
+        const chunkBuffer = ctx.createBuffer(1, length, buffer.sampleRate);
+        chunkBuffer.getChannelData(0).set(buffer.getChannelData(0).subarray(start, end));
+        chunks.push(chunkBuffer);
+      }
+    } finally {
+      ctx.close();
+    }
+    return chunks;
+  }
     if(segs.length <= 1) return segs[0];
     const AC = window.AudioContext || window.webkitAudioContext;
     const ctx = new AC();
@@ -925,13 +987,15 @@
     statusText.textContent = 'Transcribing the recording…';
 
     try{
-      const transcript = await transcribeAudio(audioBlob);
-      statusText.textContent = 'Preparing your takeaway…';
-      const summary = await summarizeTranscript(transcript);
-      showResults(transcript, summary, audioBlob, pendingId);
+    const transcript = await transcribeAudio(audioBlob, (current, total) => {
+    statusText.textContent = 'Transcribing part ' + current + ' of ' + total + '…';
+    });  
+    statusText.textContent = 'Preparing your takeaway…';
+    const summary = await summarizeTranscript(transcript);
+    showResults(transcript, summary, audioBlob, pendingId);
     }catch(err){
-      console.error(err);
-      showError(err.message || 'Something went wrong while processing the recording. Please try again.', audioBlob);
+    console.error(err);
+    showError(err.message || 'Something went wrong while processing the recording. Please try again.', audioBlob);
     }
   }
 
@@ -960,15 +1024,16 @@
     });
   }
 
-  // ---- OpenAI Whisper transcription (via secure server function) ----
-  async function transcribeAudio(blob){
+
+
+
+     async function transcribeOneChunk(blob){
     const audioBase64 = await blobToBase64(blob);
     const res = await fetch('/.netlify/functions/transcribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ audioBase64, mimeType: blob.type })
     });
-
     if(!res.ok){
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.error || ('Transcription failed. (' + res.status + ')'));
@@ -977,7 +1042,28 @@
     return data.transcript;
   }
 
-  // ---- Claude summary (via secure server function) ----
+  // ---- OpenAI Whisper transcription (via secure server function) ----
+  // Long recordings are split into smaller pieces first, since Netlify's
+  // functions reject any single request over ~6MB. Short recordings are
+  // sent as-is.
+  async function transcribeAudio(blob, onProgress){
+    if(blob.size <= CHUNK_THRESHOLD_BYTES){
+      return await transcribeOneChunk(blob);
+    }
+
+    const decoded = await decodeBlobToAudioBuffer(blob);
+    const resampled = await resampleToMono(decoded, TARGET_SAMPLE_RATE);
+    const pieces = sliceBufferIntoChunks(resampled, CHUNK_SECONDS);
+
+    const transcripts = [];
+    for(let i = 0; i < pieces.length; i++){
+      if(onProgress) onProgress(i + 1, pieces.length);
+      const chunkBlob = audioBufferToWav(pieces[i]);
+      const text = await transcribeOneChunk(chunkBlob);
+      transcripts.push(text.trim());
+    }
+    return transcripts.join(' ');
+  } // ---- Claude summary (via secure server function) ----
   async function summarizeTranscript(transcript){
     const res = await fetch('/.netlify/functions/summarize', {
       method: 'POST',
