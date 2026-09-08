@@ -493,26 +493,32 @@
       </button>
     </div>
   </header>
-
-  <main>
-    <!-- RECORD STAGE -->
-    <div class="record-stage" id="recordStage">
-      <button class="record-btn" id="recordBtn" aria-label="Start recording">
-        <span class="record-icon" id="recordIcon"></span>
-      </button>
-      <div class="timer" id="timer">00:00</div>
-      <div class="record-label" id="recordLabel">Tap to start recording</div>
-      <button class="pause-btn" id="pauseBtn" style="display:none;">Pause</button>
-      <div class="hint" id="hint">Place the phone near the pulpit, away from speakers, and switch on airplane mode to avoid interruptions.</div>
-      <button class="upload-btn" id="uploadBtn">Or upload an existing recording</button>
-      <input type="file" id="fileInput" accept="audio/*,video/*" class="visually-hidden">
-
-      <div class="status-row" id="statusRow" style="display:none;">
-        <div class="spinner"></div>
-        <span id="statusText">Transcribing…</span>
+    <!-- RESULTS -->
+    <div class="results" id="results" style="display:none;">
+      <div class="result-meta">
+        <span class="date" id="resultDate"></span>
+        <button class="new-recording-btn" id="newRecordingBtn">New recording</button>
       </div>
-      <div class="error-box" id="errorBox" style="display:none;"></div>
-      <button class="upload-btn" id="downloadNowBtn" style="display:none;">⬇ Download this recording</button>
+
+      <div class="player-row">
+        <button class="skip-btn" id="skipBackBtn" aria-label="Rewind 15 seconds">⟲ 15</button>
+        <audio id="audioPlayback" controls></audio>
+        <button class="skip-btn" id="skipFwdBtn" aria-label="Forward 15 seconds">15 ⟳</button>
+        <button class="skip-btn" id="downloadBtn" aria-label="Download recording">⬇ Save</button>
+      </div>
+
+      <button class="transcript-toggle" id="transcriptToggle">Show full transcript</button>
+      <div class="transcript-box" id="transcriptBox" style="display:none;"></div>
+
+      <div class="paper-card">
+        <div class="eyebrow">Highlights</div>
+        <ul class="bullets" id="bulletsList"></ul>
+      </div>
+
+      <div class="paper-card">
+        <div class="eyebrow">Today's takeaway</div>
+        <div class="takeaway-text" id="takeawayText"></div>
+      </div>
     </div>
 
     <!-- RESULTS -->
