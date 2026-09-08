@@ -529,18 +529,18 @@
         <button class="skip-btn" id="downloadBtn" aria-label="Download recording">⬇ Save</button>
       </div>
 
-      <div class="paper-card">
-        <div class="eyebrow">Today's takeaway</div>
-        <div class="takeaway-text" id="takeawayText"></div>
-      </div>
+      <button class="transcript-toggle" id="transcriptToggle">Show full transcript</button>
+      <div class="transcript-box" id="transcriptBox" style="display:none;"></div>
 
       <div class="paper-card">
         <div class="eyebrow">Highlights</div>
         <ul class="bullets" id="bulletsList"></ul>
       </div>
 
-      <button class="transcript-toggle" id="transcriptToggle">Show full transcript</button>
-      <div class="transcript-box" id="transcriptBox" style="display:none;"></div>
+      <div class="paper-card">
+        <div class="eyebrow">Today's takeaway</div>
+        <div class="takeaway-text" id="takeawayText"></div>
+      </div>
     </div>
 
     <!-- LIBRARY -->
@@ -784,19 +784,58 @@
     return await offline.startRendering();
   }
 
+  function computeRms(data, start, end){
+    let sumSquares = 0;
+    for(let i = start; i < end; i++){
+      sumSquares += data[i] * data[i];
+    }
+    return Math.sqrt(sumSquares / (end - start));
+  }
+
+  // Looks for the quietest moment (a natural pause) near a chunk boundary,
+  // instead of cutting at a rigid fixed time. This avoids slicing through
+  // the middle of a word or sentence, which caused dropped/duplicated words.
+  function findQuietCutPoint(data, targetSample, sampleRate, maxTotalSamples){
+    const searchWindowSeconds = 2;
+    const windowSamples = Math.floor(searchWindowSeconds * sampleRate);
+    const analysisFrame = Math.floor(0.05 * sampleRate);
+
+    const searchStart = Math.max(0, targetSample - windowSamples);
+    const searchEnd = Math.min(maxTotalSamples, targetSample + windowSamples);
+
+    let quietestPoint = targetSample;
+    let quietestLevel = Infinity;
+
+    for(let pos = searchStart; pos + analysisFrame <= searchEnd; pos += analysisFrame){
+      const level = computeRms(data, pos, pos + analysisFrame);
+      if(level < quietestLevel){
+        quietestLevel = level;
+        quietestPoint = pos;
+      }
+    }
+    return quietestPoint;
+  }
+
   function sliceBufferIntoChunks(buffer, chunkSeconds){
-    const chunkSamples = Math.floor(chunkSeconds * buffer.sampleRate);
+    const data = buffer.getChannelData(0);
     const totalSamples = buffer.length;
+    const nominalChunkSamples = Math.floor(chunkSeconds * buffer.sampleRate);
     const chunks = [];
     const AC = window.AudioContext || window.webkitAudioContext;
     const ctx = new AC();
     try{
-      for(let start = 0; start < totalSamples; start += chunkSamples){
-        const end = Math.min(start + chunkSamples, totalSamples);
+      let start = 0;
+      while(start < totalSamples){
+        let end = Math.min(start + nominalChunkSamples, totalSamples);
+        if(end < totalSamples){
+          end = findQuietCutPoint(data, end, buffer.sampleRate, totalSamples);
+          if(end <= start) end = Math.min(start + nominalChunkSamples, totalSamples);
+        }
         const length = end - start;
         const chunkBuffer = ctx.createBuffer(1, length, buffer.sampleRate);
-        chunkBuffer.getChannelData(0).set(buffer.getChannelData(0).subarray(start, end));
+        chunkBuffer.getChannelData(0).set(data.subarray(start, end));
         chunks.push(chunkBuffer);
+        start = end;
       }
     } finally {
       ctx.close();
