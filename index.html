@@ -471,6 +471,137 @@
     overflow:hidden;
     clip:rect(0,0,0,0);
   }
+
+  /* ---- Paywall ---- */
+  .paywall{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+  .paywall-hero{
+    text-align:center;
+    padding:8px 4px 4px;
+  }
+  .paywall-badge{
+    font-size:28px;
+    margin-bottom:6px;
+  }
+  .paywall-title{
+    font-family:'Source Serif 4',serif;
+    font-size:24px;
+    font-weight:600;
+    color:var(--gold-bright);
+    margin:0 0 6px;
+  }
+  .paywall-sub{
+    font-size:14px;
+    color:var(--text-muted);
+    line-height:1.5;
+    margin:0;
+  }
+  .feature-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .feature-list li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    font-size:15px;
+    line-height:1.4;
+  }
+  .feature-list .check{
+    color:var(--gold-bright);
+    font-size:16px;
+    flex-shrink:0;
+    margin-top:1px;
+  }
+  .feature-list .soon{
+    display:inline-block;
+    font-size:11px;
+    color:var(--text-muted);
+    border:1px solid var(--surface-line);
+    border-radius:10px;
+    padding:1px 8px;
+    margin-left:8px;
+  }
+  .price-tag{
+    text-align:center;
+    padding:6px 0 2px;
+  }
+  .price-tag .amount{
+    font-family:'Source Serif 4',serif;
+    font-size:36px;
+    font-weight:600;
+    color:var(--text);
+  }
+  .price-tag .amount span{
+    font-size:15px;
+    color:var(--text-muted);
+    font-weight:400;
+    margin-left:4px;
+  }
+  .price-tag .note{
+    font-size:12px;
+    color:var(--text-muted);
+    margin-top:4px;
+  }
+  .subscribe-btn{
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold));
+    color:var(--ink-deep);
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    padding:16px 20px;
+    border-radius:14px;
+    cursor:pointer;
+    transition:transform 0.15s ease;
+  }
+  .subscribe-btn:hover{ transform:scale(1.01); }
+  .subscribe-btn:active{ transform:scale(0.98); }
+  .subscribe-btn:disabled{ opacity:0.6; cursor:default; transform:none; }
+  .paywall-fine{
+    text-align:center;
+    font-size:12px;
+    color:var(--text-muted);
+    line-height:1.5;
+  }
+  .paid-banner{
+    background:var(--surface);
+    border:1px solid var(--gold);
+    border-radius:12px;
+    padding:14px 16px;
+    font-size:14px;
+    line-height:1.5;
+    margin-bottom:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .paid-banner button{
+    background:none;
+    border:none;
+    color:var(--text-muted);
+    cursor:pointer;
+    font-size:16px;
+    line-height:1;
+  }
+  .promo-link{
+    background:none;
+    border:none;
+    color:var(--gold-bright);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+    margin-top:10px;
+  }
 </style>
 </head>
 <body>
@@ -479,6 +610,11 @@
   <header>
     <div class="brand">Sermon Echo</div>
     <div class="header-actions">
+      <button class="gear-btn" id="paywallBtn" aria-label="Go Premium">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 2l2.6 6.2L21 9l-5 4.4L17.3 21 12 17.3 6.7 21 8 13.4 3 9l6.4-0.8z" stroke-linejoin="round"/>
+        </svg>
+      </button>
       <button class="gear-btn" id="libraryBtn" aria-label="Past sermons">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -546,6 +682,39 @@
       <div id="libraryList"></div>
       <div class="hint" id="libraryEmpty" style="display:none;">No saved sermons yet. Once you finish a recording, it'll show up here automatically.</div>
     </div>
+
+    <!-- PAYWALL -->
+    <div class="paywall" id="paywallView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Sermon Echo Premium</span>
+        <button class="new-recording-btn" id="closePaywallBtn">Close</button>
+      </div>
+
+      <div id="paidBanner" style="display:none;"></div>
+
+      <div class="paywall-hero">
+        <div class="paywall-badge">⭐</div>
+        <h2 class="paywall-title">Support Sermon Echo</h2>
+        <p class="paywall-sub">Help keep this tool running and growing for churches like yours.</p>
+      </div>
+
+      <ul class="feature-list">
+        <li><span class="check">✓</span> Unlimited recordings &amp; transcripts, always</li>
+        <li><span class="check">✓</span> AI-generated highlights &amp; takeaway for every sermon</li>
+        <li><span class="check">✓</span> A founding-supporter badge on your account <span class="soon">coming soon</span></li>
+        <li><span class="check">✓</span> Longer sermon storage in your library <span class="soon">coming soon</span></li>
+      </ul>
+
+      <div class="price-tag">
+        <div class="amount">₱250<span>one-time</span></div>
+        <div class="note">Not a subscription yet — just a one-time thank-you payment for now.</div>
+      </div>
+
+      <button class="subscribe-btn" id="subscribeBtn">Subscribe / Pay Now</button>
+      <div class="error-box" id="paywallError" style="display:none;"></div>
+
+      <p class="paywall-fine">Payments are processed securely by PayMongo. You'll be taken to their payment page and brought right back here.</p>
+    </div>
   </main>
 </div>
 
@@ -612,6 +781,13 @@
   const libraryBtn = document.getElementById('libraryBtn');
   const closeLibraryBtn = document.getElementById('closeLibraryBtn');
   const libraryView = document.getElementById('libraryView');
+
+  const paywallBtn = document.getElementById('paywallBtn');
+  const closePaywallBtn = document.getElementById('closePaywallBtn');
+  const paywallView = document.getElementById('paywallView');
+  const subscribeBtn = document.getElementById('subscribeBtn');
+  const paywallError = document.getElementById('paywallError');
+  const paidBanner = document.getElementById('paidBanner');
   const libraryList = document.getElementById('libraryList');
   const libraryEmpty = document.getElementById('libraryEmpty');
 
@@ -1272,6 +1448,81 @@
       recordStage.style.display = 'flex';
     }
   });
+
+  // ---- Paywall (Sermon Echo Premium) ----
+  let screenBeforePaywall = 'record';
+
+  function openPaywall(){
+    screenBeforePaywall = (results.style.display !== 'none') ? 'results'
+      : (libraryView.style.display !== 'none') ? 'library' : 'record';
+    recordStage.style.display = 'none';
+    results.style.display = 'none';
+    libraryView.style.display = 'none';
+    paywallView.style.display = 'flex';
+  }
+
+  function closePaywall(){
+    paywallView.style.display = 'none';
+    if(screenBeforePaywall === 'results'){
+      results.style.display = 'flex';
+    } else if(screenBeforePaywall === 'library'){
+      libraryView.style.display = 'flex';
+      renderLibrary();
+    } else {
+      recordStage.style.display = 'flex';
+    }
+  }
+
+  paywallBtn.addEventListener('click', openPaywall);
+  closePaywallBtn.addEventListener('click', closePaywall);
+
+  subscribeBtn.addEventListener('click', async () => {
+    paywallError.style.display = 'none';
+    subscribeBtn.disabled = true;
+    subscribeBtn.textContent = 'Redirecting to payment…';
+    try {
+      const res = await fetch('/.netlify/functions/create-checkout', { method: 'POST' });
+      if(!res.ok){
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || ('Could not start checkout. (' + res.status + ')'));
+      }
+      const data = await res.json();
+      if(!data.checkout_url) throw new Error('Did not receive a payment link. Please try again.');
+      window.location.href = data.checkout_url;
+    } catch (err) {
+      paywallError.textContent = err.message;
+      paywallError.style.display = 'block';
+      subscribeBtn.disabled = false;
+      subscribeBtn.textContent = 'Subscribe / Pay Now';
+    }
+  });
+
+  // After returning from PayMongo's checkout page, show a banner explaining
+  // what happened, based on the ?paid= flag in the URL, then clean the URL up.
+  (function checkPaymentReturn(){
+    const params = new URLSearchParams(window.location.search);
+    const paid = params.get('paid');
+    if(!paid) return;
+
+    if(paid === 'success'){
+      paidBanner.innerHTML = '<span>🎉 Thank you for your support! Your payment went through. (Feature unlocking is coming in a future update — for now, this is a founding-supporter contribution.)</span><button aria-label="Dismiss">✕</button>';
+    } else if(paid === 'cancelled'){
+      paidBanner.innerHTML = '<span>Payment was cancelled — no charge was made. You can try again anytime.</span><button aria-label="Dismiss">✕</button>';
+    } else {
+      return;
+    }
+    paidBanner.className = 'paid-banner';
+    paidBanner.style.display = 'flex';
+    paidBanner.querySelector('button').addEventListener('click', () => { paidBanner.style.display = 'none'; });
+
+    // Clean the ?paid=... param out of the address bar
+    params.delete('paid');
+    const newUrl = window.location.pathname + (params.toString() ? ('?' + params.toString()) : '');
+    window.history.replaceState({}, '', newUrl);
+
+    // Open the paywall screen so the banner has context
+    openPaywall();
+  })();
 
 })();
 </script>
