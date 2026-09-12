@@ -130,6 +130,31 @@
     height:36px;
     background:var(--ink-deep);
   }
+  .record-btn.needs-attention{
+    animation:nudge-glow 1.8s ease-in-out infinite;
+  }
+  @keyframes nudge-glow{
+    0%,100%{ box-shadow:0 0 0 8px rgba(201,162,39,0.12); }
+    50%{ box-shadow:0 0 0 20px rgba(201,162,39,0.30); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .record-btn.needs-attention{ animation:none; }
+  }
+  .record-again-btn{
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold));
+    color:var(--ink-deep);
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding:14px 18px;
+    border-radius:12px;
+    cursor:pointer;
+    margin-top:4px;
+    transition:transform 0.15s ease;
+  }
+  .record-again-btn:hover{ transform:scale(1.02); }
+  .record-again-btn:active{ transform:scale(0.97); }
   .record-label{
     font-size:15px;
     color:var(--text-muted);
@@ -642,6 +667,7 @@
         <span id="statusText">Transcribing…</span>
       </div>
       <div class="error-box" id="errorBox" style="display:none;"></div>
+      <button class="record-again-btn" id="recordAgainBtn" style="display:none;">🎙 Tap here to record again (starts fresh, from 0:00)</button>
       <button class="upload-btn" id="downloadNowBtn" style="display:none;">⬇ Download this recording</button>
     </div>
 
@@ -728,6 +754,7 @@
   const statusRow = document.getElementById('statusRow');
   const statusText = document.getElementById('statusText');
   const errorBox = document.getElementById('errorBox');
+  const recordAgainBtn = document.getElementById('recordAgainBtn');
   const recordStage = document.getElementById('recordStage');
   const results = document.getElementById('results');
   const resultDate = document.getElementById('resultDate');
@@ -1030,6 +1057,8 @@
     if(!isRecording){
       errorBox.style.display = 'none';
       downloadNowBtn.style.display = 'none';
+      recordAgainBtn.style.display = 'none';
+      recordBtn.classList.remove('needs-attention');
       try{
         activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         segments = [];
@@ -1073,6 +1102,10 @@
     }
   });
 
+  recordAgainBtn.addEventListener('click', () => {
+    recordBtn.click();
+  });
+
   pauseBtn.addEventListener('click', () => {
     if(!isRecording) return;
     if(!isPaused){
@@ -1102,6 +1135,8 @@
     statusRow.style.display = 'none';
     recordLabel.textContent = 'Tap to start recording';
     hint.style.display = 'block';
+    recordAgainBtn.style.display = 'inline-block';
+    recordBtn.classList.add('needs-attention');
 
     if(audioBlob){
       currentAudioBlob = audioBlob;
@@ -1161,6 +1196,8 @@
     fileInput.value = '';
     if(!file) return;
     errorBox.style.display = 'none';
+    recordAgainBtn.style.display = 'none';
+    recordBtn.classList.remove('needs-attention');
     statusRow.style.display = 'flex';
     recordLabel.textContent = 'Processing…';
     hint.style.display = 'none';
@@ -1285,6 +1322,8 @@
     timerEl.textContent = '00:00';
     errorBox.style.display = 'none';
     downloadNowBtn.style.display = 'none';
+    recordAgainBtn.style.display = 'none';
+    recordBtn.classList.remove('needs-attention');
   });
 
   // ---- Library (saved sermons, stored locally on this device via IndexedDB) ----
