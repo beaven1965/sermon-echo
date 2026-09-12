@@ -1223,7 +1223,9 @@
     });
     if(!res.ok){
       const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || ('Transcription failed. (' + res.status + ')'));
+      const base = errData.error || ('Transcription failed. (' + res.status + ')');
+      const detail = errData.detail ? (' Detail: ' + String(errData.detail).slice(0, 300)) : '';
+      throw new Error(base + detail);
     }
     const data = await res.json();
     return data.transcript;
