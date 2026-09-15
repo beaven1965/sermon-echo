@@ -2039,6 +2039,11 @@
         body: JSON.stringify({ code: typed })
       });
       const data = await res.json().catch(() => ({}));
+      if(!res.ok){
+        // A real server-side problem (e.g. a missing setting) — show the
+        // actual reason instead of implying the code itself was wrong.
+        throw new Error(data.error || ('Server error (' + res.status + '). Please try again in a moment.'));
+      }
       if(data.valid){
         unlockPremium(typed.toUpperCase());
         redeemCodeInput.value = '';
@@ -2047,7 +2052,7 @@
         redeemError.style.display = 'block';
       }
     } catch (err) {
-      redeemError.textContent = 'Could not check that code right now. Please try again in a moment.';
+      redeemError.textContent = err.message || 'Could not check that code right now. Please try again in a moment.';
       redeemError.style.display = 'block';
     } finally {
       redeemCodeBtn.disabled = false;
