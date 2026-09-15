@@ -802,6 +802,75 @@
     font-size:16px;
     line-height:1;
   }
+  .code-box{
+    background:var(--surface);
+    border:1px dashed var(--gold);
+    border-radius:12px;
+    padding:14px 16px;
+    text-align:center;
+    margin-top:10px;
+  }
+  .code-box .code-label{
+    font-size:12px;
+    color:var(--text-muted);
+    margin-bottom:6px;
+  }
+  .code-box .code-value{
+    font-family:'Source Serif 4',serif;
+    font-size:19px;
+    font-weight:600;
+    letter-spacing:0.5px;
+    color:var(--gold-bright);
+    word-break:break-all;
+  }
+  .code-box .copy-code-btn{
+    display:block;
+    margin:10px auto 0;
+    background:none;
+    border:1px solid var(--gold);
+    color:var(--gold-bright);
+    border-radius:10px;
+    padding:6px 16px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .redeem-row{
+    display:flex;
+    gap:8px;
+    padding:14px 4px;
+    border-bottom:1px solid var(--surface-line);
+  }
+  .redeem-row input{
+    flex:1;
+    min-width:0;
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    border-radius:10px;
+    padding:10px 12px;
+    color:var(--text);
+    font-size:14px;
+    font-family:'Inter',sans-serif;
+  }
+  .redeem-row input::placeholder{ color:var(--text-muted); }
+  .redeem-row button{
+    background:var(--gold);
+    color:var(--ink-deep);
+    border:none;
+    border-radius:10px;
+    padding:0 16px;
+    font-weight:700;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .redeem-row button:disabled{ opacity:0.6; cursor:default; }
+  .premium-badge{
+    font-size:12px;
+    padding:2px 10px;
+    border-radius:10px;
+  }
+  .premium-badge.unlocked{ color:#3fbf72; border:1px solid #3fbf72; }
+  .premium-badge.locked{ color:var(--text-muted); border:1px solid var(--surface-line); }
   .promo-link{
     background:none;
     border:none;
@@ -912,12 +981,22 @@
         <button class="new-recording-btn" id="closeSettingsBtn">Close</button>
       </div>
       <div class="settings-list">
+        <div class="settings-item">
+          <span>⭐ Premium status</span>
+          <span class="premium-badge locked" id="premiumBadge">Not unlocked</span>
+        </div>
+        <div class="redeem-row">
+          <input type="text" id="redeemCodeInput" placeholder="Enter access code (e.g. SE-...)">
+          <button id="redeemCodeBtn">Unlock</button>
+        </div>
+        <div class="error-box" id="redeemError" style="display:none;"></div>
+        <div class="hint" id="myCodeHint" style="display:none;"></div>
         <div class="settings-item"><span>🌐 Sermon Translation</span><span class="soon">coming soon</span></div>
         <div class="settings-item"><span>📖 Bible Concordance</span><span class="soon">coming soon</span></div>
         <div class="settings-item"><span>✍️ Bible Authors &amp; History</span><span class="soon">coming soon</span></div>
-        <div class="settings-item"><span>👪 Family Access Code</span><span class="soon">coming soon</span></div>
+        <div class="settings-item"><span>🔬 Bible &amp; Science</span><span class="soon">coming soon</span></div>
       </div>
-      <div class="hint">More features will appear here as they're built.</div>
+      <div class="hint">Got an access code from a payment or a family member? Enter it above to unlock Premium on this device. More features will appear here as they're built.</div>
     </div>
 
     <!-- RECORD STAGE -->
@@ -1119,6 +1198,11 @@
   const closeLibraryBtn = document.getElementById('closeLibraryBtn');
   const libraryView = document.getElementById('libraryView');
 
+  const premiumBadge = document.getElementById('premiumBadge');
+  const redeemCodeInput = document.getElementById('redeemCodeInput');
+  const redeemCodeBtn = document.getElementById('redeemCodeBtn');
+  const redeemError = document.getElementById('redeemError');
+  const myCodeHint = document.getElementById('myCodeHint');
   const paywallBtn = document.getElementById('paywallBtn');
   const closePaywallBtn = document.getElementById('closePaywallBtn');
   const paywallView = document.getElementById('paywallView');
@@ -1910,6 +1994,69 @@
   paywallBtn.addEventListener('click', openPaywall);
   closePaywallBtn.addEventListener('click', closePaywall);
 
+  // ---- Premium access code: unlock, store, and display ----
+  const PREMIUM_FLAG_KEY = 'se_premium_unlocked';
+  const PREMIUM_CODE_KEY = 'se_premium_code';
+  const CHECKOUT_SESSION_KEY = 'se_pending_checkout_session_id';
+
+  function refreshPremiumUI(){
+    const unlocked = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    const savedCode = localStorage.getItem(PREMIUM_CODE_KEY);
+    if(unlocked){
+      premiumBadge.textContent = 'Unlocked ✅';
+      premiumBadge.className = 'premium-badge unlocked';
+      if(savedCode){
+        myCodeHint.style.display = 'block';
+        myCodeHint.textContent = 'Your access code (share with family to unlock their device too): ' + savedCode;
+      }
+    } else {
+      premiumBadge.textContent = 'Not unlocked';
+      premiumBadge.className = 'premium-badge locked';
+      myCodeHint.style.display = 'none';
+    }
+  }
+
+  function unlockPremium(code){
+    localStorage.setItem(PREMIUM_FLAG_KEY, 'true');
+    if(code) localStorage.setItem(PREMIUM_CODE_KEY, code);
+    refreshPremiumUI();
+  }
+
+  redeemCodeBtn.addEventListener('click', async () => {
+    const typed = redeemCodeInput.value.trim();
+    redeemError.style.display = 'none';
+    if(!typed){
+      redeemError.textContent = 'Please type in a code first.';
+      redeemError.style.display = 'block';
+      return;
+    }
+    redeemCodeBtn.disabled = true;
+    redeemCodeBtn.textContent = '…';
+    try {
+      const res = await fetch('/.netlify/functions/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: typed })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(data.valid){
+        unlockPremium(typed.toUpperCase());
+        redeemCodeInput.value = '';
+      } else {
+        redeemError.textContent = "That code doesn't look right — please check for typos and try again.";
+        redeemError.style.display = 'block';
+      }
+    } catch (err) {
+      redeemError.textContent = 'Could not check that code right now. Please try again in a moment.';
+      redeemError.style.display = 'block';
+    } finally {
+      redeemCodeBtn.disabled = false;
+      redeemCodeBtn.textContent = 'Unlock';
+    }
+  });
+
+  refreshPremiumUI();
+
   subscribeBtn.addEventListener('click', async () => {
     paywallError.style.display = 'none';
     subscribeBtn.disabled = true;
@@ -1922,6 +2069,9 @@
       }
       const data = await res.json();
       if(!data.checkout_url) throw new Error('Did not receive a payment link. Please try again.');
+      // Save the session id so that when we come back after paying,
+      // we can ask the server to confirm this exact payment and issue a code.
+      if(data.session_id) sessionStorage.setItem(CHECKOUT_SESSION_KEY, data.session_id);
       window.location.href = data.checkout_url;
     } catch (err) {
       paywallError.textContent = err.message;
@@ -1938,16 +2088,53 @@
     const paid = params.get('paid');
     if(!paid) return;
 
+    function showBanner(html){
+      paidBanner.innerHTML = html + '<button aria-label="Dismiss">✕</button>';
+      paidBanner.className = 'paid-banner';
+      paidBanner.style.display = 'flex';
+      paidBanner.querySelector('button').addEventListener('click', () => { paidBanner.style.display = 'none'; });
+    }
+
     if(paid === 'success'){
-      paidBanner.innerHTML = '<span>🎉 Thank you for your support! Your payment went through. (Feature unlocking is coming in a future update — for now, this is a founding-supporter contribution.)</span><button aria-label="Dismiss">✕</button>';
+      showBanner('<span>🎉 Thank you for your support! Confirming your payment…</span>');
+
+      const sessionId = sessionStorage.getItem(CHECKOUT_SESSION_KEY);
+      if(sessionId){
+        fetch('/.netlify/functions/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId })
+        })
+          .then(res => res.json().then(data => ({ ok: res.ok, data })))
+          .then(({ ok, data }) => {
+            if(ok && data.code){
+              unlockPremium(data.code);
+              showBanner(
+                '<div>🎉 Thank you for your support! Premium is unlocked on this device.' +
+                '<div class="code-box"><div class="code-label">Your access code (save this — it also unlocks Premium for family members)</div>' +
+                '<div class="code-value">' + data.code + '</div>' +
+                '<button class="copy-code-btn" id="copyCodeBtn">Copy code</button></div></div>'
+              );
+              const copyBtn = document.getElementById('copyCodeBtn');
+              if(copyBtn) copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(data.code).then(() => { copyBtn.textContent = 'Copied ✓'; });
+              });
+            } else {
+              showBanner('<span>🎉 Thank you for your support! We couldn\'t automatically confirm the payment on this device. If you completed payment, please try reopening the app in the same browser you paid in, or reach out for help.</span>');
+            }
+          })
+          .catch(() => {
+            showBanner('<span>🎉 Thank you for your support! We couldn\'t automatically confirm the payment right now. Please try reopening the app in the same browser you paid in.</span>');
+          })
+          .finally(() => sessionStorage.removeItem(CHECKOUT_SESSION_KEY));
+      } else {
+        showBanner('<span>🎉 Thank you for your support! We couldn\'t find this payment session on this device (perhaps a different tab was used). If you completed payment, please reach out for help getting your access code.</span>');
+      }
     } else if(paid === 'cancelled'){
-      paidBanner.innerHTML = '<span>Payment was cancelled — no charge was made. You can try again anytime.</span><button aria-label="Dismiss">✕</button>';
+      showBanner('<span>Payment was cancelled — no charge was made. You can try again anytime.</span>');
     } else {
       return;
     }
-    paidBanner.className = 'paid-banner';
-    paidBanner.style.display = 'flex';
-    paidBanner.querySelector('button').addEventListener('click', () => { paidBanner.style.display = 'none'; });
 
     // Clean the ?paid=... param out of the address bar
     params.delete('paid');
