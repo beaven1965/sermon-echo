@@ -88,6 +88,23 @@
     outline:2px solid var(--gold);
     outline-offset:2px;
   }
+  .header-actions{
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+  }
+  .icon-with-label{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+  }
+  .icon-label{
+    font-size:10px;
+    font-weight:500;
+    letter-spacing:0.02em;
+    color:var(--text-muted);
+  }
 
   main{
     flex:1;
@@ -191,6 +208,139 @@
     line-height:1.5;
   }
 
+  /* ---- Home page ---- */
+  .home-view{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:48px;
+    width:100%;
+    padding:20px 0 40px;
+  }
+  .home-logo{ width:120px; height:120px; }
+  .home-buttons{
+    display:flex;
+    gap:36px;
+  }
+  .home-icon-btn{
+    background:none;
+    border:none;
+    color:var(--text);
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    padding:4px;
+  }
+  .home-icon-circle{
+    width:84px;
+    height:84px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold));
+    box-shadow:0 0 0 8px rgba(201,162,39,0.12);
+    transition:transform 0.15s ease;
+  }
+  .home-icon-btn:hover .home-icon-circle{ transform:scale(1.05); }
+  .home-icon-btn:active .home-icon-circle{ transform:scale(0.96); }
+  .home-icon-btn:disabled{ cursor:default; opacity:0.4; }
+  .home-icon-btn:disabled .home-icon-circle{
+    background:var(--surface);
+    box-shadow:none;
+  }
+  .home-icon-btn:disabled:hover .home-icon-circle{ transform:none; }
+  .home-icon-label{
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+  }
+
+  /* ---- Idle "waiting to record" blink (Recording page) ---- */
+  .record-btn.idle-blink{
+    animation:idle-pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes idle-pulse{
+    0%,100%{ box-shadow:0 0 0 8px rgba(201,162,39,0.10); opacity:1; }
+    50%{ box-shadow:0 0 0 22px rgba(201,162,39,0.24); opacity:0.85; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .record-btn.idle-blink{ animation:none; }
+  }
+
+  /* ---- Live equalizer while recording ---- */
+  .equalizer{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:6px;
+    height:40px;
+  }
+  .equalizer span{
+    display:block;
+    width:6px;
+    height:8px;
+    border-radius:3px;
+    background:var(--gold-bright);
+    transition:height 0.08s linear;
+  }
+  .equalizer.paused span{ background:var(--text-muted); }
+
+  .stop-btn{
+    background:none;
+    border:1px solid var(--surface-line);
+    color:var(--ember-bright);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    padding:7px 18px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:border-color 0.15s, color 0.15s;
+  }
+  .stop-btn:hover{ border-color:var(--ember); }
+
+  /* ---- Save toast ---- */
+  .save-toast{
+    position:fixed;
+    left:50%;
+    bottom:28px;
+    transform:translateX(-50%) translateY(0);
+    background:var(--surface);
+    border:1px solid var(--gold);
+    color:var(--text);
+    padding:12px 20px;
+    border-radius:20px;
+    font-size:14px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.3);
+    z-index:50;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.25s ease;
+  }
+  .save-toast.show{ opacity:1; }
+
+  /* ---- Settings ---- */
+  .settings-list{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .settings-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 4px;
+    border-bottom:1px solid var(--surface-line);
+    font-size:15px;
+  }
+  .settings-item:last-child{ border-bottom:none; }
+
   /* ---- Status / processing ---- */
   .status-row{
     display:flex;
@@ -260,10 +410,14 @@
     border-radius:20px;
     cursor:pointer;
     transition:border-color 0.15s, color 0.15s;
-    margin-top:-8px;
   }
   .pause-btn:hover{ border-color:var(--gold); color:var(--gold-bright); }
   .pause-btn.is-paused{ border-color:var(--ember); color:var(--ember-bright); }
+  .pause-stop-row{
+    display:flex;
+    gap:12px;
+    margin-top:-8px;
+  }
 
   .player-row{
     display:flex;
@@ -576,7 +730,7 @@
     flex-shrink:0;
     margin-top:1px;
   }
-  .feature-list .soon{
+  .feature-list .soon, .settings-item .soon{
     display:inline-block;
     font-size:11px;
     color:var(--text-muted);
@@ -669,29 +823,117 @@
       <div class="brand-tagline">Sermon Recorder &amp; Transcriber</div>
     </div>
     <div class="header-actions">
-      <button class="gear-btn" id="paywallBtn" aria-label="Go Premium">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M12 2l2.6 6.2L21 9l-5 4.4L17.3 21 12 17.3 6.7 21 8 13.4 3 9l6.4-0.8z" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <button class="gear-btn" id="libraryBtn" aria-label="Past sermons">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-        </svg>
-      </button>
+      <div class="icon-with-label">
+        <button class="gear-btn" id="homeBtn" aria-label="Home">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 11.5 12 4l9 7.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5.5 10v9.5a1 1 0 0 0 1 1H17.5a1 1 0 0 0 1-1V10" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="icon-label">Home</span>
+      </div>
+      <div class="icon-with-label">
+        <button class="gear-btn" id="paywallBtn" aria-label="Go Premium">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 2l2.6 6.2L21 9l-5 4.4L17.3 21 12 17.3 6.7 21 8 13.4 3 9l6.4-0.8z" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="icon-label">Premium</span>
+      </div>
+      <div class="icon-with-label">
+        <button class="gear-btn" id="libraryBtn" aria-label="Library">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </button>
+        <span class="icon-label">Library</span>
+      </div>
+      <div class="icon-with-label">
+        <button class="gear-btn" id="settingsBtn" aria-label="Settings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15 1.65 1.65 0 0 0 3.17 14H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68 1.65 1.65 0 0 0 10 3.17V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9c.14.31.22.65.22 1v.09c.66.12 1.19.64 1.31 1.3H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <span class="icon-label">Settings</span>
+      </div>
     </div>
   </header>
 
   <main>
+    <!-- HOME -->
+    <div class="home-view" id="homeView">
+      <svg class="home-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="512" height="512" rx="96" fill="#151B26"/>
+        <g opacity="0.16">
+          <rect x="234" y="70" width="44" height="330" rx="10" fill="#E0BB3D"/>
+          <rect x="150" y="155" width="212" height="44" rx="10" fill="#E0BB3D"/>
+        </g>
+        <g transform="rotate(-5 256 320)">
+          <rect x="104" y="222" width="304" height="212" rx="20" fill="#F3ECDD"/>
+          <circle cx="130" cy="246" r="6" fill="#DCD0B4"/>
+          <circle cx="130" cy="278" r="6" fill="#DCD0B4"/>
+          <circle cx="130" cy="310" r="6" fill="#DCD0B4"/>
+          <circle cx="130" cy="342" r="6" fill="#DCD0B4"/>
+          <circle cx="130" cy="374" r="6" fill="#DCD0B4"/>
+          <circle cx="130" cy="406" r="6" fill="#DCD0B4"/>
+          <rect x="160" y="270" width="208" height="14" rx="7" fill="#DCD0B4"/>
+          <rect x="160" y="308" width="208" height="14" rx="7" fill="#DCD0B4"/>
+          <rect x="160" y="346" width="150" height="14" rx="7" fill="#DCD0B4"/>
+        </g>
+        <g>
+          <rect x="222" y="118" width="68" height="128" rx="34" fill="#E0BB3D" stroke="#151B26" stroke-width="6"/>
+          <path d="M188 224 A68 74 0 0 0 324 224" fill="none" stroke="#E0BB3D" stroke-width="16" stroke-linecap="round"/>
+          <line x1="256" y1="296" x2="256" y2="352" stroke="#E0BB3D" stroke-width="16" stroke-linecap="round"/>
+          <line x1="210" y1="358" x2="302" y2="358" stroke="#E0BB3D" stroke-width="16" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <div class="home-buttons">
+        <button class="home-icon-btn" id="homeRecordBtn" aria-label="Record">
+          <span class="home-icon-circle">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="var(--ink-deep)"><circle cx="12" cy="12" r="9"/></svg>
+          </span>
+          <span class="home-icon-label">Record</span>
+        </button>
+        <button class="home-icon-btn" id="homeStopBtn" aria-label="Stop" disabled>
+          <span class="home-icon-circle">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--ink-deep)"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+          </span>
+          <span class="home-icon-label">Stop</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="library" id="settingsView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Settings</span>
+        <button class="new-recording-btn" id="closeSettingsBtn">Close</button>
+      </div>
+      <div class="settings-list">
+        <div class="settings-item"><span>🌐 Sermon Translation</span><span class="soon">coming soon</span></div>
+        <div class="settings-item"><span>📖 Bible Concordance</span><span class="soon">coming soon</span></div>
+        <div class="settings-item"><span>✍️ Bible Authors &amp; History</span><span class="soon">coming soon</span></div>
+        <div class="settings-item"><span>👪 Family Access Code</span><span class="soon">coming soon</span></div>
+      </div>
+      <div class="hint">More features will appear here as they're built.</div>
+    </div>
+
     <!-- RECORD STAGE -->
-    <div class="record-stage" id="recordStage">
+    <div class="record-stage" id="recordStage" style="display:none;">
       <button class="record-btn" id="recordBtn" aria-label="Start recording">
         <span class="record-icon" id="recordIcon"></span>
+        <div class="equalizer" id="equalizer" style="display:none;">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
       </button>
       <div class="timer" id="timer">00:00</div>
       <div class="record-label" id="recordLabel">Tap to start recording</div>
-      <button class="pause-btn" id="pauseBtn" style="display:none;">Pause</button>
+      <div class="pause-stop-row" id="pauseStopRow" style="display:none;">
+        <button class="pause-btn" id="pauseBtn">Pause</button>
+        <button class="stop-btn" id="stopBtn">Stop</button>
+      </div>
       <div class="hint" id="hint">Place the phone near the pulpit, away from speakers, and switch on airplane mode to avoid interruptions.</div>
       <button class="upload-btn" id="uploadBtn">Or upload an existing recording</button>
       <input type="file" id="fileInput" accept="audio/*,video/*" class="visually-hidden">
@@ -779,6 +1021,8 @@
   </main>
 </div>
 
+<div class="save-toast" id="saveToast">✅ Recording saved in your library</div>
+
 <script>
 (function(){
   const recordBtn = document.getElementById('recordBtn');
@@ -803,6 +1047,37 @@
   const downloadBtn = document.getElementById('downloadBtn');
   const downloadNowBtn = document.getElementById('downloadNowBtn');
   let currentAudioBlob = null;
+
+  // ---- New: Home page, Settings, equalizer, save toast ----
+  const homeView = document.getElementById('homeView');
+  const homeRecordBtn = document.getElementById('homeRecordBtn');
+  const homeStopBtn = document.getElementById('homeStopBtn');
+  const homeBtn = document.getElementById('homeBtn');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsView = document.getElementById('settingsView');
+  const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+  const equalizer = document.getElementById('equalizer');
+  const pauseStopRow = document.getElementById('pauseStopRow');
+  const stopBtn = document.getElementById('stopBtn');
+  const saveToast = document.getElementById('saveToast');
+
+  let currentView = 'home';
+  let toastTimer = null;
+  function showToast(msg){
+    saveToast.textContent = msg;
+    saveToast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { saveToast.classList.remove('show'); }, 2600);
+  }
+
+  homeBtn.addEventListener('click', () => showView('home'));
+  homeRecordBtn.addEventListener('click', () => showRecordingPage());
+  let screenBeforeSettings = 'home';
+  settingsBtn.addEventListener('click', () => {
+    screenBeforeSettings = currentView === 'settings' ? screenBeforeSettings : currentView;
+    showView('settings');
+  });
+  closeSettingsBtn.addEventListener('click', () => showView(screenBeforeSettings));
 
   const CHUNK_THRESHOLD_BYTES = 4 * 1024 * 1024; // ~4MB triggers splitting into chunks
   const CHUNK_SECONDS = 90; // length of each chunk once shrunk down
@@ -853,6 +1128,33 @@
   const libraryList = document.getElementById('libraryList');
   const libraryEmpty = document.getElementById('libraryEmpty');
   const librarySearchInput = document.getElementById('librarySearchInput');
+
+  // Central place that knows about every top-level "page" in the app.
+  // Call showView('home') / showView('record') / etc. instead of toggling
+  // .style.display directly, so only one page is ever visible at a time.
+  const VIEWS = {
+    home: homeView,
+    record: recordStage,
+    results: results,
+    library: libraryView,
+    settings: settingsView,
+    paywall: paywallView
+  };
+  function showView(name){
+    Object.values(VIEWS).forEach(v => { v.style.display = 'none'; });
+    VIEWS[name].style.display = 'flex';
+    currentView = name;
+  }
+  function showRecordingPage(){
+    showView('record');
+    if(!isRecording){
+      recordBtn.classList.add('idle-blink');
+      recordLabel.textContent = 'Tap to start recording';
+      hint.style.display = 'block';
+    } else {
+      recordBtn.classList.remove('idle-blink');
+    }
+  }
 
   let mediaRecorder, chunks = [], startTime, timerInterval;
   let isRecording = false;
@@ -1080,6 +1382,40 @@
     await saveThenProcess(audioBlob, lastRecordingDurationMs);
   }
 
+  // ---- Live equalizer while actively recording ----
+  let audioCtx = null, analyserNode = null, eqRafId = null;
+  function startEqualizer(){
+    try{
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(activeStream);
+      analyserNode = audioCtx.createAnalyser();
+      analyserNode.fftSize = 64;
+      source.connect(analyserNode);
+      const data = new Uint8Array(analyserNode.frequencyBinCount);
+      const bars = equalizer.querySelectorAll('span');
+      equalizer.classList.remove('paused');
+      function tick(){
+        analyserNode.getByteFrequencyData(data);
+        bars.forEach((bar, i) => {
+          const idx = Math.floor((i + 1) * data.length / (bars.length + 1));
+          const v = data[idx] / 255;
+          bar.style.height = (8 + v * 32) + 'px';
+        });
+        eqRafId = requestAnimationFrame(tick);
+      }
+      tick();
+    }catch(err){
+      console.error('Equalizer unavailable', err);
+    }
+  }
+  function stopEqualizer(){
+    if(eqRafId) cancelAnimationFrame(eqRafId);
+    eqRafId = null;
+    if(audioCtx){ audioCtx.close().catch(() => {}); audioCtx = null; }
+    analyserNode = null;
+    equalizer.querySelectorAll('span').forEach(bar => { bar.style.height = '8px'; });
+  }
+
   // ---- Timer ----
   function formatTime(ms){
     const totalSec = Math.floor(ms/1000);
@@ -1089,57 +1425,73 @@
   }
 
   // ---- Recording ----
-  recordBtn.addEventListener('click', async () => {
-    if(!isRecording){
-      errorBox.style.display = 'none';
-      downloadNowBtn.style.display = 'none';
-      recordAgainBtn.style.display = 'none';
-      recordBtn.classList.remove('needs-attention');
-      try{
-        activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        segments = [];
-        isFinalizing = false;
-        startSegmentRecorder();
-        isRecording = true;
-        isPaused = false;
-        pausedElapsed = 0;
-        startTime = Date.now();
-        timerInterval = setInterval(() => {
-          timerEl.textContent = formatTime(pausedElapsed + (Date.now() - startTime));
-        }, 250);
-
-        recordBtn.classList.add('recording');
-        recordBtn.setAttribute('aria-label','Stop recording');
-        recordLabel.textContent = 'Recording — tap to stop';
-        hint.style.display = 'none';
-        pauseBtn.style.display = 'inline-block';
-        pauseBtn.textContent = 'Pause';
-        pauseBtn.classList.remove('is-paused');
-      }catch(err){
-        showError('Could not access the microphone. Please allow microphone access and try again.');
-      }
-    } else {
-      lastRecordingDurationMs = isPaused ? pausedElapsed : pausedElapsed + (Date.now() - startTime);
-      isRecording = false;
+  async function startRecording(){
+    if(isRecording) return;
+    errorBox.style.display = 'none';
+    downloadNowBtn.style.display = 'none';
+    recordAgainBtn.style.display = 'none';
+    recordBtn.classList.remove('needs-attention');
+    try{
+      activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      segments = [];
+      isFinalizing = false;
+      startSegmentRecorder();
+      isRecording = true;
       isPaused = false;
-      clearInterval(timerInterval);
-      recordBtn.classList.remove('recording');
-      recordBtn.setAttribute('aria-label','Start recording');
-      recordLabel.textContent = 'Processing…';
-      pauseBtn.style.display = 'none';
+      pausedElapsed = 0;
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        timerEl.textContent = formatTime(pausedElapsed + (Date.now() - startTime));
+      }, 250);
 
-      if(mediaRecorder && mediaRecorder.state !== 'inactive'){
-        isFinalizing = true;
-        mediaRecorder.stop(); // onstop pushes the final segment, then finishes since isFinalizing is true
-      } else {
-        // Was already paused (recorder already stopped) — just finish now.
-        finishRecording();
-      }
+      recordBtn.classList.remove('idle-blink');
+      recordBtn.classList.add('recording');
+      recordBtn.setAttribute('aria-label','Recording in progress');
+      recordLabel.textContent = 'Recording — tap Pause or Stop';
+      hint.style.display = 'none';
+      recordIcon.style.display = 'none';
+      equalizer.style.display = 'flex';
+      startEqualizer();
+      pauseStopRow.style.display = 'flex';
+      pauseBtn.textContent = 'Pause';
+      pauseBtn.classList.remove('is-paused');
+      homeStopBtn.disabled = false;
+    }catch(err){
+      showError('Could not access the microphone. Please allow microphone access and try again.');
     }
-  });
+  }
+
+  function stopRecording(){
+    if(!isRecording) return;
+    lastRecordingDurationMs = isPaused ? pausedElapsed : pausedElapsed + (Date.now() - startTime);
+    isRecording = false;
+    isPaused = false;
+    clearInterval(timerInterval);
+    stopEqualizer();
+    recordBtn.classList.remove('recording');
+    recordBtn.setAttribute('aria-label','Start recording');
+    recordLabel.textContent = 'Processing…';
+    pauseStopRow.style.display = 'none';
+    recordIcon.style.display = 'block';
+    equalizer.style.display = 'none';
+    homeStopBtn.disabled = true;
+    if(currentView !== 'record') showView('record');
+
+    if(mediaRecorder && mediaRecorder.state !== 'inactive'){
+      isFinalizing = true;
+      mediaRecorder.stop(); // onstop pushes the final segment, then finishes since isFinalizing is true
+    } else {
+      // Was already paused (recorder already stopped) — just finish now.
+      finishRecording();
+    }
+  }
+
+  recordBtn.addEventListener('click', () => { startRecording(); });
+  stopBtn.addEventListener('click', stopRecording);
+  homeStopBtn.addEventListener('click', stopRecording);
 
   recordAgainBtn.addEventListener('click', () => {
-    recordBtn.click();
+    startRecording();
   });
 
   pauseBtn.addEventListener('click', () => {
@@ -1149,9 +1501,11 @@
       pausedElapsed += Date.now() - startTime;
       clearInterval(timerInterval);
       mediaRecorder.stop(); // onstop pushes this segment into the array (isFinalizing is false, so it just waits)
+      stopEqualizer();
+      equalizer.classList.add('paused');
       pauseBtn.textContent = 'Resume';
       pauseBtn.classList.add('is-paused');
-      recordLabel.textContent = 'Paused — tap Resume to continue';
+      recordLabel.textContent = 'Paused — tap Resume to continue, or Stop to finish';
     } else {
       isPaused = false;
       startSegmentRecorder(); // starts a brand-new, clean segment
@@ -1159,9 +1513,10 @@
       timerInterval = setInterval(() => {
         timerEl.textContent = formatTime(pausedElapsed + (Date.now() - startTime));
       }, 250);
+      startEqualizer();
       pauseBtn.textContent = 'Pause';
       pauseBtn.classList.remove('is-paused');
-      recordLabel.textContent = 'Recording — tap to stop';
+      recordLabel.textContent = 'Recording — tap Pause or Stop';
     }
   });
 
@@ -1173,6 +1528,7 @@
     hint.style.display = 'block';
     recordAgainBtn.style.display = 'inline-block';
     recordBtn.classList.add('needs-attention');
+    homeStopBtn.disabled = true;
 
     if(audioBlob){
       currentAudioBlob = audioBlob;
@@ -1197,6 +1553,7 @@
         durationMs: durationMs || 0,
         pending: true
       });
+      showToast('✅ Recording saved in your library');
     }catch(err){
       console.error('Could not save the raw recording', err);
     }
@@ -1312,8 +1669,7 @@
   // ---- Results display ----
   function showResults(transcript, summary, audioBlob, pendingId){
     statusRow.style.display = 'none';
-    recordStage.style.display = 'none';
-    results.style.display = 'flex';
+    showView('results');
 
     const dateObj = new Date();
     resultDate.textContent = dateObj.toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
@@ -1353,10 +1709,7 @@
   });
 
   newRecordingBtn.addEventListener('click', () => {
-    results.style.display = 'none';
-    recordStage.style.display = 'flex';
-    recordLabel.textContent = 'Tap to start recording';
-    hint.style.display = 'block';
+    showRecordingPage();
     timerEl.textContent = '00:00';
     errorBox.style.display = 'none';
     downloadNowBtn.style.display = 'none';
@@ -1501,9 +1854,7 @@
   }
 
   function openSavedSermon(sermon){
-    libraryView.style.display = 'none';
-    recordStage.style.display = 'none';
-    results.style.display = 'flex';
+    showView('results');
 
     resultDate.textContent = new Date(sermon.date).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
 
@@ -1526,13 +1877,11 @@
     audioPlayback.src = sermon.audioBlob ? URL.createObjectURL(sermon.audioBlob) : '';
   }
 
-  let screenBeforeLibrary = 'record';
+  let screenBeforeLibrary = 'home';
 
   libraryBtn.addEventListener('click', () => {
-    screenBeforeLibrary = (results.style.display !== 'none') ? 'results' : 'record';
-    recordStage.style.display = 'none';
-    results.style.display = 'none';
-    libraryView.style.display = 'flex';
+    screenBeforeLibrary = currentView === 'library' ? screenBeforeLibrary : currentView;
+    showView('library');
     librarySearchInput.value = '';
     renderLibrary();
   });
@@ -1542,36 +1891,20 @@
   });
 
   closeLibraryBtn.addEventListener('click', () => {
-    libraryView.style.display = 'none';
-    if(screenBeforeLibrary === 'results'){
-      results.style.display = 'flex';
-    } else {
-      recordStage.style.display = 'flex';
-    }
+    showView(screenBeforeLibrary);
   });
 
   // ---- Paywall (Sermon Echo Premium) ----
-  let screenBeforePaywall = 'record';
+  let screenBeforePaywall = 'home';
 
   function openPaywall(){
-    screenBeforePaywall = (results.style.display !== 'none') ? 'results'
-      : (libraryView.style.display !== 'none') ? 'library' : 'record';
-    recordStage.style.display = 'none';
-    results.style.display = 'none';
-    libraryView.style.display = 'none';
-    paywallView.style.display = 'flex';
+    screenBeforePaywall = currentView === 'paywall' ? screenBeforePaywall : currentView;
+    showView('paywall');
   }
 
   function closePaywall(){
-    paywallView.style.display = 'none';
-    if(screenBeforePaywall === 'results'){
-      results.style.display = 'flex';
-    } else if(screenBeforePaywall === 'library'){
-      libraryView.style.display = 'flex';
-      renderLibrary();
-    } else {
-      recordStage.style.display = 'flex';
-    }
+    showView(screenBeforePaywall);
+    if(screenBeforePaywall === 'library') renderLibrary();
   }
 
   paywallBtn.addEventListener('click', openPaywall);
