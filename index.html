@@ -599,6 +599,33 @@
     font-size:13px;
     font-family:'Inter',sans-serif;
   }
+  .settings-item.clickable{ cursor:pointer; }
+  .settings-item.clickable:hover{ color:var(--gold-bright); }
+  .settings-item .chevron{ color:var(--text-muted); }
+  .concordance-intro{
+    font-size:13px;
+    color:var(--text-muted);
+    margin:0 0 14px;
+    line-height:1.5;
+  }
+  .concordance-result{
+    padding:12px 14px;
+    border:1px solid var(--surface-line);
+    border-radius:12px;
+    margin-bottom:10px;
+  }
+  .concordance-result .ref{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    color:var(--gold-bright);
+    font-size:14px;
+    margin-bottom:4px;
+  }
+  .concordance-result .note{
+    font-size:13px;
+    color:var(--text);
+    line-height:1.45;
+  }
   .transcript-box{
     background:var(--surface);
     border:1px solid var(--surface-line);
@@ -1035,11 +1062,22 @@
             <option value="English">English</option>
           </select>
         </div>
-        <div class="settings-item"><span>📖 Bible Concordance</span><span class="soon">coming soon</span></div>
+        <div class="settings-item clickable" id="concordanceRow"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
         <div class="settings-item"><span>✍️ Bible Authors &amp; History</span><span class="soon">coming soon</span></div>
         <div class="settings-item"><span>🔬 Bible &amp; Science</span><span class="soon">coming soon</span></div>
       </div>
       <div class="hint">Got an access code from a payment or a family member? Enter it above to unlock Premium on this device. More features will appear here as they're built.</div>
+    </div>
+
+    <!-- BIBLE CONCORDANCE -->
+    <div class="library" id="concordanceView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Bible Concordance</span>
+        <button class="new-recording-btn" id="closeConcordanceBtn">Close</button>
+      </div>
+      <input type="text" class="library-search" id="concordanceInput" placeholder="Search a topic or word (e.g. forgiveness, worry, faith)…">
+      <div class="error-box" id="concordanceError" style="display:none;"></div>
+      <div id="concordanceResults"></div>
     </div>
 
     <!-- RECORD STAGE -->
@@ -1186,6 +1224,12 @@
   const settingsBtn = document.getElementById('settingsBtn');
   const settingsView = document.getElementById('settingsView');
   const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+  const concordanceView = document.getElementById('concordanceView');
+  const closeConcordanceBtn = document.getElementById('closeConcordanceBtn');
+  const concordanceRow = document.getElementById('concordanceRow');
+  const concordanceInput = document.getElementById('concordanceInput');
+  const concordanceError = document.getElementById('concordanceError');
+  const concordanceResults = document.getElementById('concordanceResults');
   const equalizer = document.getElementById('equalizer');
   const pauseStopRow = document.getElementById('pauseStopRow');
   const stopBtn = document.getElementById('stopBtn');
@@ -1208,6 +1252,12 @@
     showView('settings');
   });
   closeSettingsBtn.addEventListener('click', () => showView(screenBeforeSettings));
+
+  concordanceRow.addEventListener('click', () => {
+    showView('concordance');
+    concordanceError.style.display = 'none';
+  });
+  closeConcordanceBtn.addEventListener('click', () => showView('settings'));
 
   const CHUNK_THRESHOLD_BYTES = 4 * 1024 * 1024; // ~4MB triggers splitting into chunks
   const CHUNK_SECONDS = 90; // length of each chunk once shrunk down
@@ -1273,6 +1323,7 @@
     results: results,
     library: libraryView,
     settings: settingsView,
+    concordance: concordanceView,
     paywall: paywallView
   };
   function showView(name){
@@ -1947,8 +1998,72 @@
     }
   });
 
+  // ---- Bible Concordance (Premium feature) ----
+  let concordanceSearchInFlight = false;
+
+  async function runConcordanceSearch(){
+    const query = concordanceInput.value.trim();
+    concordanceError.style.display = 'none';
+
+    if(!query){
+      return;
+    }
+
+    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    if(!premium){
+      concordanceResults.innerHTML = '';
+      concordanceError.textContent = 'Bible Concordance is a Premium feature — unlock it in Settings ⭐';
+      concordanceError.style.display = 'block';
+      return;
+    }
+
+    if(concordanceSearchInFlight) return;
+    concordanceSearchInFlight = true;
+    concordanceResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
+
+    try {
+      const res = await fetch('/.netlify/functions/concordance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
+
+      concordanceResults.innerHTML = '';
+      if(data.intro){
+        const intro = document.createElement('div');
+        intro.className = 'concordance-intro';
+        intro.textContent = data.intro;
+        concordanceResults.appendChild(intro);
+      }
+      (data.passages || []).forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'concordance-result';
+        const ref = document.createElement('div');
+        ref.className = 'ref';
+        ref.textContent = p.reference;
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.textContent = p.note;
+        card.appendChild(ref);
+        card.appendChild(note);
+        concordanceResults.appendChild(card);
+      });
+    } catch (err) {
+      concordanceResults.innerHTML = '';
+      concordanceError.textContent = err.message || 'Could not search right now. Please try again.';
+      concordanceError.style.display = 'block';
+    } finally {
+      concordanceSearchInFlight = false;
+    }
+  }
+
+  concordanceInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') runConcordanceSearch();
+  });
+
   newRecordingBtn.addEventListener('click', () => {
-    showRecordingPage();
     timerEl.textContent = '00:00';
     errorBox.style.display = 'none';
     downloadNowBtn.style.display = 'none';
