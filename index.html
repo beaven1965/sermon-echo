@@ -1064,7 +1064,7 @@
         </div>
         <div class="settings-item clickable" id="concordanceRow"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="authorsRow"><span>✍️ Bible Authors &amp; History</span><span class="chevron">→</span></div>
-        <div class="settings-item"><span>🔬 Bible &amp; Science</span><span class="soon">coming soon</span></div>
+        <div class="settings-item clickable" id="scienceRow"><span>🔬 Bible &amp; Science</span><span class="chevron">→</span></div>
       </div>
       <div class="hint">Got an access code from a payment or a family member? Enter it above to unlock Premium on this device. More features will appear here as they're built.</div>
     </div>
@@ -1089,6 +1089,17 @@
       <input type="text" class="library-search" id="authorsInput" placeholder="Search an author (e.g. Paul, Moses, John)…">
       <div class="error-box" id="authorsError" style="display:none;"></div>
       <div id="authorsResults"></div>
+    </div>
+
+    <!-- BIBLE & SCIENCE -->
+    <div class="library" id="scienceView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Bible &amp; Science</span>
+        <button class="new-recording-btn" id="closeScienceBtn">Close</button>
+      </div>
+      <input type="text" class="library-search" id="scienceInput" placeholder="Search a topic or place (e.g. the Flood, Jericho, the Exodus)…">
+      <div class="error-box" id="scienceError" style="display:none;"></div>
+      <div id="scienceResults"></div>
     </div>
 
     <!-- RECORD STAGE -->
@@ -1247,6 +1258,12 @@
   const authorsInput = document.getElementById('authorsInput');
   const authorsError = document.getElementById('authorsError');
   const authorsResults = document.getElementById('authorsResults');
+  const scienceView = document.getElementById('scienceView');
+  const closeScienceBtn = document.getElementById('closeScienceBtn');
+  const scienceRow = document.getElementById('scienceRow');
+  const scienceInput = document.getElementById('scienceInput');
+  const scienceError = document.getElementById('scienceError');
+  const scienceResults = document.getElementById('scienceResults');
   const equalizer = document.getElementById('equalizer');
   const pauseStopRow = document.getElementById('pauseStopRow');
   const stopBtn = document.getElementById('stopBtn');
@@ -1281,6 +1298,12 @@
     authorsError.style.display = 'none';
   });
   closeAuthorsBtn.addEventListener('click', () => showView('settings'));
+
+  scienceRow.addEventListener('click', () => {
+    showView('science');
+    scienceError.style.display = 'none';
+  });
+  closeScienceBtn.addEventListener('click', () => showView('settings'));
 
   const CHUNK_THRESHOLD_BYTES = 4 * 1024 * 1024; // ~4MB triggers splitting into chunks
   const CHUNK_SECONDS = 90; // length of each chunk once shrunk down
@@ -1348,6 +1371,7 @@
     settings: settingsView,
     concordance: concordanceView,
     authors: authorsView,
+    science: scienceView,
     paywall: paywallView
   };
   function showView(name){
@@ -2157,6 +2181,77 @@
 
   authorsInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') runAuthorsSearch();
+  });
+
+  // ---- Bible & Science (Premium feature) ----
+  let scienceSearchInFlight = false;
+
+  async function runScienceSearch(){
+    const query = scienceInput.value.trim();
+    scienceError.style.display = 'none';
+
+    if(!query){
+      return;
+    }
+
+    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    if(!premium){
+      scienceResults.innerHTML = '';
+      scienceError.textContent = 'Bible & Science is a Premium feature — unlock it in Settings ⭐';
+      scienceError.style.display = 'block';
+      return;
+    }
+
+    if(scienceSearchInFlight) return;
+    scienceSearchInFlight = true;
+    scienceResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
+
+    try {
+      const res = await fetch('/.netlify/functions/bible-science', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
+
+      scienceResults.innerHTML = '';
+
+      const header = document.createElement('div');
+      header.className = 'concordance-intro';
+      header.textContent = data.topic || query;
+      scienceResults.appendChild(header);
+
+      const fields = [
+        ['What Scripture says', data.claim],
+        ['Archaeological & historical findings', data.evidence],
+        ['How scholars view it', data.perspective]
+      ];
+      fields.forEach(([label, text]) => {
+        if(!text) return;
+        const card = document.createElement('div');
+        card.className = 'concordance-result';
+        const ref = document.createElement('div');
+        ref.className = 'ref';
+        ref.textContent = label;
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.textContent = text;
+        card.appendChild(ref);
+        card.appendChild(note);
+        scienceResults.appendChild(card);
+      });
+    } catch (err) {
+      scienceResults.innerHTML = '';
+      scienceError.textContent = err.message || 'Could not search right now. Please try again.';
+      scienceError.style.display = 'block';
+    } finally {
+      scienceSearchInFlight = false;
+    }
+  }
+
+  scienceInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') runScienceSearch();
   });
 
   newRecordingBtn.addEventListener('click', () => {
