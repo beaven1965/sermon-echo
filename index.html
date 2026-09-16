@@ -1063,7 +1063,7 @@
           </select>
         </div>
         <div class="settings-item clickable" id="concordanceRow"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
-        <div class="settings-item"><span>✍️ Bible Authors &amp; History</span><span class="soon">coming soon</span></div>
+        <div class="settings-item clickable" id="authorsRow"><span>✍️ Bible Authors &amp; History</span><span class="chevron">→</span></div>
         <div class="settings-item"><span>🔬 Bible &amp; Science</span><span class="soon">coming soon</span></div>
       </div>
       <div class="hint">Got an access code from a payment or a family member? Enter it above to unlock Premium on this device. More features will appear here as they're built.</div>
@@ -1078,6 +1078,17 @@
       <input type="text" class="library-search" id="concordanceInput" placeholder="Search a topic or word (e.g. forgiveness, worry, faith)…">
       <div class="error-box" id="concordanceError" style="display:none;"></div>
       <div id="concordanceResults"></div>
+    </div>
+
+    <!-- BIBLE AUTHORS & HISTORY -->
+    <div class="library" id="authorsView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Bible Authors &amp; History</span>
+        <button class="new-recording-btn" id="closeAuthorsBtn">Close</button>
+      </div>
+      <input type="text" class="library-search" id="authorsInput" placeholder="Search an author (e.g. Paul, Moses, John)…">
+      <div class="error-box" id="authorsError" style="display:none;"></div>
+      <div id="authorsResults"></div>
     </div>
 
     <!-- RECORD STAGE -->
@@ -1230,6 +1241,12 @@
   const concordanceInput = document.getElementById('concordanceInput');
   const concordanceError = document.getElementById('concordanceError');
   const concordanceResults = document.getElementById('concordanceResults');
+  const authorsView = document.getElementById('authorsView');
+  const closeAuthorsBtn = document.getElementById('closeAuthorsBtn');
+  const authorsRow = document.getElementById('authorsRow');
+  const authorsInput = document.getElementById('authorsInput');
+  const authorsError = document.getElementById('authorsError');
+  const authorsResults = document.getElementById('authorsResults');
   const equalizer = document.getElementById('equalizer');
   const pauseStopRow = document.getElementById('pauseStopRow');
   const stopBtn = document.getElementById('stopBtn');
@@ -1258,6 +1275,12 @@
     concordanceError.style.display = 'none';
   });
   closeConcordanceBtn.addEventListener('click', () => showView('settings'));
+
+  authorsRow.addEventListener('click', () => {
+    showView('authors');
+    authorsError.style.display = 'none';
+  });
+  closeAuthorsBtn.addEventListener('click', () => showView('settings'));
 
   const CHUNK_THRESHOLD_BYTES = 4 * 1024 * 1024; // ~4MB triggers splitting into chunks
   const CHUNK_SECONDS = 90; // length of each chunk once shrunk down
@@ -1324,6 +1347,7 @@
     library: libraryView,
     settings: settingsView,
     concordance: concordanceView,
+    authors: authorsView,
     paywall: paywallView
   };
   function showView(name){
@@ -2061,6 +2085,78 @@
 
   concordanceInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') runConcordanceSearch();
+  });
+
+  // ---- Bible Authors & History (Premium feature) ----
+  let authorsSearchInFlight = false;
+
+  async function runAuthorsSearch(){
+    const query = authorsInput.value.trim();
+    authorsError.style.display = 'none';
+
+    if(!query){
+      return;
+    }
+
+    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    if(!premium){
+      authorsResults.innerHTML = '';
+      authorsError.textContent = 'Bible Authors & History is a Premium feature — unlock it in Settings ⭐';
+      authorsError.style.display = 'block';
+      return;
+    }
+
+    if(authorsSearchInFlight) return;
+    authorsSearchInFlight = true;
+    authorsResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
+
+    try {
+      const res = await fetch('/.netlify/functions/bible-authors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
+
+      authorsResults.innerHTML = '';
+
+      const header = document.createElement('div');
+      header.className = 'concordance-intro';
+      header.textContent = (data.name || query) + (data.testament ? ' — ' + data.testament : '') + (data.books ? ' (' + data.books + ')' : '');
+      authorsResults.appendChild(header);
+
+      const fields = [
+        ['Occupation', data.occupation],
+        ['Family', data.family],
+        ['Why included in Scripture', data.highlights],
+        ['Death', data.death]
+      ];
+      fields.forEach(([label, text]) => {
+        if(!text) return;
+        const card = document.createElement('div');
+        card.className = 'concordance-result';
+        const ref = document.createElement('div');
+        ref.className = 'ref';
+        ref.textContent = label;
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.textContent = text;
+        card.appendChild(ref);
+        card.appendChild(note);
+        authorsResults.appendChild(card);
+      });
+    } catch (err) {
+      authorsResults.innerHTML = '';
+      authorsError.textContent = err.message || 'Could not search right now. Please try again.';
+      authorsError.style.display = 'block';
+    } finally {
+      authorsSearchInFlight = false;
+    }
+  }
+
+  authorsInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') runAuthorsSearch();
   });
 
   newRecordingBtn.addEventListener('click', () => {
