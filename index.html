@@ -495,6 +495,28 @@
     text-decoration:underline;
   }
   .library-item .lib-delete:hover{ color:var(--ember-bright); }
+  .lib-actions{
+    float:right;
+    display:flex;
+    gap:12px;
+    margin-left:12px;
+  }
+  .lib-actions button{
+    background:none;
+    border:none;
+    color:var(--text-muted);
+    font-size:12px;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+    font-family:'Inter',sans-serif;
+  }
+  .lib-actions button:hover{ color:var(--gold-bright); }
+  .lib-actions button.danger:hover{ color:var(--ember-bright); }
+  .lib-title{
+    font-weight:600;
+    color:var(--text);
+  }
 
   .library-search{
     width:100%;
@@ -2368,8 +2390,28 @@
       const item = document.createElement('div');
       item.className = 'library-item';
 
+      const actions = document.createElement('div');
+      actions.className = 'lib-actions';
+
+      const renameBtn = document.createElement('button');
+      renameBtn.textContent = 'Rename';
+      renameBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const next = prompt('Rename this recording:', sermon.title || '');
+        if(next === null) return;
+        await updateSermon(sermon.id, { title: next.trim() });
+        renderLibrary();
+      });
+
+      const shareBtn = document.createElement('button');
+      shareBtn.textContent = 'Share';
+      shareBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await shareSermonAudio(sermon);
+      });
+
       const del = document.createElement('button');
-      del.className = 'lib-delete';
+      del.className = 'danger';
       del.textContent = 'Delete';
       del.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -2378,10 +2420,24 @@
         renderLibrary();
       });
 
+      actions.appendChild(renameBtn);
+      actions.appendChild(shareBtn);
+      actions.appendChild(del);
+
       const dateEl = document.createElement('div');
       dateEl.className = 'lib-date';
       const dateStr = new Date(sermon.date).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
-      dateEl.textContent = sermon.durationMs ? dateStr + '  ·  ' + formatTime(sermon.durationMs) : dateStr;
+      const dateLine = sermon.durationMs ? dateStr + '  ·  ' + formatTime(sermon.durationMs) : dateStr;
+      if(sermon.title && sermon.title.trim()){
+        dateEl.innerHTML = '';
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'lib-title';
+        titleSpan.textContent = sermon.title.trim();
+        dateEl.appendChild(titleSpan);
+        dateEl.appendChild(document.createTextNode('  ·  ' + dateLine));
+      } else {
+        dateEl.textContent = dateLine;
+      }
 
       const takeawayEl = document.createElement('div');
       takeawayEl.className = 'lib-takeaway';
@@ -2389,7 +2445,7 @@
         ? 'Recording saved — summary not available (tap to listen or download)'
         : sermon.takeaway;
 
-      item.appendChild(del);
+      item.appendChild(actions);
       item.appendChild(dateEl);
       item.appendChild(takeawayEl);
 
@@ -2398,10 +2454,43 @@
     });
   }
 
+  function makeShareFileName(sermon){
+    const d = new Date(sermon.date);
+    const stamp = d.toISOString().slice(0,10);
+    const cleanTitle = (sermon.title && sermon.title.trim())
+      ? sermon.title.trim().replace(/[^a-z0-9\-_ ]/gi, '').replace(/\s+/g, '-')
+      : ('sermon-echo-' + stamp);
+    const ext = (sermon.audioBlob && sermon.audioBlob.type && sermon.audioBlob.type.includes('wav')) ? 'wav' : 'webm';
+    return cleanTitle + '.' + ext;
+  }
+
+  async function shareSermonAudio(sermon){
+    if(!sermon.audioBlob){
+      alert('No audio file is saved for this recording, so there\'s nothing to share.');
+      return;
+    }
+    const filename = makeShareFileName(sermon);
+    const file = new File([sermon.audioBlob], filename, { type: sermon.audioBlob.type || 'audio/webm' });
+
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      try{
+        await navigator.share({
+          files: [file],
+          title: sermon.title && sermon.title.trim() ? sermon.title.trim() : 'Sermon Echo recording'
+        });
+      }catch(err){
+        // User cancelled the share sheet, or the browser blocked it — nothing to do here.
+      }
+    } else {
+      downloadBlob(sermon.audioBlob, filename);
+      alert('Sharing directly to other apps isn\'t supported in this browser, so the recording was downloaded instead — you can share it from there.');
+    }
+  }
+
   function openSavedSermon(sermon){
     showView('results');
 
-    resultDate.textContent = new Date(sermon.date).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
+    resultDate.textContent = (sermon.title && sermon.title.trim() ? sermon.title.trim() + ' — ' : '') + new Date(sermon.date).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' });
 
     if(sermon.pending){
       takeawayText.textContent = "This recording hasn't been summarized yet — the audio is saved safely below, but transcription or the takeaway didn't complete for it.";
