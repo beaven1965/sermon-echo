@@ -425,6 +425,13 @@
     gap:8px;
   }
   .player-row audio{ flex:1; min-width:0; }
+  .player-row.wrap{ flex-wrap:wrap; row-gap:8px; }
+  .seek-bar{
+    flex:1;
+    min-width:60px;
+    accent-color:var(--gold);
+    cursor:pointer;
+  }
   .skip-btn{
     background:var(--surface);
     border:1px solid var(--surface-line);
@@ -1008,6 +1015,22 @@
   }
   .premium-badge.unlocked{ color:#3fbf72; border:1px solid #3fbf72; }
   .premium-badge.locked{ color:var(--text-muted); border:1px solid var(--surface-line); }
+  .family-code-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 0;
+    border-bottom:1px solid var(--surface-line);
+    flex-wrap:wrap;
+  }
+  .family-code-item:last-child{ border-bottom:none; }
+  .family-code-name{ font-weight:600; color:var(--text); }
+  .family-code-value{ font-family:monospace; font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .family-code-right{ display:flex; align-items:center; gap:10px; }
+  .family-code-status{ font-size:12px; padding:2px 8px; border-radius:8px; white-space:nowrap; }
+  .family-code-status.active{ color:#3fbf72; border:1px solid #3fbf72; }
+  .family-code-status.revoked{ color:var(--text-muted); border:1px solid var(--surface-line); }
   .promo-link{
     background:none;
     border:none;
@@ -1128,6 +1151,15 @@
         </div>
         <div class="error-box" id="redeemError" style="display:none;"></div>
         <div class="hint" id="myCodeHint" style="display:none;"></div>
+        <div id="familyCodesSection" style="display:none;">
+          <div class="hint">Create separate access codes for family members — you can turn any of them off later.</div>
+          <div class="redeem-row">
+            <input type="text" id="familyLabelInput" placeholder="Family member's name (e.g. Mom)">
+            <button id="createFamilyCodeBtn">Create code</button>
+          </div>
+          <div class="error-box" id="familyCodeError" style="display:none;"></div>
+          <div id="familyCodesList"></div>
+        </div>
         <div class="settings-item">
           <span>🌐 Translate sermons into</span>
           <select class="lang-select" id="translateLangSelect">
@@ -1205,8 +1237,10 @@
           <img class="comic-panel-img" id="comicPanelImg" alt="Comic panel illustration">
           <div class="paper-card comic-caption" id="comicPanelCaption"></div>
         </div>
+        <audio id="comicNarrationAudio" style="display:none;"></audio>
         <div class="comic-nav">
           <button class="skip-btn" id="comicPrevBtn">◀ Prev</button>
+          <button class="skip-btn" id="comicPlayNarrationBtn" style="display:none;">🔊 Play</button>
           <span class="hint" id="comicPanelCounter"></span>
           <button class="skip-btn" id="comicNextBtn">Next ▶</button>
         </div>
@@ -1248,9 +1282,19 @@
         <button class="new-recording-btn" id="newRecordingBtn">New recording</button>
       </div>
 
+      <div class="player-row wrap" id="customPlayerRow">
+        <button class="skip-btn" id="prevSermonBtn" aria-label="Previous recording">⏮</button>
+        <button class="skip-btn" id="playPauseBtn" aria-label="Play">▶</button>
+        <button class="skip-btn" id="nextSermonBtn" aria-label="Next recording">⏭</button>
+        <input type="range" class="seek-bar" id="seekBar" min="0" max="100" value="0" step="0.1">
+        <button class="skip-btn" id="timeToggleBtn">0:00 / 0:00</button>
+        <button class="skip-btn" id="muteBtn" aria-label="Mute">🔈</button>
+        <button class="skip-btn" id="speedBtn" aria-label="Playback speed">1x</button>
+      </div>
+
       <div class="player-row">
         <button class="skip-btn" id="skipBackBtn" aria-label="Rewind 15 seconds">⟲ 15</button>
-        <audio id="audioPlayback" controls></audio>
+        <audio id="audioPlayback" style="display:none;"></audio>
         <button class="skip-btn" id="skipFwdBtn" aria-label="Forward 15 seconds">15 ⟳</button>
         <button class="skip-btn" id="downloadBtn" aria-label="Download recording">⬇ Save</button>
       </div>
@@ -1348,6 +1392,13 @@
   const skipFwdBtn = document.getElementById('skipFwdBtn');
   const downloadBtn = document.getElementById('downloadBtn');
   const downloadNowBtn = document.getElementById('downloadNowBtn');
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const prevSermonBtn = document.getElementById('prevSermonBtn');
+  const nextSermonBtn = document.getElementById('nextSermonBtn');
+  const seekBar = document.getElementById('seekBar');
+  const timeToggleBtn = document.getElementById('timeToggleBtn');
+  const muteBtn = document.getElementById('muteBtn');
+  const speedBtn = document.getElementById('speedBtn');
   let currentAudioBlob = null;
 
   // ---- New: Home page, Settings, equalizer, save toast ----
@@ -1390,6 +1441,8 @@
   const comicPrevBtn = document.getElementById('comicPrevBtn');
   const comicNextBtn = document.getElementById('comicNextBtn');
   const comicNewStoryBtn = document.getElementById('comicNewStoryBtn');
+  const comicNarrationAudio = document.getElementById('comicNarrationAudio');
+  const comicPlayNarrationBtn = document.getElementById('comicPlayNarrationBtn');
   const equalizer = document.getElementById('equalizer');
   const pauseStopRow = document.getElementById('pauseStopRow');
   const stopBtn = document.getElementById('stopBtn');
@@ -1470,6 +1523,112 @@
   skipFwdBtn.addEventListener('click', () => {
     audioPlayback.currentTime = Math.min(audioPlayback.duration || Infinity, audioPlayback.currentTime + 15);
   });
+
+  // ---- Custom player controls: Play/Pause, seek, speed, mute, Prev/Next ----
+  function formatPlayerTime(sec){
+    if(!isFinite(sec) || sec < 0) sec = 0;
+    return formatTime(sec * 1000);
+  }
+
+  let showRemainingTime = false;
+  const PLAYBACK_SPEEDS = [1, 1.25, 1.5, 2, 0.75];
+  let speedIndex = 0;
+  let seekBarDragging = false;
+
+  function updatePlayPauseIcon(){
+    playPauseBtn.textContent = audioPlayback.paused ? '▶' : '⏸';
+    playPauseBtn.setAttribute('aria-label', audioPlayback.paused ? 'Play' : 'Pause');
+  }
+
+  function updateTimeDisplay(){
+    const dur = audioPlayback.duration || 0;
+    const cur = audioPlayback.currentTime || 0;
+    timeToggleBtn.textContent = showRemainingTime
+      ? '-' + formatPlayerTime(Math.max(0, dur - cur))
+      : formatPlayerTime(cur) + ' / ' + formatPlayerTime(dur);
+    if(isFinite(dur) && dur > 0){
+      seekBar.max = dur;
+      if(!seekBarDragging) seekBar.value = cur;
+    }
+  }
+
+  playPauseBtn.addEventListener('click', () => {
+    if(!audioPlayback.src) return;
+    if(audioPlayback.paused) audioPlayback.play(); else audioPlayback.pause();
+  });
+  audioPlayback.addEventListener('play', updatePlayPauseIcon);
+  audioPlayback.addEventListener('pause', updatePlayPauseIcon);
+  audioPlayback.addEventListener('ended', updatePlayPauseIcon);
+  audioPlayback.addEventListener('timeupdate', updateTimeDisplay);
+  audioPlayback.addEventListener('loadedmetadata', updateTimeDisplay);
+  audioPlayback.addEventListener('durationchange', updateTimeDisplay);
+
+  seekBar.addEventListener('mousedown', () => { seekBarDragging = true; });
+  seekBar.addEventListener('touchstart', () => { seekBarDragging = true; });
+  seekBar.addEventListener('input', () => {
+    audioPlayback.currentTime = Number(seekBar.value);
+    updateTimeDisplay();
+  });
+  seekBar.addEventListener('change', () => { seekBarDragging = false; });
+
+  timeToggleBtn.addEventListener('click', () => {
+    showRemainingTime = !showRemainingTime;
+    updateTimeDisplay();
+  });
+
+  muteBtn.addEventListener('click', () => {
+    audioPlayback.muted = !audioPlayback.muted;
+    muteBtn.textContent = audioPlayback.muted ? '🔇' : '🔈';
+  });
+
+  speedBtn.addEventListener('click', () => {
+    speedIndex = (speedIndex + 1) % PLAYBACK_SPEEDS.length;
+    audioPlayback.playbackRate = PLAYBACK_SPEEDS[speedIndex];
+    speedBtn.textContent = PLAYBACK_SPEEDS[speedIndex] + 'x';
+  });
+
+  async function getSortedSermons(){
+    let sermons = [];
+    try{
+      sermons = await getAllSermons();
+    }catch(err){
+      return [];
+    }
+    sermons.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return sermons;
+  }
+
+  // Library is sorted newest-first: "Previous" moves to the next-older
+  // recording (higher index), "Next" moves to the more recent one.
+  async function playAdjacentSermon(indexOffset){
+    if(!currentSermon || !currentSermon.id) return;
+    const sermons = await getSortedSermons();
+    const idx = sermons.findIndex(s => s.id === currentSermon.id);
+    if(idx === -1) return;
+    const target = sermons[idx + indexOffset];
+    if(!target) return;
+    openSavedSermon(target);
+  }
+
+  prevSermonBtn.addEventListener('click', () => playAdjacentSermon(1));
+  nextSermonBtn.addEventListener('click', () => playAdjacentSermon(-1));
+
+  async function updatePrevNextButtons(){
+    if(!currentSermon || !currentSermon.id){
+      prevSermonBtn.disabled = true;
+      nextSermonBtn.disabled = true;
+      prevSermonBtn.style.opacity = '0.4';
+      nextSermonBtn.style.opacity = '0.4';
+      return;
+    }
+    const sermons = await getSortedSermons();
+    const idx = sermons.findIndex(s => s.id === currentSermon.id);
+    prevSermonBtn.disabled = idx === -1 || idx >= sermons.length - 1;
+    nextSermonBtn.disabled = idx <= 0;
+    prevSermonBtn.style.opacity = prevSermonBtn.disabled ? '0.4' : '1';
+    nextSermonBtn.style.opacity = nextSermonBtn.disabled ? '0.4' : '1';
+  }
+
   const newRecordingBtn = document.getElementById('newRecordingBtn');
   const uploadBtn = document.getElementById('uploadBtn');
   const fileInput = document.getElementById('fileInput');
@@ -1482,7 +1641,11 @@
   const redeemCodeBtn = document.getElementById('redeemCodeBtn');
   const redeemError = document.getElementById('redeemError');
   const myCodeHint = document.getElementById('myCodeHint');
-  const paywallBtn = document.getElementById('paywallBtn');
+  const familyCodesSection = document.getElementById('familyCodesSection');
+  const familyLabelInput = document.getElementById('familyLabelInput');
+  const createFamilyCodeBtn = document.getElementById('createFamilyCodeBtn');
+  const familyCodeError = document.getElementById('familyCodeError');
+  const familyCodesList = document.getElementById('familyCodesList');  const paywallBtn = document.getElementById('paywallBtn');
   const closePaywallBtn = document.getElementById('closePaywallBtn');
   const paywallView = document.getElementById('paywallView');
   const subscribeBtn = document.getElementById('subscribeBtn');
@@ -1929,6 +2092,7 @@
 
   async function processAudio(audioBlob, pendingId){
     audioPlayback.src = URL.createObjectURL(audioBlob);
+    audioPlayback.load();
     currentAudioBlob = audioBlob;
 
     statusRow.style.display = 'flex';
@@ -2054,6 +2218,7 @@
 
     currentSermon = { id: pendingId || null, takeaway: summary.takeaway, bullets: summary.bullets || [], transcript, translations: {} };
     resetTranslateUI();
+    updatePrevNextButtons();
 
     if(audioBlob){
       const fields = {
@@ -2464,6 +2629,21 @@
           throw new Error(base + detail);
         }
         panels[i].image = imgData.image;
+
+        comicProgressText.textContent = 'Recording narration for panel ' + (i + 1) + ' of ' + panels.length + '…';
+        try {
+          const audioRes = await fetch('/.netlify/functions/comic-narrate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: panels[i].caption })
+          });
+          const audioData = await audioRes.json().catch(() => ({}));
+          if(audioRes.ok && audioData.audio){
+            panels[i].audio = audioData.audio;
+          }
+        } catch (narrationErr) {
+          // Narration is a nice-to-have — if it fails, the comic still works without it.
+        }
       }
 
       comicPanels = panels;
@@ -2487,6 +2667,9 @@
     if(!panel) return;
     comicIndex = i;
 
+    comicNarrationAudio.pause();
+    comicNarrationAudio.currentTime = 0;
+
     comicPanelImg.classList.remove('loaded');
     comicPanelCaption.classList.remove('loaded');
 
@@ -2499,12 +2682,33 @@
 
     requestAnimationFrame(() => comicPanelCaption.classList.add('loaded'));
 
+    if(panel.audio){
+      comicNarrationAudio.src = panel.audio;
+      comicPlayNarrationBtn.style.display = 'inline-block';
+      comicPlayNarrationBtn.textContent = '🔊 Play';
+    } else {
+      comicNarrationAudio.removeAttribute('src');
+      comicPlayNarrationBtn.style.display = 'none';
+    }
+
     comicPanelCounter.textContent = 'Panel ' + (i + 1) + ' of ' + comicPanels.length;
     comicPrevBtn.disabled = i === 0;
     comicNextBtn.disabled = i === comicPanels.length - 1;
     comicPrevBtn.style.opacity = comicPrevBtn.disabled ? '0.4' : '1';
     comicNextBtn.style.opacity = comicNextBtn.disabled ? '0.4' : '1';
   }
+
+  comicPlayNarrationBtn.addEventListener('click', () => {
+    if(comicNarrationAudio.paused){
+      comicNarrationAudio.currentTime = 0;
+      comicNarrationAudio.play();
+    } else {
+      comicNarrationAudio.pause();
+    }
+  });
+  comicNarrationAudio.addEventListener('play', () => { comicPlayNarrationBtn.textContent = '⏸ Pause'; });
+  comicNarrationAudio.addEventListener('pause', () => { comicPlayNarrationBtn.textContent = '🔊 Play'; });
+  comicNarrationAudio.addEventListener('ended', () => { comicPlayNarrationBtn.textContent = '🔊 Play'; });
 
   comicPrevBtn.addEventListener('click', () => { if(comicIndex > 0) showComicPanel(comicIndex - 1); });
   comicNextBtn.addEventListener('click', () => { if(comicIndex < comicPanels.length - 1) showComicPanel(comicIndex + 1); });
@@ -2743,6 +2947,7 @@
 
     currentAudioBlob = sermon.audioBlob || null;
     audioPlayback.src = sermon.audioBlob ? URL.createObjectURL(sermon.audioBlob) : '';
+    audioPlayback.load();
 
     currentSermon = {
       id: sermon.id,
@@ -2752,6 +2957,7 @@
       translations: sermon.translations || {}
     };
     resetTranslateUI();
+    updatePrevNextButtons();
   }
 
   let screenBeforeLibrary = 'home';
@@ -2802,12 +3008,130 @@
         myCodeHint.style.display = 'block';
         myCodeHint.textContent = 'Your access code (share with family to unlock their device too): ' + savedCode;
       }
+      if(savedCode && savedCode.startsWith('SE-')){
+        familyCodesSection.style.display = 'block';
+        loadFamilyCodes();
+      } else {
+        familyCodesSection.style.display = 'none';
+      }
     } else {
       premiumBadge.textContent = 'Not unlocked';
       premiumBadge.className = 'premium-badge locked';
       myCodeHint.style.display = 'none';
+      familyCodesSection.style.display = 'none';
     }
   }
+
+  async function loadFamilyCodes(){
+    const ownerCode = localStorage.getItem(PREMIUM_CODE_KEY);
+    if(!ownerCode) return;
+    familyCodeError.style.display = 'none';
+    try{
+      const res = await fetch('/.netlify/functions/list-family-codes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ownerCode })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || 'Could not load family codes.');
+      renderFamilyCodes(data.codes || []);
+    }catch(err){
+      familyCodesList.innerHTML = '';
+      familyCodeError.textContent = err.message || 'Could not load family codes right now.';
+      familyCodeError.style.display = 'block';
+    }
+  }
+
+  function renderFamilyCodes(codes){
+    familyCodesList.innerHTML = '';
+    if(codes.length === 0){
+      const p = document.createElement('div');
+      p.className = 'hint';
+      p.textContent = 'No family codes yet — create one above.';
+      familyCodesList.appendChild(p);
+      return;
+    }
+    codes.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'family-code-item';
+
+      const info = document.createElement('div');
+      const name = document.createElement('div');
+      name.className = 'family-code-name';
+      name.textContent = c.label;
+      const value = document.createElement('div');
+      value.className = 'family-code-value';
+      value.textContent = c.code;
+      info.appendChild(name);
+      info.appendChild(value);
+
+      const right = document.createElement('div');
+      right.className = 'family-code-right';
+
+      const status = document.createElement('span');
+      status.className = 'family-code-status ' + (c.revoked ? 'revoked' : 'active');
+      status.textContent = c.revoked ? 'Off' : 'Active';
+
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'skip-btn';
+      toggleBtn.textContent = c.revoked ? 'Turn on' : 'Turn off';
+      toggleBtn.addEventListener('click', async () => {
+        toggleBtn.disabled = true;
+        try{
+          const ownerCode = localStorage.getItem(PREMIUM_CODE_KEY);
+          const res = await fetch('/.netlify/functions/revoke-family-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ownerCode, code: c.code, revoked: !c.revoked })
+          });
+          const data = await res.json().catch(() => ({}));
+          if(!res.ok || !data.ok) throw new Error(data.error || 'Could not update that code.');
+          loadFamilyCodes();
+        }catch(err){
+          familyCodeError.textContent = err.message || 'Could not update that code right now.';
+          familyCodeError.style.display = 'block';
+          toggleBtn.disabled = false;
+        }
+      });
+
+      right.appendChild(status);
+      right.appendChild(toggleBtn);
+      item.appendChild(info);
+      item.appendChild(right);
+      familyCodesList.appendChild(item);
+    });
+  }
+
+  createFamilyCodeBtn.addEventListener('click', async () => {
+    const label = familyLabelInput.value.trim();
+    familyCodeError.style.display = 'none';
+    if(!label){
+      familyCodeError.textContent = 'Please type a name first.';
+      familyCodeError.style.display = 'block';
+      return;
+    }
+    const ownerCode = localStorage.getItem(PREMIUM_CODE_KEY);
+    if(!ownerCode) return;
+    createFamilyCodeBtn.disabled = true;
+    createFamilyCodeBtn.textContent = '…';
+    try{
+      const res = await fetch('/.netlify/functions/create-family-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ownerCode, label })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok || !data.code) throw new Error(data.error || 'Could not create a code right now.');
+      familyLabelInput.value = '';
+      loadFamilyCodes();
+    }catch(err){
+      familyCodeError.textContent = err.message || 'Could not create a code right now.';
+      familyCodeError.style.display = 'block';
+    }finally{
+      createFamilyCodeBtn.disabled = false;
+      createFamilyCodeBtn.textContent = 'Create code';
+    }
+  });
 
   function unlockPremium(code){
     localStorage.setItem(PREMIUM_FLAG_KEY, 'true');
