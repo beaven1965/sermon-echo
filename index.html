@@ -568,6 +568,37 @@
     text-underline-offset:3px;
   }
   .transcript-toggle:hover{ color:var(--text); }
+  .translate-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:0 0 14px;
+  }
+  .translate-btn{
+    background:none;
+    border:1px solid var(--gold);
+    color:var(--gold-bright);
+    border-radius:10px;
+    padding:6px 14px;
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+  }
+  .translate-btn:disabled{ opacity:0.6; cursor:default; }
+  .translate-note{
+    font-size:12px;
+    color:var(--text-muted);
+  }
+  .lang-select{
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    border-radius:10px;
+    padding:6px 10px;
+    color:var(--text);
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+  }
   .transcript-box{
     background:var(--surface);
     border:1px solid var(--surface-line);
@@ -991,7 +1022,19 @@
         </div>
         <div class="error-box" id="redeemError" style="display:none;"></div>
         <div class="hint" id="myCodeHint" style="display:none;"></div>
-        <div class="settings-item"><span>🌐 Sermon Translation</span><span class="soon">coming soon</span></div>
+        <div class="settings-item">
+          <span>🌐 Translate sermons into</span>
+          <select class="lang-select" id="translateLangSelect">
+            <option value="Tagalog">Tagalog</option>
+            <option value="Cebuano (Bisaya)">Cebuano (Bisaya)</option>
+            <option value="Ilocano">Ilocano</option>
+            <option value="Spanish">Spanish</option>
+            <option value="Mandarin Chinese">Mandarin Chinese</option>
+            <option value="Korean">Korean</option>
+            <option value="Japanese">Japanese</option>
+            <option value="English">English</option>
+          </select>
+        </div>
         <div class="settings-item"><span>📖 Bible Concordance</span><span class="soon">coming soon</span></div>
         <div class="settings-item"><span>✍️ Bible Authors &amp; History</span><span class="soon">coming soon</span></div>
         <div class="settings-item"><span>🔬 Bible &amp; Science</span><span class="soon">coming soon</span></div>
@@ -1042,6 +1085,11 @@
 
       <button class="transcript-toggle" id="transcriptToggle">Show full transcript</button>
       <div class="transcript-box" id="transcriptBox" style="display:none;"></div>
+
+      <div class="translate-row">
+        <button class="translate-btn" id="translateBtn">🌐 Translate</button>
+        <span class="translate-note" id="translateNote"></span>
+      </div>
 
       <div class="paper-card">
         <div class="eyebrow">Highlights</div>
@@ -1120,6 +1168,9 @@
   const bulletsList = document.getElementById('bulletsList');
   const transcriptToggle = document.getElementById('transcriptToggle');
   const transcriptBox = document.getElementById('transcriptBox');
+  const translateBtn = document.getElementById('translateBtn');
+  const translateNote = document.getElementById('translateNote');
+  const translateLangSelect = document.getElementById('translateLangSelect');
   const audioPlayback = document.getElementById('audioPlayback');
   const skipBackBtn = document.getElementById('skipBackBtn');
   const skipFwdBtn = document.getElementById('skipFwdBtn');
@@ -1769,6 +1820,9 @@
     transcriptBox.textContent = transcript;
     currentAudioBlob = audioBlob || currentAudioBlob;
 
+    currentSermon = { id: pendingId || null, takeaway: summary.takeaway, bullets: summary.bullets || [], transcript, translations: {} };
+    resetTranslateUI();
+
     if(audioBlob){
       const fields = {
         date: dateObj.toISOString(),
@@ -1781,7 +1835,9 @@
       if(pendingId){
         updateSermon(pendingId, fields).catch(err => console.error('Could not update sermon in library', err));
       } else {
-        saveSermon(fields).catch(err => console.error('Could not save sermon to library', err));
+        saveSermon(fields).then(newId => {
+          if(currentSermon && currentSermon.transcript === transcript) currentSermon.id = newId;
+        }).catch(err => console.error('Could not save sermon to library', err));
       }
     }
   }
@@ -1790,6 +1846,105 @@
     const showing = transcriptBox.style.display === 'block';
     transcriptBox.style.display = showing ? 'none' : 'block';
     transcriptToggle.textContent = showing ? 'Show full transcript' : 'Hide full transcript';
+  });
+
+  // ---- Sermon translation (Premium feature) ----
+  const TRANSLATE_LANG_KEY = 'se_translate_lang';
+  const savedLang = localStorage.getItem(TRANSLATE_LANG_KEY);
+  if(savedLang) translateLangSelect.value = savedLang;
+
+  let currentSermon = null; // { id, takeaway, bullets, transcript, translations }
+  let viewingTranslation = false;
+
+  function renderSermonText(data){
+    takeawayText.textContent = data.takeaway;
+    bulletsList.innerHTML = '';
+    (data.bullets || []).forEach(b => {
+      const li = document.createElement('li');
+      li.textContent = b;
+      bulletsList.appendChild(li);
+    });
+    transcriptBox.textContent = data.transcript;
+  }
+
+  function resetTranslateUI(){
+    viewingTranslation = false;
+    translateBtn.textContent = '🌐 Translate';
+    translateBtn.disabled = false;
+    translateNote.textContent = '';
+  }
+
+  translateLangSelect.addEventListener('change', () => {
+    localStorage.setItem(TRANSLATE_LANG_KEY, translateLangSelect.value);
+    if(viewingTranslation && currentSermon){
+      renderSermonText(currentSermon);
+      resetTranslateUI();
+    }
+  });
+
+  translateBtn.addEventListener('click', async () => {
+    if(!currentSermon) return;
+
+    // Flip back to the original if we're currently showing a translation.
+    if(viewingTranslation){
+      renderSermonText(currentSermon);
+      resetTranslateUI();
+      return;
+    }
+
+    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    if(!premium){
+      translateNote.textContent = 'Translation is a Premium feature — unlock it in Settings ⭐';
+      return;
+    }
+
+    if(!currentSermon.transcript){
+      translateNote.textContent = "There's nothing to translate yet for this recording.";
+      return;
+    }
+
+    const lang = translateLangSelect.value;
+    const cached = currentSermon.translations && currentSermon.translations[lang];
+    if(cached){
+      renderSermonText(cached);
+      viewingTranslation = true;
+      translateBtn.textContent = 'Show original';
+      translateNote.textContent = 'Showing ' + lang + ' translation';
+      return;
+    }
+
+    translateBtn.disabled = true;
+    translateNote.textContent = 'Translating into ' + lang + '… this can take a bit for long recordings.';
+    try {
+      const res = await fetch('/.netlify/functions/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: currentSermon.transcript,
+          takeaway: currentSermon.takeaway,
+          bullets: currentSermon.bullets,
+          targetLanguage: lang
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || ('Translation failed (' + res.status + ').'));
+
+      currentSermon.translations = currentSermon.translations || {};
+      currentSermon.translations[lang] = data;
+      renderSermonText(data);
+      viewingTranslation = true;
+      translateBtn.textContent = 'Show original';
+      translateNote.textContent = 'Showing ' + lang + ' translation';
+
+      if(currentSermon.id){
+        updateSermon(currentSermon.id, { translations: currentSermon.translations })
+          .catch(err => console.error('Could not save translation', err));
+      }
+    } catch (err) {
+      translateNote.textContent = err.message || 'Could not translate right now. Please try again.';
+    } finally {
+      translateBtn.disabled = false;
+    }
   });
 
   newRecordingBtn.addEventListener('click', () => {
@@ -1959,6 +2114,15 @@
 
     currentAudioBlob = sermon.audioBlob || null;
     audioPlayback.src = sermon.audioBlob ? URL.createObjectURL(sermon.audioBlob) : '';
+
+    currentSermon = {
+      id: sermon.id,
+      takeaway: sermon.pending ? '' : sermon.takeaway,
+      bullets: sermon.pending ? [] : (sermon.bullets || []),
+      transcript: sermon.transcript || '',
+      translations: sermon.translations || {}
+    };
+    resetTranslateUI();
   }
 
   let screenBeforeLibrary = 'home';
