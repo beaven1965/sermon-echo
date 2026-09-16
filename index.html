@@ -517,6 +517,63 @@
     font-weight:600;
     color:var(--text);
   }
+  .comic-picker{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .comic-story-btn{
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    text-align:left;
+    padding:14px 16px;
+    border-radius:12px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    transition:border-color 0.15s;
+  }
+  .comic-story-btn:hover{ border-color:var(--gold); }
+  .comic-panel-stage{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    align-items:center;
+  }
+  .comic-panel-img{
+    width:100%;
+    max-width:420px;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    border-radius:12px;
+    border:1px solid var(--surface-line);
+    background:var(--surface);
+    opacity:0;
+    transition:opacity 0.4s ease;
+  }
+  .comic-panel-img.loaded{ opacity:1; }
+  .comic-caption{
+    width:100%;
+    box-sizing:border-box;
+    opacity:0;
+    transform:translateY(6px);
+    transition:opacity 0.4s ease, transform 0.4s ease;
+  }
+  .comic-caption.loaded{ opacity:1; transform:translateY(0); }
+  .comic-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    width:100%;
+    max-width:420px;
+    margin:14px auto 0;
+  }
+  .comic-nav .hint{ max-width:none; }
 
   .library-search{
     width:100%;
@@ -1087,6 +1144,7 @@
         <div class="settings-item clickable" id="concordanceRow"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="authorsRow"><span>✍️ Bible Authors &amp; History</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="scienceRow"><span>🔬 Bible &amp; Science</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable" id="comicRow"><span>🎨 Kids Comic Bible Stories</span><span class="chevron">→</span></div>
       </div>
       <div class="hint">Got an access code from a payment or a family member? Enter it above to unlock Premium on this device. More features will appear here as they're built.</div>
     </div>
@@ -1122,6 +1180,38 @@
       <input type="text" class="library-search" id="scienceInput" placeholder="Search a topic or place (e.g. the Flood, Jericho, the Exodus)…">
       <div class="error-box" id="scienceError" style="display:none;"></div>
       <div id="scienceResults"></div>
+    </div>
+
+    <!-- KIDS COMIC BIBLE STORIES -->
+    <div class="library" id="comicView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Kids Comic Bible Stories</span>
+        <button class="new-recording-btn" id="closeComicBtn">Close</button>
+      </div>
+
+      <div id="comicPicker" class="comic-picker">
+        <div class="concordance-intro">Pick a story to turn into a comic:</div>
+      </div>
+
+      <div class="status-row" id="comicProgress" style="display:none;">
+        <div class="spinner"></div>
+        <span id="comicProgressText">Working on it…</span>
+      </div>
+
+      <div class="error-box" id="comicError" style="display:none;"></div>
+
+      <div id="comicViewer" style="display:none;">
+        <div class="comic-panel-stage">
+          <img class="comic-panel-img" id="comicPanelImg" alt="Comic panel illustration">
+          <div class="paper-card comic-caption" id="comicPanelCaption"></div>
+        </div>
+        <div class="comic-nav">
+          <button class="skip-btn" id="comicPrevBtn">◀ Prev</button>
+          <span class="hint" id="comicPanelCounter"></span>
+          <button class="skip-btn" id="comicNextBtn">Next ▶</button>
+        </div>
+        <button class="new-recording-btn" id="comicNewStoryBtn" style="margin-top:16px;">Choose another story</button>
+      </div>
     </div>
 
     <!-- RECORD STAGE -->
@@ -1286,6 +1376,20 @@
   const scienceInput = document.getElementById('scienceInput');
   const scienceError = document.getElementById('scienceError');
   const scienceResults = document.getElementById('scienceResults');
+  const comicView = document.getElementById('comicView');
+  const closeComicBtn = document.getElementById('closeComicBtn');
+  const comicRow = document.getElementById('comicRow');
+  const comicPicker = document.getElementById('comicPicker');
+  const comicProgress = document.getElementById('comicProgress');
+  const comicProgressText = document.getElementById('comicProgressText');
+  const comicError = document.getElementById('comicError');
+  const comicViewer = document.getElementById('comicViewer');
+  const comicPanelImg = document.getElementById('comicPanelImg');
+  const comicPanelCaption = document.getElementById('comicPanelCaption');
+  const comicPanelCounter = document.getElementById('comicPanelCounter');
+  const comicPrevBtn = document.getElementById('comicPrevBtn');
+  const comicNextBtn = document.getElementById('comicNextBtn');
+  const comicNewStoryBtn = document.getElementById('comicNewStoryBtn');
   const equalizer = document.getElementById('equalizer');
   const pauseStopRow = document.getElementById('pauseStopRow');
   const stopBtn = document.getElementById('stopBtn');
@@ -1326,6 +1430,12 @@
     scienceError.style.display = 'none';
   });
   closeScienceBtn.addEventListener('click', () => showView('settings'));
+
+  comicRow.addEventListener('click', () => {
+    showView('comic');
+    showComicPicker();
+  });
+  closeComicBtn.addEventListener('click', () => showView('settings'));
 
   const CHUNK_THRESHOLD_BYTES = 4 * 1024 * 1024; // ~4MB triggers splitting into chunks
   const CHUNK_SECONDS = 90; // length of each chunk once shrunk down
@@ -1394,6 +1504,7 @@
     concordance: concordanceView,
     authors: authorsView,
     science: scienceView,
+    comic: comicView,
     paywall: paywallView
   };
   function showView(name){
@@ -2275,6 +2386,125 @@
   scienceInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') runScienceSearch();
   });
+
+  // ---- Kids Comic Bible Stories (Premium feature) ----
+  const COMIC_STORIES = [
+    { key: 'Noah\'s Ark', emoji: '🌈' },
+    { key: 'Baby Moses in the Basket', emoji: '🧺' },
+    { key: 'David and Goliath', emoji: '🪨' },
+    { key: 'Daniel in the Lions\' Den', emoji: '🦁' },
+    { key: 'Jonah and the Big Fish', emoji: '🐋' },
+    { key: 'The Birth of Jesus', emoji: '⭐' },
+    { key: 'Jesus Feeds the 5,000', emoji: '🍞' },
+    { key: 'The Good Samaritan', emoji: '🤝' },
+    { key: 'The Prodigal Son', emoji: '🏡' },
+    { key: 'Joseph and His Colorful Coat', emoji: '🧥' }
+  ];
+
+  let comicPanels = [];
+  let comicIndex = 0;
+  let comicGenerationInFlight = false;
+
+  function showComicPicker(){
+    comicError.style.display = 'none';
+    comicProgress.style.display = 'none';
+    comicViewer.style.display = 'none';
+    comicPicker.style.display = 'flex';
+    if(comicPicker.dataset.built === 'true') return;
+    COMIC_STORIES.forEach(story => {
+      const btn = document.createElement('button');
+      btn.className = 'comic-story-btn';
+      btn.textContent = story.emoji + '  ' + story.key;
+      btn.addEventListener('click', () => generateComicStory(story.key));
+      comicPicker.appendChild(btn);
+    });
+    comicPicker.dataset.built = 'true';
+  }
+
+  async function generateComicStory(storyKey){
+    if(comicGenerationInFlight) return;
+
+    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    if(!premium){
+      comicError.textContent = 'Kids Comic Bible Stories is a Premium feature — unlock it in Settings ⭐';
+      comicError.style.display = 'block';
+      return;
+    }
+
+    comicGenerationInFlight = true;
+    comicError.style.display = 'none';
+    comicPicker.style.display = 'none';
+    comicViewer.style.display = 'none';
+    comicProgress.style.display = 'flex';
+    comicProgressText.textContent = 'Writing the story…';
+
+    try {
+      const storyRes = await fetch('/.netlify/functions/comic-story', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ story: storyKey })
+      });
+      const storyData = await storyRes.json().catch(() => ({}));
+      if(!storyRes.ok) throw new Error(storyData.error || ('Story request failed (' + storyRes.status + ').'));
+      if(!Array.isArray(storyData.panels) || storyData.panels.length === 0) throw new Error('Received an unexpected response. Please try again.');
+
+      const panels = storyData.panels;
+
+      for(let i = 0; i < panels.length; i++){
+        comicProgressText.textContent = 'Illustrating panel ' + (i + 1) + ' of ' + panels.length + '…';
+        const imgRes = await fetch('/.netlify/functions/comic-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scene: panels[i].scene })
+        });
+        const imgData = await imgRes.json().catch(() => ({}));
+        if(!imgRes.ok || !imgData.image) throw new Error(imgData.error || 'Could not illustrate panel ' + (i + 1) + '. Please try again.');
+        panels[i].image = imgData.image;
+      }
+
+      comicPanels = panels;
+      comicPanels.lesson = storyData.lesson || '';
+      comicIndex = 0;
+      comicProgress.style.display = 'none';
+      comicViewer.style.display = 'block';
+      showComicPanel(0);
+    } catch (err) {
+      comicProgress.style.display = 'none';
+      comicPicker.style.display = 'flex';
+      comicError.textContent = err.message || 'Could not create the comic right now. Please try again.';
+      comicError.style.display = 'block';
+    } finally {
+      comicGenerationInFlight = false;
+    }
+  }
+
+  function showComicPanel(i){
+    const panel = comicPanels[i];
+    if(!panel) return;
+    comicIndex = i;
+
+    comicPanelImg.classList.remove('loaded');
+    comicPanelCaption.classList.remove('loaded');
+
+    comicPanelImg.src = panel.image;
+    comicPanelImg.onload = () => comicPanelImg.classList.add('loaded');
+
+    const isLast = i === comicPanels.length - 1;
+    comicPanelCaption.textContent = panel.caption + (isLast && comicPanels.lesson ? '\n\n' + comicPanels.lesson : '');
+    comicPanelCaption.style.whiteSpace = 'pre-line';
+
+    requestAnimationFrame(() => comicPanelCaption.classList.add('loaded'));
+
+    comicPanelCounter.textContent = 'Panel ' + (i + 1) + ' of ' + comicPanels.length;
+    comicPrevBtn.disabled = i === 0;
+    comicNextBtn.disabled = i === comicPanels.length - 1;
+    comicPrevBtn.style.opacity = comicPrevBtn.disabled ? '0.4' : '1';
+    comicNextBtn.style.opacity = comicNextBtn.disabled ? '0.4' : '1';
+  }
+
+  comicPrevBtn.addEventListener('click', () => { if(comicIndex > 0) showComicPanel(comicIndex - 1); });
+  comicNextBtn.addEventListener('click', () => { if(comicIndex < comicPanels.length - 1) showComicPanel(comicIndex + 1); });
+  comicNewStoryBtn.addEventListener('click', () => showComicPicker());
 
   newRecordingBtn.addEventListener('click', () => {
     timerEl.textContent = '00:00';
