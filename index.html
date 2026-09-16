@@ -2458,7 +2458,11 @@
           body: JSON.stringify({ scene: panels[i].scene })
         });
         const imgData = await imgRes.json().catch(() => ({}));
-        if(!imgRes.ok || !imgData.image) throw new Error(imgData.error || 'Could not illustrate panel ' + (i + 1) + '. Please try again.');
+        if(!imgRes.ok || !imgData.image){
+          const base = imgData.error || ('Could not illustrate panel ' + (i + 1) + '. Please try again.');
+          const detail = imgData.detail ? ' — ' + String(imgData.detail).slice(0, 300) : '';
+          throw new Error(base + detail);
+        }
         panels[i].image = imgData.image;
       }
 
