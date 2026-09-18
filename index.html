@@ -261,6 +261,74 @@
     text-transform:uppercase;
     color:var(--text-muted);
   }
+  .home-triangle{
+    position:relative;
+    width:300px;
+    height:340px;
+    margin:0 auto;
+  }
+  .home-mic-wrap{
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .home-mic-circle{
+    width:92px;
+    height:92px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #7CC24A, #4F8A2E);
+    box-shadow:0 0 0 8px rgba(95,161,59,0.14);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .home-mic-label{
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+  }
+  .home-roof-wrap{
+    position:absolute;
+    top:132px;
+    left:50%;
+    transform:translateX(-50%);
+  }
+  .home-roof{
+    animation:roof-glow 2.6s ease-in-out infinite;
+  }
+  @keyframes roof-glow{
+    0%,100%{ filter:drop-shadow(0 0 4px rgba(243,236,221,0.3)); opacity:0.88; }
+    50%{ filter:drop-shadow(0 0 16px rgba(243,236,221,0.75)); opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .home-roof{ animation:none; }
+  }
+  .home-corner-left{
+    position:absolute;
+    bottom:0;
+    left:6px;
+  }
+  .home-corner-right{
+    position:absolute;
+    bottom:0;
+    right:6px;
+  }
+  .home-icon-circle.stop-variant{
+    background:radial-gradient(circle at 35% 30%, var(--ember-bright), var(--ember));
+    box-shadow:0 0 0 8px rgba(178,76,59,0.14);
+  }
+  .home-icon-btn:disabled .home-icon-circle.stop-variant{
+    background:radial-gradient(circle at 35% 30%, var(--ember-bright), var(--ember));
+    box-shadow:none;
+    opacity:0.55;
+  }
 
   /* ---- Idle "waiting to record" blink (Recording page) ---- */
   .record-btn.idle-blink{
@@ -1093,40 +1161,34 @@
   <main>
     <!-- HOME -->
     <div class="home-view" id="homeView">
-      <svg class="home-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="512" height="512" rx="96" fill="#151B26"/>
-        <g opacity="0.16">
-          <rect x="234" y="70" width="44" height="330" rx="10" fill="#E0BB3D"/>
-          <rect x="150" y="155" width="212" height="44" rx="10" fill="#E0BB3D"/>
-        </g>
-        <g transform="rotate(-5 256 320)">
-          <rect x="104" y="222" width="304" height="212" rx="20" fill="#F3ECDD"/>
-          <circle cx="130" cy="246" r="6" fill="#DCD0B4"/>
-          <circle cx="130" cy="278" r="6" fill="#DCD0B4"/>
-          <circle cx="130" cy="310" r="6" fill="#DCD0B4"/>
-          <circle cx="130" cy="342" r="6" fill="#DCD0B4"/>
-          <circle cx="130" cy="374" r="6" fill="#DCD0B4"/>
-          <circle cx="130" cy="406" r="6" fill="#DCD0B4"/>
-          <rect x="160" y="270" width="208" height="14" rx="7" fill="#DCD0B4"/>
-          <rect x="160" y="308" width="208" height="14" rx="7" fill="#DCD0B4"/>
-          <rect x="160" y="346" width="150" height="14" rx="7" fill="#DCD0B4"/>
-        </g>
-        <g>
-          <rect x="222" y="118" width="68" height="128" rx="34" fill="#E0BB3D" stroke="#151B26" stroke-width="6"/>
-          <path d="M188 224 A68 74 0 0 0 324 224" fill="none" stroke="#E0BB3D" stroke-width="16" stroke-linecap="round"/>
-          <line x1="256" y1="296" x2="256" y2="352" stroke="#E0BB3D" stroke-width="16" stroke-linecap="round"/>
-          <line x1="210" y1="358" x2="302" y2="358" stroke="#E0BB3D" stroke-width="16" stroke-linecap="round"/>
-        </g>
-      </svg>
-      <div class="home-buttons">
-        <button class="home-icon-btn" id="homeRecordBtn" aria-label="Record">
+      <div class="home-triangle">
+        <div class="home-mic-wrap" aria-hidden="true">
+          <span class="home-mic-circle">
+            <svg width="34" height="34" viewBox="0 0 52 52" fill="none">
+              <rect x="15" y="4" width="22" height="34" rx="11" fill="#151B26"/>
+              <path d="M9 22 A17 19 0 0 0 43 22" stroke="#151B26" stroke-width="5" stroke-linecap="round" fill="none"/>
+              <line x1="26" y1="41" x2="26" y2="47" stroke="#151B26" stroke-width="5" stroke-linecap="round"/>
+              <line x1="15" y1="47" x2="37" y2="47" stroke="#151B26" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="home-mic-label">Mic</span>
+        </div>
+        <div class="home-roof-wrap">
+          <svg class="home-roof" width="62" height="62" viewBox="0 0 70 70" fill="none">
+            <rect x="31" y="0" width="8" height="22" fill="#F3ECDD"/>
+            <rect x="24" y="6" width="22" height="6" fill="#F3ECDD"/>
+            <polygon points="3,58 35,22 67,58" fill="#F3ECDD"/>
+            <rect x="6" y="58" width="58" height="8" fill="#F3ECDD"/>
+          </svg>
+        </div>
+        <button class="home-icon-btn home-corner-left" id="homeRecordBtn" aria-label="Record">
           <span class="home-icon-circle">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="var(--ink-deep)"><circle cx="12" cy="12" r="9"/></svg>
           </span>
           <span class="home-icon-label">Record</span>
         </button>
-        <button class="home-icon-btn" id="homeStopBtn" aria-label="Stop" disabled>
-          <span class="home-icon-circle">
+        <button class="home-icon-btn home-corner-right" id="homeStopBtn" aria-label="Stop" disabled>
+          <span class="home-icon-circle stop-variant">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--ink-deep)"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
           </span>
           <span class="home-icon-label">Stop</span>
@@ -2720,6 +2782,7 @@
     downloadNowBtn.style.display = 'none';
     recordAgainBtn.style.display = 'none';
     recordBtn.classList.remove('needs-attention');
+    showView('home');
   });
 
   // ---- Library (saved sermons, stored locally on this device via IndexedDB) ----
