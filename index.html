@@ -321,11 +321,11 @@
     right:6px;
   }
   .home-icon-circle.stop-variant{
-    background:radial-gradient(circle at 35% 30%, var(--ember-bright), var(--ember));
-    box-shadow:0 0 0 8px rgba(178,76,59,0.14);
+    background:radial-gradient(circle at 35% 30%, #C0392B, #7B241C);
+    box-shadow:0 0 0 8px rgba(123,36,28,0.18);
   }
   .home-icon-btn:disabled .home-icon-circle.stop-variant{
-    background:radial-gradient(circle at 35% 30%, var(--ember-bright), var(--ember));
+    background:radial-gradient(circle at 35% 30%, #C0392B, #7B241C);
     box-shadow:none;
     opacity:0.55;
   }
@@ -753,6 +753,34 @@
     font-size:13px;
     font-family:'Inter',sans-serif;
   }
+  .premium-note{
+    background:rgba(201,162,39,0.12);
+    border:1px solid var(--gold);
+    color:var(--text);
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:13px;
+    line-height:1.5;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:-4px 0 14px;
+  }
+  .premium-note .unlock-btn{
+    background:none;
+    border:1px solid var(--gold);
+    color:var(--gold-bright);
+    border-radius:8px;
+    padding:6px 12px;
+    font-size:12px;
+    font-weight:600;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .premium-note .unlock-btn:hover{ background:rgba(201,162,39,0.18); }
   .settings-item.clickable{ cursor:pointer; }
   .settings-item.clickable:hover{ color:var(--gold-bright); }
   .settings-item .chevron{ color:var(--text-muted); }
@@ -1189,7 +1217,7 @@
         </button>
         <button class="home-icon-btn home-corner-right" id="homeStopBtn" aria-label="Stop" disabled>
           <span class="home-icon-circle stop-variant">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--ink-deep)"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="#F3ECDD"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
           </span>
           <span class="home-icon-label">Stop</span>
         </button>
@@ -1221,19 +1249,6 @@
           </div>
           <div class="error-box" id="familyCodeError" style="display:none;"></div>
           <div id="familyCodesList"></div>
-        </div>
-        <div class="settings-item">
-          <span>🌐 Translate sermons into</span>
-          <select class="lang-select" id="translateLangSelect">
-            <option value="Tagalog">Tagalog</option>
-            <option value="Cebuano (Bisaya)">Cebuano (Bisaya)</option>
-            <option value="Ilocano">Ilocano</option>
-            <option value="Spanish">Spanish</option>
-            <option value="Mandarin Chinese">Mandarin Chinese</option>
-            <option value="Korean">Korean</option>
-            <option value="Japanese">Japanese</option>
-            <option value="English">English</option>
-          </select>
         </div>
         <div class="settings-item clickable" id="concordanceRow"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="authorsRow"><span>✍️ Bible Authors &amp; History</span><span class="chevron">→</span></div>
@@ -1366,8 +1381,19 @@
 
       <div class="translate-row">
         <button class="translate-btn" id="translateBtn">🌐 Translate</button>
+        <select class="lang-select" id="translateLangSelect">
+          <option value="Tagalog">Tagalog</option>
+          <option value="Cebuano (Bisaya)">Cebuano (Bisaya)</option>
+          <option value="Ilocano">Ilocano</option>
+          <option value="Spanish">Spanish</option>
+          <option value="Mandarin Chinese">Mandarin Chinese</option>
+          <option value="Korean">Korean</option>
+          <option value="Japanese">Japanese</option>
+          <option value="English">English</option>
+        </select>
         <span class="translate-note" id="translateNote"></span>
       </div>
+      <div class="premium-note" id="translatePremiumNote" style="display:none;"></div>
 
       <div class="paper-card">
         <div class="eyebrow">Highlights</div>
@@ -2314,6 +2340,26 @@
 
   let currentSermon = null; // { id, takeaway, bullets, transcript, translations }
   let viewingTranslation = false;
+  const translatePremiumNote = document.getElementById('translatePremiumNote');
+
+  function showTranslatePremiumNote(){
+    translatePremiumNote.innerHTML = '';
+    const text = document.createElement('span');
+    text.textContent = '⭐ Translation is a Premium feature.';
+    const btn = document.createElement('button');
+    btn.className = 'unlock-btn';
+    btn.textContent = 'Unlock in Settings';
+    btn.addEventListener('click', () => {
+      screenBeforeSettings = currentView === 'settings' ? screenBeforeSettings : currentView;
+      showView('settings');
+    });
+    translatePremiumNote.appendChild(text);
+    translatePremiumNote.appendChild(btn);
+    translatePremiumNote.style.display = 'flex';
+  }
+  function hideTranslatePremiumNote(){
+    translatePremiumNote.style.display = 'none';
+  }
 
   function renderSermonText(data){
     takeawayText.textContent = data.takeaway;
@@ -2331,6 +2377,7 @@
     translateBtn.textContent = '🌐 Translate';
     translateBtn.disabled = false;
     translateNote.textContent = '';
+    hideTranslatePremiumNote();
   }
 
   translateLangSelect.addEventListener('change', () => {
@@ -2353,9 +2400,10 @@
 
     const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
     if(!premium){
-      translateNote.textContent = 'Translation is a Premium feature — unlock it in Settings ⭐';
+      showTranslatePremiumNote();
       return;
     }
+    hideTranslatePremiumNote();
 
     if(!currentSermon.transcript){
       translateNote.textContent = "There's nothing to translate yet for this recording.";
