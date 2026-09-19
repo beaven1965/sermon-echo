@@ -1266,6 +1266,7 @@
         <div class="settings-item clickable" id="concordanceRow"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="authorsRow"><span>✍️ Bible Authors &amp; History</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="scienceRow"><span>🔬 Bible &amp; Science</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable" id="quotesRow"><span>💬 Quotable Quotes</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="comicRow"><span>🎨 Kids Comic Bible Stories</span><span class="chevron">→</span></div>
       </div>
       <div class="hint">Got an access code from a payment or a family member? Enter it above to unlock Premium on this device. More features will appear here as they're built.</div>
@@ -1302,6 +1303,17 @@
       <input type="text" class="library-search" id="scienceInput" placeholder="Search a topic or place (e.g. the Flood, Jericho, the Exodus)…">
       <div class="error-box" id="scienceError" style="display:none;"></div>
       <div id="scienceResults"></div>
+    </div>
+
+    <!-- QUOTABLE QUOTES -->
+    <div class="library" id="quotesView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Quotable Quotes</span>
+        <button class="new-recording-btn" id="closeQuotesBtn">Close</button>
+      </div>
+      <input type="text" class="library-search" id="quotesInput" placeholder="Search a topic (e.g. love, patience, courage, hope)…">
+      <div class="error-box" id="quotesError" style="display:none;"></div>
+      <div id="quotesResults"></div>
     </div>
 
     <!-- KIDS COMIC BIBLE STORIES -->
@@ -1528,6 +1540,12 @@
   const scienceInput = document.getElementById('scienceInput');
   const scienceError = document.getElementById('scienceError');
   const scienceResults = document.getElementById('scienceResults');
+  const quotesView = document.getElementById('quotesView');
+  const closeQuotesBtn = document.getElementById('closeQuotesBtn');
+  const quotesRow = document.getElementById('quotesRow');
+  const quotesInput = document.getElementById('quotesInput');
+  const quotesError = document.getElementById('quotesError');
+  const quotesResults = document.getElementById('quotesResults');
   const comicView = document.getElementById('comicView');
   const closeComicBtn = document.getElementById('closeComicBtn');
   const comicRow = document.getElementById('comicRow');
@@ -1584,6 +1602,12 @@
     scienceError.style.display = 'none';
   });
   closeScienceBtn.addEventListener('click', () => showView('settings'));
+
+  quotesRow.addEventListener('click', () => {
+    showView('quotes');
+    quotesError.style.display = 'none';
+  });
+  closeQuotesBtn.addEventListener('click', () => showView('settings'));
 
   comicRow.addEventListener('click', () => {
     showView('comic');
@@ -1768,6 +1792,7 @@
     concordance: concordanceView,
     authors: authorsView,
     science: scienceView,
+    quotes: quotesView,
     comic: comicView,
     paywall: paywallView
   };
@@ -2673,6 +2698,74 @@
 
   scienceInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') runScienceSearch();
+  });
+
+  // ---- Quotable Quotes (Premium feature) ----
+  let quotesSearchInFlight = false;
+
+  async function runQuotesSearch(){
+    const query = quotesInput.value.trim();
+    quotesError.style.display = 'none';
+
+    if(!query){
+      return;
+    }
+
+    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    if(!premium){
+      quotesResults.innerHTML = '';
+      quotesError.textContent = 'Quotable Quotes is a Premium feature — unlock it in Settings ⭐';
+      quotesError.style.display = 'block';
+      return;
+    }
+
+    if(quotesSearchInFlight) return;
+    quotesSearchInFlight = true;
+    quotesResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
+
+    try {
+      const res = await fetch('/.netlify/functions/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
+
+      quotesResults.innerHTML = '';
+      if(data.intro){
+        const intro = document.createElement('div');
+        intro.className = 'concordance-intro';
+        intro.textContent = data.intro;
+        quotesResults.appendChild(intro);
+      }
+      (data.quotes || []).forEach(q => {
+        const card = document.createElement('div');
+        card.className = 'concordance-result';
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.style.fontStyle = 'italic';
+        note.textContent = '"' + q.quote + '"';
+        const ref = document.createElement('div');
+        ref.className = 'ref';
+        ref.style.marginTop = '6px';
+        ref.style.marginBottom = '0';
+        ref.textContent = '— ' + q.source;
+        card.appendChild(note);
+        card.appendChild(ref);
+        quotesResults.appendChild(card);
+      });
+    } catch (err) {
+      quotesResults.innerHTML = '';
+      quotesError.textContent = err.message || 'Could not search right now. Please try again.';
+      quotesError.style.display = 'block';
+    } finally {
+      quotesSearchInFlight = false;
+    }
+  }
+
+  quotesInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') runQuotesSearch();
   });
 
   // ---- Kids Comic Bible Stories (Premium feature) ----
