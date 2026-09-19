@@ -321,13 +321,26 @@
     right:6px;
   }
   .home-icon-circle.stop-variant{
-    background:radial-gradient(circle at 35% 30%, #C0392B, #7B241C);
-    box-shadow:0 0 0 8px rgba(123,36,28,0.18);
+    position:relative;
+    overflow:hidden;
+    background:radial-gradient(circle at 32% 28%, rgba(255,140,124,0.97) 0%, rgba(230,57,70,0.94) 55%, rgba(150,26,38,0.96) 100%);
+    box-shadow:0 0 0 5px var(--paper), 0 0 0 13px rgba(230,57,70,0.28);
+  }
+  .home-icon-circle.stop-variant::after{
+    content:'';
+    position:absolute;
+    top:10%;
+    left:16%;
+    width:42%;
+    height:26%;
+    background:radial-gradient(ellipse at center, rgba(255,255,255,0.65), rgba(255,255,255,0) 72%);
+    border-radius:50%;
+    pointer-events:none;
   }
   .home-icon-btn:disabled .home-icon-circle.stop-variant{
-    background:radial-gradient(circle at 35% 30%, #C0392B, #7B241C);
-    box-shadow:none;
-    opacity:0.55;
+    background:radial-gradient(circle at 32% 28%, rgba(255,140,124,0.75) 0%, rgba(230,57,70,0.7) 55%, rgba(150,26,38,0.75) 100%);
+    box-shadow:0 0 0 5px rgba(243,236,221,0.55);
+    opacity:0.75;
   }
 
   /* ---- Idle "waiting to record" blink (Recording page) ---- */
