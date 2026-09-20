@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sermon Echo — Sermon Recorder &amp; Transcriber</title>
-<meta name="description" content="Record, transcribe, and summarize sermons — built for churches.">
+<title>Sermon Recorder — Recorder, Transcriber &amp; Translator</title>
+<meta name="description" content="Record, transcribe, and translate sermons — built for churches.">
 <meta name="theme-color" content="#151B26">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
@@ -261,6 +261,16 @@
     text-transform:uppercase;
     color:var(--text-muted);
   }
+  .home-icon-circle.home-record-only{
+    width:160px;
+    height:160px;
+    background:radial-gradient(circle at 35% 30%, #8BD15B, #4F8A2E);
+    box-shadow:0 0 0 10px rgba(95,161,59,0.16);
+  }
+  .home-icon-btn .home-icon-label{
+    margin-top:4px;
+  }
+
   .home-triangle{
     position:relative;
     width:300px;
@@ -1157,8 +1167,8 @@
 <div class="shell">
   <header>
     <div class="brand">
-      Sermon Echo
-      <div class="brand-tagline">Sermon Recorder &amp; Transcriber</div>
+      Sermon Recorder
+      <div class="brand-tagline">Transcriber &amp; Translator</div>
     </div>
     <div class="header-actions">
       <div class="icon-with-label">
@@ -1202,39 +1212,23 @@
   <main>
     <!-- HOME -->
     <div class="home-view" id="homeView">
-      <div class="home-triangle">
-        <div class="home-mic-wrap" aria-hidden="true">
-          <span class="home-mic-circle">
-            <svg width="34" height="34" viewBox="0 0 52 52" fill="none">
-              <rect x="15" y="4" width="22" height="34" rx="11" fill="#151B26"/>
-              <path d="M9 22 A17 19 0 0 0 43 22" stroke="#151B26" stroke-width="5" stroke-linecap="round" fill="none"/>
-              <line x1="26" y1="41" x2="26" y2="47" stroke="#151B26" stroke-width="5" stroke-linecap="round"/>
-              <line x1="15" y1="47" x2="37" y2="47" stroke="#151B26" stroke-width="5" stroke-linecap="round"/>
-            </svg>
-          </span>
-          <span class="home-mic-label">Mic</span>
-        </div>
-        <div class="home-roof-wrap">
-          <svg class="home-roof" width="62" height="62" viewBox="0 0 70 70" fill="none">
-            <rect x="31" y="0" width="8" height="22" fill="#F3ECDD"/>
-            <rect x="24" y="6" width="22" height="6" fill="#F3ECDD"/>
-            <polygon points="3,58 35,22 67,58" fill="#F3ECDD"/>
-            <rect x="6" y="58" width="58" height="8" fill="#F3ECDD"/>
+      <button class="home-icon-btn" id="homeRecordBtn" aria-label="Record">
+        <span class="home-icon-circle home-record-only">
+          <svg width="40" height="40" viewBox="0 0 52 52" fill="none">
+            <rect x="15" y="4" width="22" height="34" rx="11" fill="#151B26"/>
+            <path d="M9 22 A17 19 0 0 0 43 22" stroke="#151B26" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <line x1="26" y1="41" x2="26" y2="47" stroke="#151B26" stroke-width="5" stroke-linecap="round"/>
+            <line x1="15" y1="47" x2="37" y2="47" stroke="#151B26" stroke-width="5" stroke-linecap="round"/>
           </svg>
-        </div>
-        <button class="home-icon-btn home-corner-left" id="homeRecordBtn" aria-label="Record">
-          <span class="home-icon-circle">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="var(--ink-deep)"><circle cx="12" cy="12" r="9"/></svg>
-          </span>
-          <span class="home-icon-label">Record</span>
-        </button>
-        <button class="home-icon-btn home-corner-right" id="homeStopBtn" aria-label="Stop" disabled>
-          <span class="home-icon-circle stop-variant">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="#F3ECDD"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
-          </span>
-          <span class="home-icon-label">Stop</span>
-        </button>
-      </div>
+        </span>
+        <span class="home-icon-label">Record</span>
+      </button>
+      <button class="home-icon-btn" id="homeStopBtn" aria-label="Stop" disabled style="display:none;">
+        <span class="home-icon-circle">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--ink-deep)"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+        </span>
+        <span class="home-icon-label">Stop</span>
+      </button>
     </div>
 
     <!-- SETTINGS -->
@@ -1445,7 +1439,7 @@
     <!-- PAYWALL -->
     <div class="paywall" id="paywallView" style="display:none;">
       <div class="result-meta">
-        <span class="date">Sermon Echo Premium</span>
+        <span class="date">Sermon Recorder Premium</span>
         <button class="new-recording-btn" id="closePaywallBtn">Close</button>
       </div>
 
@@ -1453,7 +1447,7 @@
 
       <div class="paywall-hero">
         <div class="paywall-badge">⭐</div>
-        <h2 class="paywall-title">Support Sermon Echo</h2>
+        <h2 class="paywall-title">Support Sermon Recorder</h2>
         <p class="paywall-sub">Help keep this tool running and growing for churches like yours.</p>
       </div>
 
@@ -3131,7 +3125,7 @@
       try{
         await navigator.share({
           files: [file],
-          title: sermon.title && sermon.title.trim() ? sermon.title.trim() : 'Sermon Echo recording'
+          title: sermon.title && sermon.title.trim() ? sermon.title.trim() : 'Sermon Recorder recording'
         });
       }catch(err){
         // User cancelled the share sheet, or the browser blocked it — nothing to do here.
@@ -3194,7 +3188,7 @@
     showView(screenBeforeLibrary);
   });
 
-  // ---- Paywall (Sermon Echo Premium) ----
+  // ---- Paywall (Sermon Recorder Premium) ----
   let screenBeforePaywall = 'home';
 
   function openPaywall(){
