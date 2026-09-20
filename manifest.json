@@ -1,7 +1,7 @@
 {
-  "name": "Sermon Echo — Sermon Recorder & Transcriber",
-  "short_name": "Sermon Echo",
-  "description": "Record, transcribe, and summarize sermons.",
+  "name": "Sermon Recorder — Transcriber & Translator",
+  "short_name": "Sermon Recorder",
+  "description": "Record, transcribe, translate, and summarize sermons.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#151B26",
