@@ -2830,7 +2830,7 @@
         const imgRes = await fetch('/.netlify/functions/comic-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ scene: panels[i].scene })
+          body: JSON.stringify({ text: (i === panels.length - 1 && storyData.lesson) ? 'Lesson of the story. ' + storyData.lesson : panels[i].caption })({ scene: panels[i].scene })
         });
         const imgData = await imgRes.json().catch(() => ({}));
         if(!imgRes.ok || !imgData.image){
@@ -2887,7 +2887,7 @@
     comicPanelImg.onload = () => comicPanelImg.classList.add('loaded');
 
     const isLast = i === comicPanels.length - 1;
-    comicPanelCaption.textContent = panel.caption + (isLast && comicPanels.lesson ? '\n\n' + comicPanels.lesson : '');
+    comicPanelCaption.textContent = panel.caption + (isLast && comicPanels.lesson ? '\n\n' + comicPanels.lesson : ''); Delete it and type this instead: comicPanelCaption.textContent = (isLast && comicPanels.lesson) ? 'Lesson of the Story\n\n' + comicPanels.lesson : panel.caption; && comicPanels.lesson ? '\n\n' + comicPanels.lesson : '');
     comicPanelCaption.style.whiteSpace = 'pre-line';
 
     requestAnimationFrame(() => comicPanelCaption.classList.add('loaded'));
