@@ -3462,11 +3462,11 @@
             }
           })
           .catch(() => {
-            showBanner('<span>🎉 Thank you for your support! We couldn\'t automatically confirm the payment right now. Please try reopening the app in the same browser you paid in.</span>');
+                          showBanner('<span>🎉 Thank you for your support! We couldn\'t automatically confirm the payment on this device. If you completed payment, please try reopening the app in the same browser you paid in, or email beavenbermudez@gmail.com with your PayMongo receipt or reference number and we\'ll send your code.</span>');
           })
           .finally(() => sessionStorage.removeItem(CHECKOUT_SESSION_KEY));
       } else {
-        showBanner('<span>🎉 Thank you for your support! We couldn\'t find this payment session on this device (perhaps a different tab was used). If you completed payment, please         showBanner('<span>🎉 Thank you for your support! We couldn\'t find this payment session on this device (perhaps a different tab was used). If you completed payment, please email beavenbermudez@gmail.com with your PayMongo receipt or reference number and we\'ll send your code.</span>');
+                showBanner('<span>🎉 Thank you for your support! We couldn\'t find this payment session on this device (perhaps a different tab was used). If you completed payment, please email beavenbermudez@gmail.com with your PayMongo receipt or reference number and we\'ll send your code.</span>');
       }
     } else if(paid === 'cancelled'){
       showBanner('<span>Payment was cancelled — no charge was made. You can try again anytime.</span>');
