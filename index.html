@@ -972,6 +972,17 @@
     line-height:1.5;
     margin:0;
   }
+  .founding-banner{
+    background:rgba(201,162,39,0.12);
+    border:1px solid var(--gold);
+    color:var(--gold-bright);
+    text-align:center;
+    padding:10px 14px;
+    border-radius:12px;
+    font-size:13px;
+    font-weight:600;
+    line-height:1.4;
+  }
   .feature-list{
     list-style:none;
     margin:0;
@@ -1262,7 +1273,9 @@
           <div id="familyCodesList"></div>
         </div>
         <div class="settings-item clickable" id="concordanceRow"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable" id="commentaryRow"><span>📜 Bible Commentary</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="authorsRow"><span>✍️ Bible Authors &amp; History</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable" id="genealogyRow"><span>🌳 Bible Genealogy — Adam to Jesus</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="scienceRow"><span>🔬 Bible &amp; Science</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="quotesRow"><span>💬 Quotable Quotes</span><span class="chevron">→</span></div>
         <div class="settings-item clickable" id="comicRow"><span>🎨 Kids Comic Bible Stories</span><span class="chevron">→</span></div>
@@ -1301,6 +1314,28 @@
       <input type="text" class="library-search" id="scienceInput" placeholder="Search a topic or place (e.g. the Flood, Jericho, the Exodus)…">
       <div class="error-box" id="scienceError" style="display:none;"></div>
       <div id="scienceResults"></div>
+    </div>
+
+    <!-- BIBLE COMMENTARY -->
+    <div class="library" id="commentaryView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Bible Commentary</span>
+        <button class="new-recording-btn" id="closeCommentaryBtn">Close</button>
+      </div>
+      <input type="text" class="library-search" id="commentaryInput" placeholder="Enter a verse or passage (e.g. John 3:16, Psalm 23, the Beatitudes)…">
+      <div class="error-box" id="commentaryError" style="display:none;"></div>
+      <div id="commentaryResults"></div>
+    </div>
+
+    <!-- BIBLE GENEALOGY -->
+    <div class="library" id="genealogyView" style="display:none;">
+      <div class="result-meta">
+        <span class="date">Bible Genealogy — Adam to Jesus</span>
+        <button class="new-recording-btn" id="closeGenealogyBtn">Close</button>
+      </div>
+      <input type="text" class="library-search" id="genealogyInput" placeholder="Search a name (e.g. Noah, Abraham, David, Jesus)…">
+      <div class="error-box" id="genealogyError" style="display:none;"></div>
+      <div id="genealogyResults"></div>
     </div>
 
     <!-- QUOTABLE QUOTES -->
@@ -1455,9 +1490,19 @@
         <p class="paywall-sub">Help keep this tool running and growing for churches like yours.</p>
       </div>
 
+      <div class="founding-banner">🎉 Founding Supporter Offer — be among the first to help build this ministry tool.</div>
+
       <ul class="feature-list">
-        <li><span class="check">✓</span> Unlimited recordings &amp; transcripts, always</li>
-        <li><span class="check">✓</span> AI-generated highlights &amp; takeaway for every sermon</li>
+        <li><span class="check">✓</span> Unlimited recordings, transcribing &amp; translating — always</li>
+        <li><span class="check">✓</span> Easy-to-use recording, right from your phone or laptop</li>
+        <li><span class="check">✓</span> Instant sermon translation into 7+ languages</li>
+        <li><span class="check">✓</span> Bible Concordance — search any topic across Scripture</li>
+        <li><span class="check">✓</span> Bible Commentary — context &amp; meaning for any verse</li>
+        <li><span class="check">✓</span> Bible Authors &amp; Their Lives — the history behind every book</li>
+        <li><span class="check">✓</span> Bible Genealogy — trace the line from Adam to Jesus</li>
+        <li><span class="check">✓</span> Bible &amp; Science — honest, balanced answers</li>
+        <li><span class="check">✓</span> Quotable Quotes for sermon prep</li>
+        <li><span class="check">✓</span> Illustrated Bible Stories — narrated, comic-style retellings</li>
         <li><span class="check">✓</span> A founding-supporter badge on your account <span class="soon">coming soon</span></li>
         <li><span class="check">✓</span> Longer sermon storage in your library <span class="soon">coming soon</span></li>
       </ul>
@@ -1471,6 +1516,7 @@
       <div class="error-box" id="paywallError" style="display:none;"></div>
 
            <p class="paywall-fine">Payments are processed securely by PayMongo. You'll be taken to their payment page and brought right back here.</p>
+           <p class="paywall-fine">After paying, your access code will show up right here — and you'll always be able to find it again under Settings → Premium status.</p>
             <p class="paywall-fine">Didn't get your access code after paying? Email <a href="mailto:beavenbermudez@gmail.com" style="color:inherit;">beavenbermudez@gmail.com</a> and we'll sort it out.</p>
     </div>
   </main>
@@ -1533,6 +1579,18 @@
   const authorsInput = document.getElementById('authorsInput');
   const authorsError = document.getElementById('authorsError');
   const authorsResults = document.getElementById('authorsResults');
+  const commentaryView = document.getElementById('commentaryView');
+  const closeCommentaryBtn = document.getElementById('closeCommentaryBtn');
+  const commentaryRow = document.getElementById('commentaryRow');
+  const commentaryInput = document.getElementById('commentaryInput');
+  const commentaryError = document.getElementById('commentaryError');
+  const commentaryResults = document.getElementById('commentaryResults');
+  const genealogyView = document.getElementById('genealogyView');
+  const closeGenealogyBtn = document.getElementById('closeGenealogyBtn');
+  const genealogyRow = document.getElementById('genealogyRow');
+  const genealogyInput = document.getElementById('genealogyInput');
+  const genealogyError = document.getElementById('genealogyError');
+  const genealogyResults = document.getElementById('genealogyResults');
   const scienceView = document.getElementById('scienceView');
   const closeScienceBtn = document.getElementById('closeScienceBtn');
   const scienceRow = document.getElementById('scienceRow');
@@ -1595,6 +1653,18 @@
     authorsError.style.display = 'none';
   });
   closeAuthorsBtn.addEventListener('click', () => showView('settings'));
+
+  commentaryRow.addEventListener('click', () => {
+    showView('commentary');
+    commentaryError.style.display = 'none';
+  });
+  closeCommentaryBtn.addEventListener('click', () => showView('settings'));
+
+  genealogyRow.addEventListener('click', () => {
+    showView('genealogy');
+    genealogyError.style.display = 'none';
+  });
+  closeGenealogyBtn.addEventListener('click', () => showView('settings'));
 
   scienceRow.addEventListener('click', () => {
     showView('science');
@@ -1789,7 +1859,9 @@
     library: libraryView,
     settings: settingsView,
     concordance: concordanceView,
+    commentary: commentaryView,
     authors: authorsView,
+    genealogy: genealogyView,
     science: scienceView,
     quotes: quotesView,
     comic: comicView,
@@ -2626,6 +2698,161 @@
 
   authorsInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') runAuthorsSearch();
+  });
+
+  // ---- Bible Commentary (Premium feature) ----
+  let commentarySearchInFlight = false;
+
+  async function runCommentarySearch(){
+    const query = commentaryInput.value.trim();
+    commentaryError.style.display = 'none';
+
+    if(!query){
+      return;
+    }
+
+    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    if(!premium){
+      commentaryResults.innerHTML = '';
+      commentaryError.textContent = 'Bible Commentary is a Premium feature — unlock it in Settings ⭐';
+      commentaryError.style.display = 'block';
+      return;
+    }
+
+    if(commentarySearchInFlight) return;
+    commentarySearchInFlight = true;
+    commentaryResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
+
+    try {
+      const res = await fetch('/.netlify/functions/bible-commentary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
+
+      commentaryResults.innerHTML = '';
+
+      const header = document.createElement('div');
+      header.className = 'concordance-intro';
+      header.textContent = data.reference || query;
+      commentaryResults.appendChild(header);
+
+      const fields = [
+        ['Context', data.context],
+        ['What it means', data.meaning],
+        ['How to apply it', data.application]
+      ];
+      fields.forEach(([label, text]) => {
+        if(!text) return;
+        const card = document.createElement('div');
+        card.className = 'concordance-result';
+        const ref = document.createElement('div');
+        ref.className = 'ref';
+        ref.textContent = label;
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.textContent = text;
+        card.appendChild(ref);
+        card.appendChild(note);
+        commentaryResults.appendChild(card);
+      });
+    } catch (err) {
+      commentaryResults.innerHTML = '';
+      commentaryError.textContent = err.message || 'Could not search right now. Please try again.';
+      commentaryError.style.display = 'block';
+    } finally {
+      commentarySearchInFlight = false;
+    }
+  }
+
+  commentaryInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') runCommentarySearch();
+  });
+
+  // ---- Bible Genealogy — Adam to Jesus (Premium feature) ----
+  let genealogySearchInFlight = false;
+
+  async function runGenealogySearch(){
+    const query = genealogyInput.value.trim();
+    genealogyError.style.display = 'none';
+
+    if(!query){
+      return;
+    }
+
+    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    if(!premium){
+      genealogyResults.innerHTML = '';
+      genealogyError.textContent = 'Bible Genealogy is a Premium feature — unlock it in Settings ⭐';
+      genealogyError.style.display = 'block';
+      return;
+    }
+
+    if(genealogySearchInFlight) return;
+    genealogySearchInFlight = true;
+    genealogyResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
+
+    try {
+      const res = await fetch('/.netlify/functions/bible-genealogy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
+
+      genealogyResults.innerHTML = '';
+
+      const header = document.createElement('div');
+      header.className = 'concordance-intro';
+      header.textContent = (data.name || query) + (data.generation ? ' — ' + data.generation : '');
+      genealogyResults.appendChild(header);
+
+      const fields = [
+        ['Father', data.father],
+        ['Connection to Jesus\' line', data.note]
+      ];
+      fields.forEach(([label, text]) => {
+        if(!text) return;
+        const card = document.createElement('div');
+        card.className = 'concordance-result';
+        const ref = document.createElement('div');
+        ref.className = 'ref';
+        ref.textContent = label;
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.textContent = text;
+        card.appendChild(ref);
+        card.appendChild(note);
+        genealogyResults.appendChild(card);
+      });
+
+      if(Array.isArray(data.lineageSnippet) && data.lineageSnippet.length){
+        const card = document.createElement('div');
+        card.className = 'concordance-result';
+        const ref = document.createElement('div');
+        ref.className = 'ref';
+        ref.textContent = 'Nearby in the line';
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.textContent = data.lineageSnippet.join('  →  ');
+        card.appendChild(ref);
+        card.appendChild(note);
+        genealogyResults.appendChild(card);
+      }
+    } catch (err) {
+      genealogyResults.innerHTML = '';
+      genealogyError.textContent = err.message || 'Could not search right now. Please try again.';
+      genealogyError.style.display = 'block';
+    } finally {
+      genealogySearchInFlight = false;
+    }
+  }
+
+  genealogyInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') runGenealogySearch();
   });
 
   // ---- Bible & Science (Premium feature) ----
