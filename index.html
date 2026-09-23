@@ -831,6 +831,42 @@
     color:var(--text);
     line-height:1.45;
   }
+  .quiz-question{
+    border:1px solid var(--surface-line);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:12px;
+  }
+  .quiz-question .q-num{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    color:var(--gold-bright);
+    font-size:14px;
+    margin-bottom:6px;
+  }
+  .quiz-question .q-text{
+    font-size:14px;
+    color:var(--text);
+    line-height:1.5;
+    margin-bottom:8px;
+  }
+  .quiz-question .q-options{
+    list-style:none;
+    margin:0 0 8px;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .quiz-question .q-options li{
+    font-size:13px;
+    color:var(--text-muted);
+  }
+  .quiz-question .q-answer{
+    font-size:13px;
+    color:#3fbf72;
+    font-weight:600;
+  }
   .transcript-box{
     background:var(--surface);
     border:1px solid var(--surface-line);
@@ -1430,6 +1466,7 @@
       </div>
 
       <button class="transcript-toggle" id="transcriptToggle">Show full transcript</button>
+      <button class="upload-btn" id="printTranscriptBtn">🖨️ Print full text</button>
       <div class="transcript-box" id="transcriptBox" style="display:none;"></div>
 
       <div class="translate-row">
@@ -1456,6 +1493,24 @@
       <div class="paper-card">
         <div class="eyebrow">Today's takeaway</div>
         <div class="takeaway-text" id="takeawayText"></div>
+      </div>
+
+      <div class="paper-card">
+        <div class="eyebrow">Quiz for Students</div>
+        <div class="premium-note" id="quizPremiumNote" style="display:none;"></div>
+        <button class="translate-btn" id="generateQuizBtn">📝 Generate Quiz</button>
+        <div class="status-row" id="quizStatusRow" style="display:none; margin-top:10px;">
+          <div class="spinner"></div>
+          <span>Writing quiz questions…</span>
+        </div>
+        <div class="error-box" id="quizError" style="display:none; margin-top:10px;"></div>
+        <div id="quizContainer" style="display:none; margin-top:14px;">
+          <div id="quizQuestionsList"></div>
+          <div class="player-row" style="margin-top:16px; flex-wrap:wrap;">
+            <button class="skip-btn" id="printQuizStudentBtn">🖨️ Print (Student copy)</button>
+            <button class="skip-btn" id="printQuizAnswerKeyBtn">🖨️ Print (Answer key)</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1536,6 +1591,7 @@
   const takeawayText = document.getElementById('takeawayText');
   const bulletsList = document.getElementById('bulletsList');
   const transcriptToggle = document.getElementById('transcriptToggle');
+  const printTranscriptBtn = document.getElementById('printTranscriptBtn');
   const transcriptBox = document.getElementById('transcriptBox');
   const translateBtn = document.getElementById('translateBtn');
   const translateNote = document.getElementById('translateNote');
@@ -2408,8 +2464,9 @@
     transcriptBox.textContent = transcript;
     currentAudioBlob = audioBlob || currentAudioBlob;
 
-    currentSermon = { id: pendingId || null, takeaway: summary.takeaway, bullets: summary.bullets || [], transcript, translations: {} };
+    currentSermon = { id: pendingId || null, takeaway: summary.takeaway, bullets: summary.bullets || [], transcript, translations: {}, quiz: null };
     resetTranslateUI();
+    resetQuizUI();
     updatePrevNextButtons();
 
     if(audioBlob){
@@ -2436,6 +2493,62 @@
     transcriptBox.style.display = showing ? 'none' : 'block';
     transcriptToggle.textContent = showing ? 'Show full transcript' : 'Hide full transcript';
   });
+
+  // ---- Print the full sermon text (takeaway, highlights, transcript) ----
+  // Reads directly from what's currently shown on screen, so if the user is
+  // viewing a translation, the printed page matches that language too.
+  function escapeHtml(str){
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function printSermonText(){
+    const title = (resultDate.textContent || 'Sermon Recorder').trim();
+    const takeaway = takeawayText.textContent.trim();
+    const bullets = Array.from(bulletsList.children).map(li => li.textContent.trim()).filter(Boolean);
+    const transcript = transcriptBox.textContent.trim();
+
+    if(!takeaway && bullets.length === 0 && !transcript){
+      alert("There's nothing to print for this recording yet.");
+      return;
+    }
+
+    const bulletsHtml = bullets.map(b => '<li>' + escapeHtml(b) + '</li>').join('');
+
+    const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + escapeHtml(title) + '</title>' +
+      '<style>' +
+      'body{font-family: Georgia, "Times New Roman", serif; color:#1a1a1a; max-width:700px; margin:40px auto; padding:0 20px; line-height:1.6;}' +
+      'h1{font-size:22px; margin-bottom:4px;}' +
+      '.meta{color:#666; font-size:13px; margin-bottom:24px;}' +
+      'h2{font-size:15px; text-transform:uppercase; letter-spacing:0.05em; color:#444; border-bottom:1px solid #ddd; padding-bottom:6px; margin-top:28px;}' +
+      '.takeaway{font-style:italic; font-size:17px;}' +
+      'ul{padding-left:20px;} li{margin-bottom:8px;}' +
+      '.transcript{white-space:pre-wrap; font-size:14px;}' +
+      '@media print{ body{margin:0; padding:24px;} }' +
+      '</style></head><body>' +
+      '<h1>' + escapeHtml(title) + '</h1>' +
+      '<div class="meta">Sermon Recorder — Transcriber &amp; Translator</div>' +
+      (takeaway ? '<h2>Takeaway</h2><div class="takeaway">' + escapeHtml(takeaway) + '</div>' : '') +
+      (bulletsHtml ? '<h2>Highlights</h2><ul>' + bulletsHtml + '</ul>' : '') +
+      (transcript ? '<h2>Full Transcript</h2><div class="transcript">' + escapeHtml(transcript) + '</div>' : '') +
+      '</body></html>';
+
+    const win = window.open('', '_blank');
+    if(!win){
+      alert('Please allow pop-ups for this site so the print page can open.');
+      return;
+    }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    const triggerPrint = () => { win.focus(); win.print(); };
+    win.onload = triggerPrint;
+    setTimeout(triggerPrint, 400); // fallback in case onload doesn't fire
+  }
+
+  printTranscriptBtn.addEventListener('click', printSermonText);
 
   // ---- Sermon translation (Premium feature) ----
   const TRANSLATE_LANG_KEY = 'se_translate_lang';
@@ -2483,6 +2596,194 @@
     translateNote.textContent = '';
     hideTranslatePremiumNote();
   }
+
+  // ---- Quiz for Students (Premium feature) ----
+  const generateQuizBtn = document.getElementById('generateQuizBtn');
+  const quizPremiumNote = document.getElementById('quizPremiumNote');
+  const quizStatusRow = document.getElementById('quizStatusRow');
+  const quizError = document.getElementById('quizError');
+  const quizContainer = document.getElementById('quizContainer');
+  const quizQuestionsList = document.getElementById('quizQuestionsList');
+  const printQuizStudentBtn = document.getElementById('printQuizStudentBtn');
+  const printQuizAnswerKeyBtn = document.getElementById('printQuizAnswerKeyBtn');
+  let currentQuiz = null; // array of {type, question, options?, answer}
+  let quizGenerationInFlight = false;
+
+  function showQuizPremiumNote(){
+    quizPremiumNote.innerHTML = '';
+    const text = document.createElement('span');
+    text.textContent = '⭐ Quiz generation is a Premium feature.';
+    const btn = document.createElement('button');
+    btn.className = 'unlock-btn';
+    btn.textContent = 'Unlock in Settings';
+    btn.addEventListener('click', () => {
+      screenBeforeSettings = currentView === 'settings' ? screenBeforeSettings : currentView;
+      showView('settings');
+    });
+    quizPremiumNote.appendChild(text);
+    quizPremiumNote.appendChild(btn);
+    quizPremiumNote.style.display = 'flex';
+  }
+  function hideQuizPremiumNote(){
+    quizPremiumNote.style.display = 'none';
+  }
+
+  function resetQuizUI(){
+    currentQuiz = null;
+    quizContainer.style.display = 'none';
+    quizQuestionsList.innerHTML = '';
+    quizError.style.display = 'none';
+    quizStatusRow.style.display = 'none';
+    hideQuizPremiumNote();
+    generateQuizBtn.style.display = 'inline-block';
+    generateQuizBtn.textContent = '📝 Generate Quiz';
+    generateQuizBtn.disabled = false;
+  }
+
+  function renderQuiz(questions){
+    currentQuiz = questions;
+    quizQuestionsList.innerHTML = '';
+    questions.forEach((q, i) => {
+      const card = document.createElement('div');
+      card.className = 'quiz-question';
+
+      const num = document.createElement('div');
+      num.className = 'q-num';
+      num.textContent = 'Question ' + (i + 1) + (q.type === 'multiple_choice' ? ' (Multiple Choice)' : ' (Short Answer)');
+      card.appendChild(num);
+
+      const qText = document.createElement('div');
+      qText.className = 'q-text';
+      qText.textContent = q.question;
+      card.appendChild(qText);
+
+      if(q.type === 'multiple_choice' && Array.isArray(q.options)){
+        const ul = document.createElement('ul');
+        ul.className = 'q-options';
+        const letters = ['A','B','C','D','E','F'];
+        q.options.forEach((opt, oi) => {
+          const li = document.createElement('li');
+          li.textContent = letters[oi] + '. ' + opt;
+          ul.appendChild(li);
+        });
+        card.appendChild(ul);
+      }
+
+      const ans = document.createElement('div');
+      ans.className = 'q-answer';
+      ans.textContent = 'Answer: ' + q.answer;
+      card.appendChild(ans);
+
+      quizQuestionsList.appendChild(card);
+    });
+    quizContainer.style.display = 'block';
+    generateQuizBtn.style.display = 'none';
+  }
+
+  async function generateQuiz(){
+    if(!currentSermon) return;
+
+    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    if(!premium){
+      showQuizPremiumNote();
+      return;
+    }
+    hideQuizPremiumNote();
+
+    if(!currentSermon.transcript){
+      quizError.textContent = "There's nothing to build a quiz from yet for this recording.";
+      quizError.style.display = 'block';
+      return;
+    }
+
+    if(quizGenerationInFlight) return;
+    quizGenerationInFlight = true;
+    quizError.style.display = 'none';
+    quizStatusRow.style.display = 'flex';
+    generateQuizBtn.disabled = true;
+
+    try {
+      const res = await fetch('/.netlify/functions/generate-quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: currentSermon.transcript,
+          takeaway: currentSermon.takeaway,
+          title: resultDate.textContent || ''
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || ('Could not generate the quiz (' + res.status + ').'));
+      if(!Array.isArray(data.questions) || data.questions.length === 0) throw new Error('Received an unexpected response. Please try again.');
+
+      renderQuiz(data.questions);
+      currentSermon.quiz = data.questions;
+      if(currentSermon.id){
+        updateSermon(currentSermon.id, { quiz: data.questions }).catch(err => console.error('Could not save quiz', err));
+      }
+    } catch (err) {
+      quizError.textContent = err.message || 'Could not generate the quiz right now. Please try again.';
+      quizError.style.display = 'block';
+    } finally {
+      quizGenerationInFlight = false;
+      generateQuizBtn.disabled = false;
+    }
+  }
+
+  generateQuizBtn.addEventListener('click', generateQuiz);
+
+  function printQuiz(includeAnswers){
+    if(!currentQuiz || currentQuiz.length === 0) return;
+    const title = (resultDate.textContent || 'Sermon Recorder').trim();
+    const letters = ['A','B','C','D','E','F'];
+
+    const questionsHtml = currentQuiz.map((q, i) => {
+      let optionsHtml = '';
+      if(q.type === 'multiple_choice' && Array.isArray(q.options)){
+        optionsHtml = '<ul class="opts">' + q.options.map((opt, oi) => '<li>' + letters[oi] + '. ' + escapeHtml(opt) + '</li>').join('') + '</ul>';
+      } else {
+        optionsHtml = '<div class="blank-lines"><div class="line"></div><div class="line"></div></div>';
+      }
+      const answerHtml = includeAnswers ? '<div class="answer">Answer: ' + escapeHtml(q.answer) + '</div>' : '';
+      return '<div class="question"><div class="q-head">' + (i + 1) + '. ' + escapeHtml(q.question) + '</div>' + optionsHtml + answerHtml + '</div>';
+    }).join('');
+
+    const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + escapeHtml(title) + ' — Quiz</title>' +
+      '<style>' +
+      'body{font-family: Georgia, "Times New Roman", serif; color:#1a1a1a; max-width:700px; margin:40px auto; padding:0 20px; line-height:1.6;}' +
+      'h1{font-size:20px; margin-bottom:2px;}' +
+      '.meta{color:#666; font-size:13px; margin-bottom:6px;}' +
+      '.name-line{margin:18px 0 28px; font-size:14px;}' +
+      '.name-line span{display:inline-block; border-bottom:1px solid #999; min-width:220px; margin-left:6px;}' +
+      '.question{margin-bottom:22px;}' +
+      '.q-head{font-weight:600; margin-bottom:8px;}' +
+      '.opts{list-style:none; margin:0 0 6px; padding-left:14px;}' +
+      '.opts li{margin-bottom:4px; font-size:14px;}' +
+      '.blank-lines .line{border-bottom:1px solid #999; height:22px; margin-bottom:4px;}' +
+      '.answer{color:#0a7a3d; font-weight:600; font-size:13px; margin-top:6px;}' +
+      '@media print{ body{margin:0; padding:24px;} }' +
+      '</style></head><body>' +
+      '<h1>' + escapeHtml(title) + ' — Quiz' + (includeAnswers ? ' (Answer Key)' : '') + '</h1>' +
+      '<div class="meta">Sermon Recorder — Transcriber &amp; Translator</div>' +
+      (includeAnswers ? '' : '<div class="name-line">Name:<span></span> &nbsp;&nbsp; Date:<span></span></div>') +
+      questionsHtml +
+      '</body></html>';
+
+    const win = window.open('', '_blank');
+    if(!win){
+      alert('Please allow pop-ups for this site so the print page can open.');
+      return;
+    }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    const triggerPrint = () => { win.focus(); win.print(); };
+    win.onload = triggerPrint;
+    setTimeout(triggerPrint, 400);
+  }
+
+  printQuizStudentBtn.addEventListener('click', () => printQuiz(false));
+  printQuizAnswerKeyBtn.addEventListener('click', () => printQuiz(true));
 
   translateLangSelect.addEventListener('change', () => {
     localStorage.setItem(TRANSLATE_LANG_KEY, translateLangSelect.value);
@@ -3392,9 +3693,15 @@
       takeaway: sermon.pending ? '' : sermon.takeaway,
       bullets: sermon.pending ? [] : (sermon.bullets || []),
       transcript: sermon.transcript || '',
-      translations: sermon.translations || {}
+      translations: sermon.translations || {},
+      quiz: sermon.quiz || null
     };
     resetTranslateUI();
+    if(sermon.quiz && sermon.quiz.length){
+      renderQuiz(sermon.quiz);
+    } else {
+      resetQuizUI();
+    }
     updatePrevNextButtons();
   }
 
