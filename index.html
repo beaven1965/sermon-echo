@@ -611,6 +611,58 @@
   }
   .lib-actions button:hover{ color:var(--gold-bright); }
   .lib-actions button.danger:hover{ color:var(--ember-bright); }
+  .lib-menu-wrap{
+    float:right;
+    position:relative;
+    margin-left:12px;
+  }
+  .lib-menu-toggle{
+    background:none;
+    border:1px solid var(--surface-line);
+    color:var(--text-muted);
+    border-radius:8px;
+    width:30px;
+    height:28px;
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:border-color 0.15s, color 0.15s;
+  }
+  .lib-menu-toggle:hover{ border-color:var(--gold); color:var(--gold-bright); }
+  .lib-menu-panel{
+    position:absolute;
+    top:34px;
+    right:0;
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    min-width:150px;
+    z-index:8;
+    display:none;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .lib-menu-panel.open{ display:flex; }
+  .lib-menu-panel button{
+    background:none;
+    border:none;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    text-align:left;
+    padding:10px 14px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    white-space:nowrap;
+  }
+  .lib-menu-panel button:hover{ background:var(--ink-deep); color:var(--gold-bright); }
+  .lib-menu-panel button.danger:hover{ color:var(--ember-bright); }
   .lib-title{
     font-weight:600;
     color:var(--text);
@@ -1458,15 +1510,15 @@
         <button class="skip-btn" id="speedBtn" aria-label="Playback speed">1x</button>
       </div>
 
-      <div class="player-row">
+      <div class="player-row wrap">
         <button class="skip-btn" id="skipBackBtn" aria-label="Rewind 15 seconds">⟲ 15</button>
         <audio id="audioPlayback" style="display:none;"></audio>
         <button class="skip-btn" id="skipFwdBtn" aria-label="Forward 15 seconds">15 ⟳</button>
         <button class="skip-btn" id="downloadBtn" aria-label="Download recording">⬇ Save</button>
+        <button class="skip-btn" id="printTranscriptBtn" aria-label="Print full text">🖨️ Print</button>
       </div>
 
       <button class="transcript-toggle" id="transcriptToggle">Show full transcript</button>
-      <button class="upload-btn" id="printTranscriptBtn">🖨️ Print full text</button>
       <div class="transcript-box" id="transcriptBox" style="display:none;"></div>
 
       <div class="translate-row">
@@ -3567,39 +3619,84 @@
       const item = document.createElement('div');
       item.className = 'library-item';
 
-      const actions = document.createElement('div');
-      actions.className = 'lib-actions';
+      const menuWrap = document.createElement('div');
+      menuWrap.className = 'lib-menu-wrap';
+
+      const menuToggle = document.createElement('button');
+      menuToggle.className = 'lib-menu-toggle';
+      menuToggle.textContent = '⋯';
+      menuToggle.setAttribute('aria-label', 'More actions');
+
+      const menuPanel = document.createElement('div');
+      menuPanel.className = 'lib-menu-panel';
+
+      function closeThisMenu(){ menuPanel.classList.remove('open'); }
+
+      menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wasOpen = menuPanel.classList.contains('open');
+        document.querySelectorAll('.lib-menu-panel.open').forEach(p => p.classList.remove('open'));
+        if(!wasOpen) menuPanel.classList.add('open');
+      });
 
       const renameBtn = document.createElement('button');
-      renameBtn.textContent = 'Rename';
+      renameBtn.innerHTML = '✏️ Rename';
       renameBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
+        closeThisMenu();
         const next = prompt('Rename this recording:', sermon.title || '');
         if(next === null) return;
         await updateSermon(sermon.id, { title: next.trim() });
         renderLibrary();
       });
 
+      const quizBtn = document.createElement('button');
+      quizBtn.innerHTML = '📝 Quiz';
+      quizBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeThisMenu();
+        openSavedSermon(sermon);
+        if(!sermon.quiz || !sermon.quiz.length){
+          generateQuiz();
+        }
+      });
+
+      const printBtn = document.createElement('button');
+      printBtn.innerHTML = '🖨️ Print';
+      printBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeThisMenu();
+        openSavedSermon(sermon);
+        printSermonText();
+      });
+
       const shareBtn = document.createElement('button');
-      shareBtn.textContent = 'Share';
+      shareBtn.innerHTML = '📤 Share';
       shareBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
+        closeThisMenu();
         await shareSermonAudio(sermon);
       });
 
       const del = document.createElement('button');
       del.className = 'danger';
-      del.textContent = 'Delete';
+      del.innerHTML = '🗑️ Delete';
       del.addEventListener('click', async (e) => {
         e.stopPropagation();
+        closeThisMenu();
         if(!confirm('Delete this saved sermon? This cannot be undone.')) return;
         await deleteSermon(sermon.id);
         renderLibrary();
       });
 
-      actions.appendChild(renameBtn);
-      actions.appendChild(shareBtn);
-      actions.appendChild(del);
+      menuPanel.appendChild(renameBtn);
+      menuPanel.appendChild(quizBtn);
+      menuPanel.appendChild(printBtn);
+      menuPanel.appendChild(shareBtn);
+      menuPanel.appendChild(del);
+
+      menuWrap.appendChild(menuToggle);
+      menuWrap.appendChild(menuPanel);
 
       const dateEl = document.createElement('div');
       dateEl.className = 'lib-date';
@@ -3622,7 +3719,7 @@
         ? 'Recording saved — summary not available (tap to listen or download)'
         : sermon.takeaway;
 
-      item.appendChild(actions);
+      item.appendChild(menuWrap);
       item.appendChild(dateEl);
       item.appendChild(takeawayEl);
 
@@ -3630,6 +3727,13 @@
       libraryList.appendChild(item);
     });
   }
+
+  // Close any open library "⋯" menu when clicking anywhere outside it.
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('.lib-menu-wrap')){
+      document.querySelectorAll('.lib-menu-panel.open').forEach(p => p.classList.remove('open'));
+    }
+  });
 
   function makeShareFileName(sermon){
     const d = new Date(sermon.date);
