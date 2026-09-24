@@ -1974,6 +1974,7 @@
     Object.values(VIEWS).forEach(v => { v.style.display = 'none'; });
     VIEWS[name].style.display = 'flex';
     currentView = name;
+    window.scrollTo(0, 0);
   }
   function showRecordingPage(){
     showView('record');
