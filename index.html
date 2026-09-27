@@ -857,20 +857,40 @@
   }
   .premium-note .unlock-btn:hover{ background:rgba(201,162,39,0.18); }
   .settings-item.clickable{ cursor:pointer; }
-  .settings-item.clickable:hover{ color:var(--gold-bright); }
-  .settings-item .chevron{ color:var(--text-muted); }
+  .settings-item.clickable:hover{ background:rgba(255,255,255,0.03); }
+  .settings-item .chevron{ color:var(--gold-bright); }
+  .settings-item.feature-row{
+    border-bottom:none;
+    border-left:3px solid var(--accent, var(--gold));
+    background:var(--surface);
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:8px;
+    color:var(--text);
+  }
   .concordance-intro{
     font-size:13px;
     color:var(--text-muted);
     margin:0 0 14px;
-    line-height:1.5;
+    line-height:1.6;
   }
   .concordance-result{
-    padding:12px 14px;
-    border:1px solid var(--surface-line);
-    border-radius:12px;
-    margin-bottom:10px;
+    display:flex;
+    gap:12px;
+    padding:0 0 14px;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--surface-line);
   }
+  .concordance-result:last-child{ border-bottom:none; margin-bottom:0; }
+  .concordance-result .num{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    color:var(--gold-bright);
+    font-size:14px;
+    min-width:20px;
+    flex-shrink:0;
+  }
+  .concordance-result .body{ flex:1; min-width:0; }
   .concordance-result .ref{
     font-family:'Source Serif 4',serif;
     font-weight:600;
@@ -881,8 +901,41 @@
   .concordance-result .note{
     font-size:13px;
     color:var(--text);
-    line-height:1.45;
+    line-height:1.5;
   }
+  .linked-term{
+    color:#6FB3A0;
+    text-decoration:underline;
+    text-underline-offset:2px;
+    cursor:pointer;
+  }
+  .related-topics{
+    margin-top:6px;
+    padding-top:14px;
+    border-top:1px solid var(--surface-line);
+  }
+  .related-topics .label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--text-muted);
+    margin-bottom:8px;
+  }
+  .related-topics .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .related-topics .chip{
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    color:var(--text);
+    font-size:13px;
+    padding:6px 12px;
+    border-radius:16px;
+    cursor:pointer;
+  }
+  .related-topics .chip:hover{ border-color:var(--gold); color:var(--gold-bright); }
   .quiz-question{
     border:1px solid var(--surface-line);
     border-radius:12px;
@@ -1355,13 +1408,13 @@
           <div class="error-box" id="familyCodeError" style="display:none;"></div>
           <div id="familyCodesList"></div>
         </div>
-        <div class="settings-item clickable" id="concordanceRow"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable" id="commentaryRow"><span>📜 Bible Commentary</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable" id="authorsRow"><span>✍️ Bible Authors &amp; History</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable" id="genealogyRow"><span>🌳 Bible Genealogy — Adam to Jesus</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable" id="scienceRow"><span>🔬 Bible &amp; Science</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable" id="quotesRow"><span>💬 Quotable Quotes</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable" id="comicRow"><span>🎨 Kids Comic Bible Stories</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable feature-row" id="concordanceRow" style="--accent:#C9A24B"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable feature-row" id="commentaryRow" style="--accent:#B08968"><span>📜 Bible Commentary</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable feature-row" id="authorsRow" style="--accent:#8C7853"><span>✍️ Bible Authors &amp; History</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable feature-row" id="genealogyRow" style="--accent:#6E8B5C"><span>🌳 Bible Genealogy — Adam to Jesus</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable feature-row" id="scienceRow" style="--accent:#5B8A8C"><span>🔬 Bible &amp; Science</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable feature-row" id="quotesRow" style="--accent:#A66B8E"><span>💬 Quotable Quotes</span><span class="chevron">→</span></div>
+        <div class="settings-item clickable feature-row" id="comicRow" style="--accent:#C9762E"><span>🎨 Kids Comic Bible Stories</span><span class="chevron">→</span></div>
       </div>
       <div class="hint">Got an access code from a payment or a family member? Enter it above to unlock Premium on this device. More features will appear here as they're built.</div>
     </div>
@@ -2912,6 +2965,30 @@
     }
   });
 
+  // ---- Shared helpers: turn related-topic words into clickable inline links ----
+  function escapeHtml(str){
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+  function escapeRegExp(str){
+    return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  // Escapes text for safe innerHTML use, then wraps any occurrence of the
+  // given terms (matched case-insensitively, longest terms first so e.g.
+  // "God's mercy" wins over just "mercy") in a clickable <span>.
+  function highlightTerms(text, terms){
+    const escaped = escapeHtml(text);
+    const clean = (terms || []).map(t => (t || '').trim()).filter(Boolean);
+    if(!clean.length) return escaped;
+    const sorted = [...clean].sort((a, b) => b.length - a.length);
+    const pattern = sorted.map(t => escapeRegExp(escapeHtml(t))).join('|');
+    if(!pattern) return escaped;
+    const re = new RegExp('(' + pattern + ')', 'gi');
+    return escaped.replace(re, '<span class="linked-term">$1</span>');
+  }
+
   // ---- Bible Concordance (Premium feature) ----
   let concordanceSearchInFlight = false;
 
@@ -2945,24 +3022,64 @@
       if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
 
       concordanceResults.innerHTML = '';
+      const relatedTopics = Array.isArray(data.relatedTopics) ? data.relatedTopics.filter(t => t && t.trim()) : [];
+
       if(data.intro){
         const intro = document.createElement('div');
         intro.className = 'concordance-intro';
-        intro.textContent = data.intro;
+        intro.innerHTML = highlightTerms(data.intro, relatedTopics);
         concordanceResults.appendChild(intro);
       }
-      (data.passages || []).forEach(p => {
+      (data.passages || []).forEach((p, i) => {
         const card = document.createElement('div');
         card.className = 'concordance-result';
+        const num = document.createElement('div');
+        num.className = 'num';
+        num.textContent = (i + 1) + '.';
+        const body = document.createElement('div');
+        body.className = 'body';
         const ref = document.createElement('div');
         ref.className = 'ref';
         ref.textContent = p.reference;
         const note = document.createElement('div');
         note.className = 'note';
-        note.textContent = p.note;
-        card.appendChild(ref);
-        card.appendChild(note);
+        note.innerHTML = highlightTerms(p.note || '', relatedTopics);
+        body.appendChild(ref);
+        body.appendChild(note);
+        card.appendChild(num);
+        card.appendChild(body);
         concordanceResults.appendChild(card);
+      });
+
+      if(relatedTopics.length){
+        const wrap = document.createElement('div');
+        wrap.className = 'related-topics';
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = 'Related topics';
+        const chips = document.createElement('div');
+        chips.className = 'chips';
+        relatedTopics.forEach(topic => {
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.textContent = topic;
+          chip.addEventListener('click', () => {
+            concordanceInput.value = topic;
+            runConcordanceSearch();
+          });
+          chips.appendChild(chip);
+        });
+        wrap.appendChild(label);
+        wrap.appendChild(chips);
+        concordanceResults.appendChild(wrap);
+      }
+
+      // Clicking a linked term inline re-runs the search on that term.
+      concordanceResults.querySelectorAll('.linked-term').forEach(el => {
+        el.addEventListener('click', () => {
+          concordanceInput.value = el.textContent;
+          runConcordanceSearch();
+        });
       });
     } catch (err) {
       concordanceResults.innerHTML = '';
