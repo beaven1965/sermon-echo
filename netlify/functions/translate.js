@@ -22,10 +22,32 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing transcript or targetLanguage.' }) };
     }
 
+    // For languages the model tends to flatten into Tagalog, anchor it with
+    // real worked examples so it has concrete vocabulary/grammar to imitate
+    // instead of just a description of "don't do X".
+    const regionalExemplars = {
+      'cebuano (bisaya)': `Worked examples of genuine Cebuano (Bisaya) — study the vocabulary and sentence patterns, they are NOT Tagalog:
+- "She denied any connection between the two investigations." → "Gilalis niya ang bisan unsang koneksyon tali sa duha ka imbestigasyon."
+- "He said his office works independently of his wife's role." → "Miingon siya nga ang iyang opisina naglihok nga independente sa tahas sa iyang asawa."
+- "She promised full cooperation with local investigations." → "Misaad siya og bug-os nga kooperasyon sa lokal nga mga imbestigasyon."
+- "This is the day the Lord has made." → "Kini ang adlaw nga gibuhat sa Ginoo."
+Notice: "tali sa" (between/among) not "sa pagitan ng"; "og"/"ug" (and) not "at"; "niya/siya" placement and verb-first sentence order; "mga" for plurals like Tagalog but very different verbs and connectors ("nga" not "na/ng" in most places).`,
+      'ilocano': `Worked examples of genuine Ilocano — study the vocabulary and sentence patterns, they are NOT Tagalog:
+- "She denied any connection between the two investigations." → "Inlibakna ti aniaman a koneksion iti nagbaetan ti dua nga imbestigasion."
+- "He said his office works independently of his wife's role." → "Kinunana a ti opisinana ket agtrabaho a sibubukel manipud iti akem ti asawana."
+- "She promised full cooperation with local investigations." → "Nangipatulod isuna iti naan-anay a kooperasion kadagiti lokal nga imbestigasion."
+- "This is the day the Lord has made." → "Daytoy ti aldaw nga inaramid ti Apo."
+Notice: "iti nagbaetan" (between/among) not "sa pagitan ng"; "ken" (and) not "at"; "ti/iti" articles instead of "ang/ng/sa"; "kinunana", "nangipatulod" verb forms instead of Tagalog "sinabi niya", "nangako siya".`
+    };
+    const langKey = String(targetLanguage || '').trim().toLowerCase();
+    const exemplarBlock = regionalExemplars[langKey] ? '\n\n' + regionalExemplars[langKey] : '';
+
     const systemPrompt = `You translate a sermon/talk's takeaway, highlight bullets, and full transcript into ${targetLanguage}.
 Translate naturally and faithfully — capture the real meaning and tone, not a word-for-word translation. Keep it warm and easy to read aloud, the way a fluent native speaker would say it. Keep names of people, places, and Bible book names in their standard form for ${targetLanguage} (e.g. use the conventional localized name for Bible books/figures if one commonly exists in that language).
 
-If ${targetLanguage} is Cebuano (Bisaya), Ilocano, or another regional Philippine language: write in that language's own actual vocabulary and grammar, NOT in Tagalog/Filipino with a few words swapped. These are genuinely distinct languages, not dialects of Tagalog — a Cebuano or Ilocano speaker should recognize the output as their own language, not as Tagalog. For example, Cebuano uses words like "og" (and), "sa taliwala sa" (between), "nagsulti" (said) rather than Tagalog's "at", "sa pagitan ng", "sinabi"; Ilocano uses words like "ken" (and), "iti nagbaetan" (between), "kinuna" (said) rather than Tagalog equivalents. Do not default to Tagalog phrasing out of caution — commit fully to the target language's real grammar and word choices throughout the whole transcript, not just isolated words.
+If ${targetLanguage} is Cebuano (Bisaya), Ilocano, or another regional Philippine language: write in that language's own actual vocabulary and grammar, NOT in Tagalog/Filipino with a few words swapped. These are genuinely distinct languages, not dialects of Tagalog — a Cebuano or Ilocano speaker should recognize the output as their own language, not as Tagalog.${exemplarBlock}
+
+Before you finalize your answer, silently re-read your own "transcript" translation and check: does this actually look like ${targetLanguage}, or did it slip into Tagalog/Filipino with just a word or two changed? If it reads like Tagalog, rewrite it properly in ${targetLanguage} before responding — do not settle for a Tagalog draft.
 
 Respond with ONLY valid JSON, no other text, no markdown fences, in this exact shape:
 {"takeaway": "...", "bullets": ["...", "..."], "transcript": "..."}
