@@ -27,9 +27,11 @@ exports.handler = async (event) => {
   "reference": "the verse, passage, or topic as best identified (e.g. 'John 3:16' or 'The Beatitudes, Matthew 5:1-12')",
   "context": "2-4 sentences of historical and literary context — who wrote it, to whom, and why it matters in its setting",
   "meaning": "2-4 sentences explaining what the passage actually says and means, in plain language",
-  "application": "2-3 sentences of practical, non-denominational application a preacher or reader could use today"
+  "application": "2-3 sentences of practical, non-denominational application a preacher or reader could use today",
+  "relatedTopics": ["...", "..."]
 }
-Keep the tone warm, honest, and useful for sermon preparation. If the input is unclear or not a real Bible reference/topic, do your best reasonable interpretation rather than refusing.`;
+Keep the tone warm, honest, and useful for sermon preparation. If the input is unclear or not a real Bible reference/topic, do your best reasonable interpretation rather than refusing.
+"relatedTopics": 4-6 short related topic words or phrases (1-3 words each, e.g. "forgiveness", "God's mercy") that someone studying this passage would naturally want to look up next. IMPORTANT: each one must appear verbatim (case-insensitive) somewhere inside "context", "meaning", or "application" — pick your wording in those fields with this in mind, write them first, then choose relatedTopics from words/phrases actually present in them. Never invent a relatedTopics entry that doesn't literally appear in the text.`;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
