@@ -1321,6 +1321,121 @@
     cursor:pointer;
     margin-top:10px;
   }
+
+  /* ---- White-background pages: Library, Premium, Bible Concordance & Commentary ---- */
+  .page-white{
+    background:#FFFFFF;
+    color:#1C2331;
+    border-radius:16px;
+    padding:18px 16px 22px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.16);
+  }
+  .page-white .result-meta .date{ color:#1C2331; }
+  .page-white .new-recording-btn{
+    border-color:#DADCE0;
+    color:#5B6472;
+  }
+  .page-white .new-recording-btn:hover{ border-color:#1a73e8; color:#1a73e8; }
+  .page-white .hint{ color:#5B6472; }
+  .page-white .library-search{
+    background:#F5F6F7;
+    border-color:#DADCE0;
+    color:#1C2331;
+  }
+  .page-white .library-search::placeholder{ color:#8A8F98; }
+  .page-white .library-search:focus{ border-color:#1a73e8; }
+  .page-white .error-box{
+    background:rgba(178,76,59,0.08);
+    border-color:rgba(178,76,59,0.35);
+    color:#8A3527;
+  }
+  .page-white .code-box{
+    background:#F5F6F7;
+    border-color:#1a73e8;
+  }
+  .page-white .code-box .code-label{ color:#5B6472; }
+  .page-white .code-box .code-value{ color:#1C2331; }
+  .page-white .code-box .copy-code-btn{
+    border-color:#1a73e8;
+    color:#1a73e8;
+  }
+
+  /* Library (past sermons) list items on white */
+  .page-white .library-item{
+    background:#F8F9FA;
+    border-color:#E3E5E8;
+  }
+  .page-white .library-item:hover{ border-color:#1a73e8; }
+  .page-white .library-item .lib-date{ color:#6B7280; }
+  .page-white .library-item .lib-takeaway{ color:#1C2331; }
+  .page-white .library-item .lib-delete{ color:#6B7280; }
+  .page-white .library-item .lib-delete:hover{ color:#B24C3B; }
+  .page-white .lib-actions button{ color:#6B7280; }
+  .page-white .lib-actions button:hover{ color:#1a73e8; }
+  .page-white .lib-actions button.danger:hover{ color:#B24C3B; }
+  .page-white .lib-menu-toggle{ border-color:#DADCE0; color:#6B7280; }
+  .page-white .lib-menu-toggle:hover{ border-color:#1a73e8; color:#1a73e8; }
+  .page-white .lib-menu-panel{
+    background:#FFFFFF;
+    border-color:#E3E5E8;
+    box-shadow:0 8px 24px rgba(0,0,0,0.12);
+  }
+  .page-white .lib-menu-panel button{ color:#1C2331; }
+  .page-white .lib-menu-panel button:hover{ background:#F5F6F7; color:#1a73e8; }
+  .page-white .lib-title{ color:#1C2331; }
+
+  /* Premium (paywall) page on white */
+  .paywall.page-white .paywall-title{ color:#1C2331; }
+  .paywall.page-white .paywall-sub{ color:#5B6472; }
+  .paywall.page-white .founding-banner{
+    background:rgba(26,115,232,0.08);
+    border-color:#1a73e8;
+    color:#1a4fa0;
+  }
+  .paywall.page-white .feature-list .check{ color:#1a73e8; }
+  .paywall.page-white .feature-list .soon{
+    color:#6B7280;
+    border-color:#DADCE0;
+  }
+  .paywall.page-white .price-tag .amount{ color:#1C2331; }
+  .paywall.page-white .price-tag .amount span{ color:#6B7280; }
+  .paywall.page-white .price-tag .note{ color:#6B7280; }
+  .paywall.page-white .paywall-fine{ color:#6B7280; }
+  .paywall.page-white .paid-banner{
+    background:#F5F6F7;
+    border-color:#1a73e8;
+    color:#1C2331;
+  }
+  .paywall.page-white .paid-banner button{ color:#6B7280; }
+
+  /* Bible Concordance & Bible Commentary research pages: white card + Google-style blue links */
+  .research-panel .concordance-intro{ color:#4B5563; }
+  .research-panel .concordance-result{ border-bottom-color:#E3E5E8; }
+  .research-panel .concordance-result .num{ color:#1C2331; }
+  .research-panel .concordance-result .ref{ color:#1C2331; }
+  .research-panel .concordance-result .note{ color:#374151; }
+  .research-panel .linked-term{
+    color:#1a73e8;
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .research-panel .linked-term:hover{ color:#174EA6; }
+  .research-panel .related-topics{ border-top-color:#E3E5E8; }
+  .research-panel .related-topics-top{
+    border-color:#E3E5E8;
+    background:#F8F9FA;
+  }
+  .research-panel .related-topics .label{ color:#6B7280; }
+  .research-panel .related-topics .chip{
+    background:#F5F6F7;
+    border-color:#DADCE0;
+    color:#1a73e8;
+  }
+  .research-panel .related-topics .chip:hover{
+    border-color:#1a73e8;
+    color:#174EA6;
+    background:#EAF1FE;
+  }
 </style>
 </head>
 <body>
@@ -1429,7 +1544,7 @@
     </div>
 
     <!-- BIBLE CONCORDANCE -->
-    <div class="library" id="concordanceView" style="display:none;">
+    <div class="library page-white research-panel" id="concordanceView" style="display:none;">
       <div class="result-meta">
         <span class="date">Bible Concordance</span>
         <button class="new-recording-btn" id="closeConcordanceBtn">Close</button>
@@ -1462,7 +1577,7 @@
     </div>
 
     <!-- BIBLE COMMENTARY -->
-    <div class="library" id="commentaryView" style="display:none;">
+    <div class="library page-white research-panel" id="commentaryView" style="display:none;">
       <div class="result-meta">
         <span class="date">Bible Commentary</span>
         <button class="new-recording-btn" id="closeCommentaryBtn">Close</button>
@@ -1629,7 +1744,7 @@
     </div>
 
     <!-- LIBRARY -->
-    <div class="library" id="libraryView" style="display:none;">
+    <div class="library page-white" id="libraryView" style="display:none;">
       <div class="result-meta">
         <span class="date">Past sermons</span>
         <button class="new-recording-btn" id="closeLibraryBtn">Close</button>
@@ -1640,7 +1755,7 @@
     </div>
 
     <!-- PAYWALL -->
-    <div class="paywall" id="paywallView" style="display:none;">
+    <div class="paywall page-white" id="paywallView" style="display:none;">
       <div class="result-meta">
         <span class="date">Sermon Recorder Premium</span>
         <button class="new-recording-btn" id="closePaywallBtn">Close</button>
@@ -3211,11 +3326,37 @@
       if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
 
       commentaryResults.innerHTML = '';
+      const relatedTopics = Array.isArray(data.relatedTopics) ? data.relatedTopics.filter(t => t && t.trim()) : [];
 
       const header = document.createElement('div');
       header.className = 'concordance-intro';
-      header.textContent = data.reference || query;
+      header.innerHTML = highlightTerms(data.reference || query, relatedTopics);
       commentaryResults.appendChild(header);
+
+      // Related topics sit right under the header, so they're visible
+      // without scrolling past the context/meaning/application cards.
+      if(relatedTopics.length){
+        const wrap = document.createElement('div');
+        wrap.className = 'related-topics related-topics-top';
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = 'Go deeper — related topics';
+        const chips = document.createElement('div');
+        chips.className = 'chips';
+        relatedTopics.forEach(topic => {
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.textContent = topic;
+          chip.addEventListener('click', () => {
+            commentaryInput.value = topic;
+            runCommentarySearch();
+          });
+          chips.appendChild(chip);
+        });
+        wrap.appendChild(label);
+        wrap.appendChild(chips);
+        commentaryResults.appendChild(wrap);
+      }
 
       const fields = [
         ['Context', data.context],
@@ -3231,10 +3372,18 @@
         ref.textContent = label;
         const note = document.createElement('div');
         note.className = 'note';
-        note.textContent = text;
+        note.innerHTML = highlightTerms(text, relatedTopics);
         card.appendChild(ref);
         card.appendChild(note);
         commentaryResults.appendChild(card);
+      });
+
+      // Clicking a linked term inline re-runs the search on that term.
+      commentaryResults.querySelectorAll('.linked-term').forEach(el => {
+        el.addEventListener('click', () => {
+          commentaryInput.value = el.textContent;
+          runCommentarySearch();
+        });
       });
     } catch (err) {
       commentaryResults.innerHTML = '';
