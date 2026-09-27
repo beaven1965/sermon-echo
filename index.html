@@ -1710,6 +1710,7 @@
           <option value="Japanese">Japanese</option>
           <option value="English">English</option>
         </select>
+        <button class="translate-btn" id="retranslateBtn" style="display:none;" title="Ask for a fresh translation instead of the saved one">↻ Redo translation</button>
         <span class="translate-note" id="translateNote"></span>
       </div>
       <div class="premium-note" id="translatePremiumNote" style="display:none;"></div>
@@ -1823,6 +1824,7 @@
   const printTranscriptBtn = document.getElementById('printTranscriptBtn');
   const transcriptBox = document.getElementById('transcriptBox');
   const translateBtn = document.getElementById('translateBtn');
+  const retranslateBtn = document.getElementById('retranslateBtn');
   const translateNote = document.getElementById('translateNote');
   const translateLangSelect = document.getElementById('translateLangSelect');
   const audioPlayback = document.getElementById('audioPlayback');
@@ -2824,6 +2826,7 @@
     translateBtn.textContent = '🌐 Translate';
     translateBtn.disabled = false;
     translateNote.textContent = '';
+    retranslateBtn.style.display = 'none';
     hideTranslatePremiumNote();
   }
 
@@ -3023,6 +3026,74 @@
     }
   });
 
+  async function attemptTranslate(lang){
+    const res = await fetch('/.netlify/functions/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: currentSermon.transcript,
+        takeaway: currentSermon.takeaway,
+        bullets: currentSermon.bullets,
+        targetLanguage: lang
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.error || ('Translation failed (' + res.status + ').'));
+    return data;
+  }
+
+  // forceFresh=true skips any saved translation and asks the AI again —
+  // used by "Redo translation" when an earlier saved translation reads oddly.
+  async function runTranslate(forceFresh){
+    const lang = translateLangSelect.value;
+
+    if(!forceFresh){
+      const cached = currentSermon.translations && currentSermon.translations[lang];
+      if(cached){
+        renderSermonText(cached);
+        viewingTranslation = true;
+        translateBtn.textContent = 'Show original';
+        translateNote.textContent = 'Showing ' + lang + ' translation';
+        retranslateBtn.style.display = 'inline-block';
+        return;
+      }
+    }
+
+    translateBtn.disabled = true;
+    retranslateBtn.disabled = true;
+    translateNote.textContent = 'Translating into ' + lang + '… this can take a bit for long recordings.';
+
+    try {
+      let data;
+      try {
+        data = await attemptTranslate(lang);
+      } catch (firstErr) {
+        // Some languages occasionally trip up the translator on the first
+        // try (a malformed response) — silently retry once before giving up.
+        translateNote.textContent = 'That took an extra try — still translating into ' + lang + '…';
+        data = await attemptTranslate(lang);
+      }
+
+      currentSermon.translations = currentSermon.translations || {};
+      currentSermon.translations[lang] = data;
+      renderSermonText(data);
+      viewingTranslation = true;
+      translateBtn.textContent = 'Show original';
+      translateNote.textContent = 'Showing ' + lang + ' translation';
+      retranslateBtn.style.display = 'inline-block';
+
+      if(currentSermon.id){
+        updateSermon(currentSermon.id, { translations: currentSermon.translations })
+          .catch(err => console.error('Could not save translation', err));
+      }
+    } catch (err) {
+      translateNote.textContent = err.message || 'Could not translate right now. Please try again.';
+    } finally {
+      translateBtn.disabled = false;
+      retranslateBtn.disabled = false;
+    }
+  }
+
   translateBtn.addEventListener('click', async () => {
     if(!currentSermon) return;
 
@@ -3045,48 +3116,12 @@
       return;
     }
 
-    const lang = translateLangSelect.value;
-    const cached = currentSermon.translations && currentSermon.translations[lang];
-    if(cached){
-      renderSermonText(cached);
-      viewingTranslation = true;
-      translateBtn.textContent = 'Show original';
-      translateNote.textContent = 'Showing ' + lang + ' translation';
-      return;
-    }
+    runTranslate(false);
+  });
 
-    translateBtn.disabled = true;
-    translateNote.textContent = 'Translating into ' + lang + '… this can take a bit for long recordings.';
-    try {
-      const res = await fetch('/.netlify/functions/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          transcript: currentSermon.transcript,
-          takeaway: currentSermon.takeaway,
-          bullets: currentSermon.bullets,
-          targetLanguage: lang
-        })
-      });
-      const data = await res.json().catch(() => ({}));
-      if(!res.ok) throw new Error(data.error || ('Translation failed (' + res.status + ').'));
-
-      currentSermon.translations = currentSermon.translations || {};
-      currentSermon.translations[lang] = data;
-      renderSermonText(data);
-      viewingTranslation = true;
-      translateBtn.textContent = 'Show original';
-      translateNote.textContent = 'Showing ' + lang + ' translation';
-
-      if(currentSermon.id){
-        updateSermon(currentSermon.id, { translations: currentSermon.translations })
-          .catch(err => console.error('Could not save translation', err));
-      }
-    } catch (err) {
-      translateNote.textContent = err.message || 'Could not translate right now. Please try again.';
-    } finally {
-      translateBtn.disabled = false;
-    }
+  retranslateBtn.addEventListener('click', () => {
+    if(!currentSermon || !viewingTranslation) return;
+    runTranslate(true);
   });
 
   // ---- Shared helpers: turn related-topic words into clickable inline links ----
