@@ -25,12 +25,16 @@ exports.handler = async (event) => {
     const systemPrompt = `You translate a sermon/talk's takeaway, highlight bullets, and full transcript into ${targetLanguage}.
 Translate naturally and faithfully — capture the real meaning and tone, not a word-for-word translation. Keep it warm and easy to read aloud, the way a fluent native speaker would say it. Keep names of people, places, and Bible book names in their standard form for ${targetLanguage} (e.g. use the conventional localized name for Bible books/figures if one commonly exists in that language).
 
+If ${targetLanguage} is Cebuano (Bisaya), Ilocano, or another regional Philippine language: write in that language's own actual vocabulary and grammar, NOT in Tagalog/Filipino with a few words swapped. These are genuinely distinct languages, not dialects of Tagalog — a Cebuano or Ilocano speaker should recognize the output as their own language, not as Tagalog. For example, Cebuano uses words like "og" (and), "sa taliwala sa" (between), "nagsulti" (said) rather than Tagalog's "at", "sa pagitan ng", "sinabi"; Ilocano uses words like "ken" (and), "iti nagbaetan" (between), "kinuna" (said) rather than Tagalog equivalents. Do not default to Tagalog phrasing out of caution — commit fully to the target language's real grammar and word choices throughout the whole transcript, not just isolated words.
+
 Respond with ONLY valid JSON, no other text, no markdown fences, in this exact shape:
 {"takeaway": "...", "bullets": ["...", "..."], "transcript": "..."}
 
 - "takeaway": the translated takeaway, same number of sentences and same meaning as the original.
 - "bullets": the translated bullets, same count and order as the original.
-- "transcript": the full transcript translated into ${targetLanguage}, preserving paragraph/sentence flow.`;
+- "transcript": the full transcript translated into ${targetLanguage}, preserving paragraph/sentence flow.
+
+IMPORTANT: Your entire reply must be that one JSON object and nothing else — no preamble, no note about ${targetLanguage} being a regional or lower-resource language, no apology, no explanation before or after. Even if you are less certain about some regional terms in ${targetLanguage}, still do your best full translation rather than commenting on the difficulty or refusing. Your reply must start with { and end with }.`;
 
     const userContent =
       'Takeaway:\n' + (takeaway || '') +
@@ -45,7 +49,7 @@ Respond with ONLY valid JSON, no other text, no markdown fences, in this exact s
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-5',
         max_tokens: 8192,
         system: systemPrompt,
         messages: [
