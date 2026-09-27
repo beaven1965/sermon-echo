@@ -1610,8 +1610,8 @@
       </ul>
 
       <div class="price-tag">
-        <div class="amount">₱250<span>one-time</span></div>
-        <div class="note">Not a subscription yet — just a one-time thank-you payment for now.</div>
+        <div class="amount">₱250<span>per month</span></div>
+        <div class="note">No auto-charge, no card stored. Pay once a month here and get a fresh code good for another 30 days.</div>
       </div>
 
       <button class="subscribe-btn" id="subscribeBtn">Subscribe / Pay Now</button>
@@ -3846,17 +3846,39 @@
   // ---- Premium access code: unlock, store, and display ----
   const PREMIUM_FLAG_KEY = 'se_premium_unlocked';
   const PREMIUM_CODE_KEY = 'se_premium_code';
+  const PREMIUM_EXPIRES_KEY = 'se_premium_expires_at';
   const CHECKOUT_SESSION_KEY = 'se_pending_checkout_session_id';
 
+  function formatExpiryDate(iso){
+    try{
+      return new Date(iso).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+    }catch(e){
+      return iso;
+    }
+  }
+
   function refreshPremiumUI(){
+    // If a stored expiry has already passed, treat Premium as locked again
+    // automatically — no server round-trip needed, the code already proved
+    // itself genuine when it was first redeemed.
+    const storedExpiry = localStorage.getItem(PREMIUM_EXPIRES_KEY);
+    if(storedExpiry && Date.now() > new Date(storedExpiry).getTime()){
+      localStorage.removeItem(PREMIUM_FLAG_KEY);
+      localStorage.removeItem(PREMIUM_EXPIRES_KEY);
+      // Keep PREMIUM_CODE_KEY around so myCodeHint doesn't lose the code
+      // reference on locked state — it just won't unlock features anymore.
+    }
+
     const unlocked = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
     const savedCode = localStorage.getItem(PREMIUM_CODE_KEY);
+    const expiresAt = localStorage.getItem(PREMIUM_EXPIRES_KEY);
     if(unlocked){
       premiumBadge.textContent = 'Unlocked ✅';
       premiumBadge.className = 'premium-badge unlocked';
       if(savedCode){
         myCodeHint.style.display = 'block';
-        myCodeHint.textContent = 'Your access code (share with family to unlock their device too): ' + savedCode;
+        const expiryLine = expiresAt ? (' — active until ' + formatExpiryDate(expiresAt)) : '';
+        myCodeHint.textContent = 'Your access code (share with family to unlock their device too): ' + savedCode + expiryLine;
       }
       if(savedCode && savedCode.startsWith('SE-')){
         familyCodesSection.style.display = 'block';
@@ -3983,9 +4005,11 @@
     }
   });
 
-  function unlockPremium(code){
+  function unlockPremium(code, expiresAt){
     localStorage.setItem(PREMIUM_FLAG_KEY, 'true');
     if(code) localStorage.setItem(PREMIUM_CODE_KEY, code);
+    if(expiresAt) localStorage.setItem(PREMIUM_EXPIRES_KEY, expiresAt);
+    else localStorage.removeItem(PREMIUM_EXPIRES_KEY); // old-format/tester codes: no built-in expiry to store
     refreshPremiumUI();
   }
 
@@ -4012,8 +4036,11 @@
         throw new Error(data.error || ('Server error (' + res.status + '). Please try again in a moment.'));
       }
       if(data.valid){
-        unlockPremium(typed.toUpperCase());
+        unlockPremium(typed.toUpperCase(), data.expiresAt);
         redeemCodeInput.value = '';
+      } else if(data.reason === 'expired'){
+        redeemError.textContent = 'This code has expired. Please renew to keep using Premium features.';
+        redeemError.style.display = 'block';
       } else {
         redeemError.textContent = "That code doesn't look right — please check for typos and try again.";
         redeemError.style.display = 'block';
@@ -4080,11 +4107,13 @@
           .then(res => res.json().then(data => ({ ok: res.ok, data })))
           .then(({ ok, data }) => {
             if(ok && data.code){
-              unlockPremium(data.code);
+              unlockPremium(data.code, data.expiresAt);
+              const expiryLine = data.expiresAt ? ('<div style="font-size:12px; color:var(--text-muted); margin-top:8px;">Active for 30 days, until ' + formatExpiryDate(data.expiresAt) + '</div>') : '';
               showBanner(
                 '<div>🎉 Thank you for your support! Premium is unlocked on this device.' +
                 '<div class="code-box"><div class="code-label">Your access code (save this — it also unlocks Premium for family members)</div>' +
                 '<div class="code-value">' + data.code + '</div>' +
+                expiryLine +
                 '<button class="copy-code-btn" id="copyCodeBtn">Copy code</button></div></div>'
               );
               const copyBtn = document.getElementById('copyCodeBtn');
