@@ -16,15 +16,22 @@
 const crypto = require('crypto');
 const { getStore, connectLambda } = require('@netlify/blobs');
 
+const CODE_VALID_DAYS = 30;
+
+// Issues a code good for 30 days from right now. The expiry is baked
+// into the code itself (as 8 hex digits of a Unix timestamp), so
+// verify-code.js can check it later with no database lookup at all.
 function issueAccessCode(secret) {
   const randomPart = crypto.randomBytes(5).toString('hex').toUpperCase();
+  const expiresAtMs = Date.now() + CODE_VALID_DAYS * 24 * 60 * 60 * 1000;
+  const expiryHex = Math.floor(expiresAtMs / 1000).toString(16).toUpperCase().padStart(8, '0');
   const signature = crypto
     .createHmac('sha256', secret)
-    .update(randomPart)
+    .update(randomPart + expiryHex)
     .digest('hex')
     .slice(0, 6)
     .toUpperCase();
-  return `SE-${randomPart}-${signature}`;
+  return { code: `SE-${randomPart}-${expiryHex}-${signature}`, expiresAt: new Date(expiresAtMs).toISOString() };
 }
 
 exports.handler = async (event) => {
@@ -57,7 +64,7 @@ exports.handler = async (event) => {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: existing.code, alreadyRecovered: true })
+        body: JSON.stringify({ code: existing.code, expiresAt: existing.expiresAt, alreadyRecovered: true })
       };
     }
 
@@ -81,13 +88,13 @@ exports.handler = async (event) => {
       return { statusCode: 402, body: JSON.stringify({ error: 'PayMongo shows this payment\'s status as "' + status + '", not "paid" yet.' }) };
     }
 
-    const code = issueAccessCode(accessSecret);
-    await store.setJSON(cleanedId, { code, recoveredAt: new Date().toISOString() });
+    const { code, expiresAt } = issueAccessCode(accessSecret);
+    await store.setJSON(cleanedId, { code, expiresAt, recoveredAt: new Date().toISOString() });
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({ code, expiresAt })
     };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
