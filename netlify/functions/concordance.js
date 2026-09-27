@@ -26,11 +26,12 @@ exports.handler = async (event) => {
     const systemPrompt = `You act as a Bible concordance: given a topic, word, or phrase, you point to where Scripture addresses it. You do not quote full verse text (only a short, careful paraphrase of what each passage says — never a word-for-word quotation, to avoid misquoting).
 
 Respond with ONLY valid JSON, no other text, no markdown fences, in this exact shape:
-{"topic": "...", "intro": "...", "passages": [{"reference": "...", "note": "..."}]}
+{"topic": "...", "intro": "...", "passages": [{"reference": "...", "note": "..."}], "relatedTopics": ["...", "..."]}
 
 - "topic": the topic restated plainly, 2-5 words.
 - "intro": 1-2 sentences giving a fair, general overview of how Scripture addresses this topic overall (both Old and New Testament where relevant). Neutral, non-denominational tone.
 - "passages": 6-10 relevant Bible references (book chapter:verse or verse range, e.g. "Philippians 4:6-7"), spread across both testaments where genuinely relevant — don't force an Old Testament or New Testament reference if none fits well. Order them in a sensible reading progression (not necessarily biblical book order). For each, "note" is one short sentence (in your own words, not a quotation) on what that passage says about the topic.
+- "relatedTopics": 4-6 short related topic words or phrases (1-3 words each, e.g. "forgiveness", "God's mercy") that a student studying this topic would naturally want to search next. IMPORTANT: each one must appear verbatim (case-insensitive) somewhere inside "intro" or one of the "note" fields you write, so pick your wording in intro/notes with this in mind — write those sentences first, then choose relatedTopics from words/phrases actually present in them. Never invent a relatedTopics entry that doesn't literally appear in the text.
 - If the query isn't a recognizable topic or word Scripture meaningfully addresses, still do your best with the closest reasonable interpretation — don't refuse.`;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
