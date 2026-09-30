@@ -748,6 +748,26 @@
     padding:28px 26px;
     box-shadow:0 12px 30px rgba(0,0,0,0.28);
   }
+  /* Tap-to-open sections on the results page */
+  details.se-fold{ margin-top:14px; }
+  details.se-fold > summary{ list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--surface); border:1px solid var(--surface-line); color:var(--text); border-radius:12px; padding:15px 18px; font-weight:600; font-size:15px; }
+  details.se-fold > summary::-webkit-details-marker{ display:none; }
+  details.se-fold > summary::after{ content:'▾'; color:var(--text-muted); transition:transform .15s; transform:rotate(-90deg); }
+  details.se-fold[open] > summary::after{ transform:rotate(0deg); }
+  details.se-fold > summary small{ display:block; font-weight:400; font-size:12.5px; color:var(--text-muted); margin-top:2px; }
+  details.se-fold > .se-fold-body{ margin-top:10px; }
+  .lib-details{ font-size:12.5px; color:var(--text-muted); margin-top:4px; }
+  .lib-edit{ margin-top:10px; display:grid; gap:8px; }
+  .lib-edit input{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid var(--surface-line); background:var(--ink-deep); color:var(--text); font-size:14px; }
+  .lib-edit .row{ display:flex; gap:8px; }
+  .lib-edit button{ flex:1; padding:10px; border-radius:8px; border:1px solid var(--gold); background:transparent; color:var(--gold-bright); font-weight:600; cursor:pointer; }
+  .lib-edit button.save{ background:var(--gold); color:var(--ink-deep); }
+  .lib-chips{ display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 4px; }
+  .lib-chips button{ padding:5px 11px; border-radius:999px; border:1px solid var(--surface-line); background:var(--surface); color:var(--text); font-size:12.5px; cursor:pointer; }
+  .page-white .lib-details{ color:#5b6876; }
+  .page-white .lib-edit input{ background:#fff; color:#1C2331; border-color:#cfd6df; }
+  .page-white .lib-chips button{ background:#F5F6F7; color:#1C2331; border-color:#dfe3e8; }
   .paper-card .eyebrow{
     font-size:12px;
     color:var(--ink-on-paper-muted);
@@ -1414,6 +1434,22 @@
   .research-panel .concordance-result .num{ color:#1C2331; }
   .research-panel .concordance-result .ref{ color:#1C2331; }
   .research-panel .concordance-result .note{ color:#374151; }
+  /* Voices & worldview (Bible Commentary) */
+  details.cv-fold{ margin-top:18px; border:1.5px solid #d6dbe1; border-radius:12px; background:#fff; }
+  details.cv-fold > summary{ list-style:none; cursor:pointer; padding:14px 16px; font-weight:700; color:#1C2331; font-size:15.5px; position:relative; padding-right:40px; }
+  details.cv-fold > summary::-webkit-details-marker{ display:none; }
+  details.cv-fold > summary::after{ content:'▾'; position:absolute; right:16px; top:15px; color:#6b7684; transform:rotate(-90deg); transition:transform .15s; }
+  details.cv-fold[open] > summary::after{ transform:rotate(0deg); }
+  details.cv-fold > summary small{ display:block; font-weight:400; color:#5b6876; font-size:12.5px; margin-top:2px; }
+  .cv-body{ padding:0 16px 14px; color:#374151; font-size:14.5px; line-height:1.55; }
+  .cv-h{ font-weight:700; color:#1C2331; margin:14px 0 6px; font-size:14px; letter-spacing:.2px; }
+  .cv-era{ font-size:12px; font-weight:700; color:#1a73e8; text-transform:uppercase; letter-spacing:.6px; margin:12px 0 2px; }
+  .cv-item{ padding:8px 0; border-bottom:1px solid #eef0f3; }
+  .cv-item b{ color:#1C2331; }
+  .cv-role{ color:#6b7684; font-size:12.5px; }
+  .cv-resp{ margin-top:4px; padding-left:10px; border-left:3px solid #c9a227; color:#4b5563; font-size:13.5px; }
+  .cv-label{ display:inline-block; font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:999px; background:#eef4ff; color:#1a4fb3; margin-left:4px; }
+  .cv-note{ font-size:12px; color:#6b7684; margin-top:12px; }
   .research-panel .linked-term{
     color:#1a73e8;
     text-decoration:underline;
@@ -1711,24 +1747,38 @@
           <option value="English">English</option>
         </select>
         <button class="translate-btn" id="retranslateBtn" style="display:none;" title="Ask for a fresh translation instead of the saved one">↻ Redo translation</button>
-        <button class="translate-btn" id="listenBtn" title="Read everything aloud with your phone's own voice (free)">🔊 Listen (phone voice)</button>
-        <button class="translate-btn" id="aiVoiceBtn" title="A clear AI voice reads the Takeaway and Highlights (Premium)">✨ AI voice: takeaway ⭐</button>
         <span class="translate-note" id="translateNote"></span>
       </div>
       <div class="premium-note" id="translatePremiumNote" style="display:none;"></div>
-      <audio id="aiVoiceAudio" controls style="display:none; width:100%; margin-top:8px;"></audio>
+      <details class="se-fold" id="foldListen">
+        <summary><span>🔊 Listen<small>Hear the sermon read aloud</small></span></summary>
+        <div class="se-fold-body">
+          <div class="player-row wrap">
+            <button class="translate-btn" id="aiVoiceBtn" title="A clear AI voice reads the Takeaway and Highlights (Premium)">✨ AI voice: takeaway ⭐</button>
+            <button class="translate-btn" id="listenBtn" title="Read everything aloud with your phone's own voice (free)">🔊 Phone voice: everything</button>
+          </div>
+          <div class="hint" style="margin-top:6px;">✨ AI voice: clear in Tagalog and other languages (Premium). 🔊 Phone voice: free, best for English.</div>
+          <audio id="aiVoiceAudio" controls style="display:none; width:100%; margin-top:8px;"></audio>
+        </div>
+      </details>
 
-      <div class="paper-card">
+      <details class="se-fold" id="foldHighlights">
+        <summary><span>✨ Highlights<small>The main points</small></span></summary>
+        <div class="se-fold-body"><div class="paper-card">
         <div class="eyebrow">Highlights</div>
         <ul class="bullets" id="bulletsList"></ul>
-      </div>
+      </div></div></details>
 
-      <div class="paper-card">
+      <details class="se-fold" id="foldTakeaway">
+        <summary><span>💡 Today's takeaway<small>One sentence to remember</small></span></summary>
+        <div class="se-fold-body"><div class="paper-card">
         <div class="eyebrow">Today's takeaway</div>
         <div class="takeaway-text" id="takeawayText"></div>
-      </div>
+      </div></div></details>
 
-      <div class="paper-card">
+      <details class="se-fold" id="foldQuiz">
+        <summary><span>📝 Quiz for Students<small>Questions from this sermon · Premium</small></span></summary>
+        <div class="se-fold-body"><div class="paper-card">
         <div class="eyebrow">Quiz for Students</div>
         <div class="premium-note" id="quizPremiumNote" style="display:none;"></div>
         <button class="translate-btn" id="generateQuizBtn">📝 Generate Quiz</button>
@@ -1744,7 +1794,7 @@
             <button class="skip-btn" id="printQuizAnswerKeyBtn">🖨️ Print (Answer key)</button>
           </div>
         </div>
-      </div>
+      </div></div></details>
     </div>
 
     <!-- LIBRARY -->
@@ -1753,7 +1803,8 @@
         <span class="date">Past sermons</span>
         <button class="new-recording-btn" id="closeLibraryBtn">Close</button>
       </div>
-      <input type="text" class="library-search" id="librarySearchInput" placeholder="Search by word or topic…">
+      <input type="text" class="library-search" id="librarySearchInput" placeholder="Search title, speaker, topic, date…">
+      <div class="lib-chips" id="libraryChips"></div>
       <div id="libraryList"></div>
       <div class="hint" id="libraryEmpty" style="display:none;">No saved sermons yet. Once you finish a recording, it'll show up here automatically.</div>
     </div>
@@ -3107,7 +3158,7 @@
   function stopListening(){
     if(listenSupported()) window.speechSynthesis.cancel();
     listening = false;
-    if(listenBtn) listenBtn.textContent = '🔊 Listen (phone voice)';
+    if(listenBtn) listenBtn.textContent = '🔊 Phone voice: everything';
   }
   // Long text is read in short pieces — phones stop reading after ~15 seconds of one long piece.
   function listenChunks(text){
@@ -3529,6 +3580,9 @@
         commentaryResults.appendChild(card);
       });
 
+      // 🗣 Voices & worldview — loaded only when tapped (saves cost).
+      commentaryResults.appendChild(buildVoicesFold(data.reference || query));
+
       // Clicking a linked term inline re-runs the search on that term.
       commentaryResults.querySelectorAll('.linked-term').forEach(el => {
         el.addEventListener('click', () => {
@@ -3548,6 +3602,74 @@
   commentaryInput.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') runCommentarySearch();
   });
+
+  function cvEl(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text !== undefined) e.textContent = text; return e; }
+  function buildVoicesFold(topic){
+    const d = cvEl('details', 'cv-fold');
+    const sum = cvEl('summary');
+    sum.appendChild(document.createTextNode('🗣 Voices & worldview'));
+    sum.appendChild(cvEl('small', '', 'Thinkers through the ages · scientists who believed in a Creator · creation or evolution'));
+    d.appendChild(sum);
+    const body = cvEl('div', 'cv-body');
+    d.appendChild(body);
+    let loaded = false;
+    d.addEventListener('toggle', async () => {
+      if(!d.open || loaded) return;
+      loaded = true;
+      body.innerHTML = '';
+      body.appendChild(cvEl('div', 'cv-note', 'Gathering voices from across the centuries… about 15–30 seconds.'));
+      try{
+        const res = await fetch('/.netlify/functions/bible-voices', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ query: topic }) });
+        const raw = await res.text();
+        let data = {}; try{ data = JSON.parse(raw.trim() || '{}'); }catch(e){}
+        if(data.error || !res.ok) throw new Error(data.error || 'Could not load right now. Please try again.');
+        body.innerHTML = '';
+        // Thinkers by era
+        if((data.voices || []).length){
+          body.appendChild(cvEl('div', 'cv-h', '🗣 Voices through the ages'));
+          let lastEra = '';
+          data.voices.forEach(v => {
+            if(v.era && v.era !== lastEra){ body.appendChild(cvEl('div', 'cv-era', v.era)); lastEra = v.era; }
+            const it = cvEl('div', 'cv-item');
+            it.appendChild(cvEl('b', '', v.name));
+            if(v.role) it.appendChild(cvEl('span', 'cv-role', ' — ' + v.role));
+            it.appendChild(cvEl('div', '', v.view));
+            if(v.response) it.appendChild(cvEl('div', 'cv-resp', '📖 Biblical response: ' + v.response));
+            body.appendChild(it);
+          });
+        }
+        // Scientists who believed in a Creator
+        if((data.scientists || []).length){
+          body.appendChild(cvEl('div', 'cv-h', '🔬 Scientists who believed in a Creator'));
+          data.scientists.forEach(v => {
+            const it = cvEl('div', 'cv-item');
+            it.appendChild(cvEl('b', '', v.name));
+            it.appendChild(cvEl('span', 'cv-label', v.label));
+            it.appendChild(cvEl('div', 'cv-role', [v.years, v.field].filter(Boolean).join(' · ')));
+            it.appendChild(cvEl('div', '', v.view));
+            body.appendChild(it);
+          });
+        }
+        // Creation or evolution?
+        if(data.creation && data.creation.relevant){
+          body.appendChild(cvEl('div', 'cv-h', '🌍 Creation or evolution?'));
+          [['What evolution teaches', data.creation.evolution], ['The creationist answer', data.creation.creationist], ['Why it matters', data.creation.matters]].forEach(([h, t]) => {
+            if(!t) return;
+            const it = cvEl('div', 'cv-item');
+            it.appendChild(cvEl('b', '', h));
+            it.appendChild(cvEl('div', '', t));
+            body.appendChild(it);
+          });
+        }
+        body.appendChild(cvEl('div', 'cv-note', 'Each view is a short summary of what that person is known to have taught, in our own words — not a direct quote. This app presents a biblical, creationist worldview.'));
+      }catch(err){
+        loaded = false;
+        body.innerHTML = '';
+        body.appendChild(cvEl('div', 'cv-note', (err.message || 'Could not load right now.') + ' Close and open this section to try again.'));
+      }
+    });
+    return d;
+  }
 
   // ---- Bible Genealogy — Adam to Jesus (Premium feature) ----
   let genealogySearchInFlight = false;
@@ -4026,10 +4148,34 @@
       return;
     }
 
+    // Quick-search chips from the details people saved (speaker, event, topic).
+    const chipBox = document.getElementById('libraryChips');
+    if(chipBox){
+      const seen = new Map();
+      sermons.forEach(x => ['speaker','event','topic'].forEach(k => {
+        const v = (x[k] || '').trim(); if(v && !seen.has(v.toLowerCase())) seen.set(v.toLowerCase(), { v, k });
+      }));
+      const icon = { speaker:'👤', event:'⛪', topic:'🏷' };
+      chipBox.innerHTML = '';
+      Array.from(seen.values()).slice(0, 10).forEach(({ v, k }) => {
+        const b = document.createElement('button'); b.type = 'button';
+        b.textContent = icon[k] + ' ' + v;
+        b.addEventListener('click', () => { librarySearchInput.value = v; renderLibrary(); });
+        chipBox.appendChild(b);
+      });
+      if(!seen.size){
+        const tip = document.createElement('span'); tip.className = 'hint';
+        tip.textContent = 'Tip: tap ⋯ → "Title & details" on a sermon to add the speaker, event and topic. They will show here as quick search buttons.';
+        chipBox.appendChild(tip);
+      }
+    }
+
     const query = librarySearchInput.value.trim().toLowerCase();
     if(query){
       sermons = sermons.filter(sermon => {
         const haystack = [
+          sermon.title || '', sermon.speaker || '', sermon.event || '', sermon.topic || '',
+          new Date(sermon.date).toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric', year:'numeric' }),
           sermon.takeaway || '',
           (sermon.bullets || []).join(' '),
           sermon.transcript || ''
@@ -4070,14 +4216,38 @@
       });
 
       const renameBtn = document.createElement('button');
-      renameBtn.innerHTML = '✏️ Rename';
-      renameBtn.addEventListener('click', async (e) => {
+      renameBtn.innerHTML = '✏️ Title &amp; details';
+      renameBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         closeThisMenu();
-        const next = prompt('Rename this recording:', sermon.title || '');
-        if(next === null) return;
-        await updateSermon(sermon.id, { title: next.trim() });
-        renderLibrary();
+        if(item.querySelector('.lib-edit')) return;
+        const form = document.createElement('div');
+        form.className = 'lib-edit';
+        form.addEventListener('click', ev => ev.stopPropagation());
+        const fields = [
+          ['title', 'Title (e.g. "Faith that moves mountains")'],
+          ['speaker', 'Speaker / pastor (e.g. Ptr. Juan Santos)'],
+          ['event', 'Event / church (e.g. Sunday Service, Youth Camp)'],
+          ['topic', 'Topic (e.g. faith, forgiveness)']
+        ];
+        const inputs = {};
+        fields.forEach(([k, ph]) => {
+          const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = ph;
+          inp.setAttribute('aria-label', ph); inp.value = sermon[k] || ''; inp.maxLength = 120;
+          inputs[k] = inp; form.appendChild(inp);
+        });
+        const row = document.createElement('div'); row.className = 'row';
+        const save = document.createElement('button'); save.type = 'button'; save.className = 'save'; save.textContent = '✓ Save';
+        const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Cancel';
+        save.addEventListener('click', async () => {
+          const upd = {}; fields.forEach(([k]) => { upd[k] = inputs[k].value.trim(); });
+          await updateSermon(sermon.id, upd);
+          renderLibrary();
+        });
+        cancel.addEventListener('click', () => form.remove());
+        row.appendChild(save); row.appendChild(cancel); form.appendChild(row);
+        item.appendChild(form);
+        inputs.title.focus();
       });
 
       const quizBtn = document.createElement('button');
@@ -4086,6 +4256,7 @@
         e.stopPropagation();
         closeThisMenu();
         openSavedSermon(sermon);
+        const fq = document.getElementById('foldQuiz'); if(fq){ fq.open = true; setTimeout(() => fq.scrollIntoView({ behavior:'smooth', block:'start' }), 50); }
         if(!sermon.quiz || !sermon.quiz.length){
           generateQuiz();
         }
@@ -4151,6 +4322,12 @@
 
       item.appendChild(menuWrap);
       item.appendChild(dateEl);
+      const det = [sermon.speaker && ('👤 ' + sermon.speaker), sermon.event && ('⛪ ' + sermon.event), sermon.topic && ('🏷 ' + sermon.topic)].filter(Boolean);
+      if(det.length){
+        const detEl = document.createElement('div'); detEl.className = 'lib-details';
+        detEl.textContent = det.join('   ·   ');
+        item.appendChild(detEl);
+      }
       item.appendChild(takeawayEl);
 
       item.addEventListener('click', () => openSavedSermon(sermon));
