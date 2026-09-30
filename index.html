@@ -1711,10 +1711,12 @@
           <option value="English">English</option>
         </select>
         <button class="translate-btn" id="retranslateBtn" style="display:none;" title="Ask for a fresh translation instead of the saved one">↻ Redo translation</button>
-        <button class="translate-btn" id="listenBtn" title="Read the text aloud with your phone's voice">🔊 Listen</button>
+        <button class="translate-btn" id="listenBtn" title="Read everything aloud with your phone's own voice (free)">🔊 Listen (phone voice)</button>
+        <button class="translate-btn" id="aiVoiceBtn" title="A clear AI voice reads the Takeaway and Highlights (Premium)">✨ AI voice: takeaway ⭐</button>
         <span class="translate-note" id="translateNote"></span>
       </div>
       <div class="premium-note" id="translatePremiumNote" style="display:none;"></div>
+      <audio id="aiVoiceAudio" controls style="display:none; width:100%; margin-top:8px;"></audio>
 
       <div class="paper-card">
         <div class="eyebrow">Highlights</div>
@@ -3105,7 +3107,7 @@
   function stopListening(){
     if(listenSupported()) window.speechSynthesis.cancel();
     listening = false;
-    if(listenBtn) listenBtn.textContent = '🔊 Listen';
+    if(listenBtn) listenBtn.textContent = '🔊 Listen (phone voice)';
   }
   // Long text is read in short pieces — phones stop reading after ~15 seconds of one long piece.
   function listenChunks(text){
@@ -3155,6 +3157,58 @@
   translateLangSelect.addEventListener('change', stopListening);
   document.getElementById('newRecordingBtn').addEventListener('click', stopListening);
   window.addEventListener('pagehide', stopListening);
+
+  // ---- ✨ AI voice (Premium): reads only the Takeaway + Highlights, clear in Tagalog too ----
+  const aiVoiceBtn = document.getElementById('aiVoiceBtn');
+  const aiVoiceAudio = document.getElementById('aiVoiceAudio');
+  let aiVoiceCache = { text: null, url: null };
+  let aiVoiceBusy = false;
+  if(aiVoiceBtn) aiVoiceBtn.addEventListener('click', async () => {
+    if(aiVoiceBusy) return;
+    stopListening();
+    const code = localStorage.getItem(PREMIUM_CODE_KEY);
+    if(localStorage.getItem(PREMIUM_FLAG_KEY) !== 'true' || !code){
+      translateNote.textContent = '⭐ The AI voice is a Premium feature. Unlock it in Settings. (The phone-voice Listen button is free.)';
+      return;
+    }
+    const bullets = Array.from(bulletsList.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean);
+    const take = (takeawayText.textContent || '').trim();
+    const text = [take].concat(bullets).filter(Boolean).map(t => /[.!?。！？]$/.test(t) ? t : t + '.').join(' ');
+    if(!text){ translateNote.textContent = 'There is no takeaway or highlights to read yet.'; return; }
+    if(aiVoiceCache.text === text && aiVoiceCache.url){
+      aiVoiceAudio.style.display = 'block'; aiVoiceAudio.currentTime = 0; aiVoiceAudio.play().catch(() => {});
+      translateNote.textContent = 'Playing again (free).';
+      return;
+    }
+    aiVoiceBusy = true;
+    const label = aiVoiceBtn.textContent;
+    aiVoiceBtn.textContent = '⏳ Preparing voice…'; aiVoiceBtn.disabled = true;
+    translateNote.textContent = 'Preparing the AI voice… about 5–15 seconds.';
+    try{
+      const res = await fetch('/.netlify/functions/narrate-summary', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, text })
+      });
+      const type = res.headers.get('Content-Type') || '';
+      if(type.indexOf('application/json') >= 0){ const d = await res.json().catch(() => ({})); throw new Error(d.error || 'Could not prepare the AI voice right now.'); }
+      const blob = await res.blob();
+      if(!res.ok || !blob.size) throw new Error('The voice service did not answer. Please try again in a moment.');
+      if(aiVoiceCache.url) URL.revokeObjectURL(aiVoiceCache.url);
+      aiVoiceCache = { text, url: URL.createObjectURL(blob) };
+      aiVoiceAudio.src = aiVoiceCache.url;
+      aiVoiceAudio.style.display = 'block';
+      aiVoiceAudio.play().catch(() => {});
+      translateNote.textContent = '✨ Playing the Takeaway and Highlights. Use the player to pause, replay or download (⋮).';
+    }catch(err){
+      translateNote.textContent = err.message || 'Could not prepare the AI voice right now.';
+    }finally{
+      aiVoiceBusy = false; aiVoiceBtn.textContent = label; aiVoiceBtn.disabled = false;
+    }
+  });
+  function stopAiVoice(){ try{ aiVoiceAudio.pause(); }catch(e){} aiVoiceAudio.style.display = 'none'; }
+  [translateBtn, retranslateBtn].forEach(b => b && b.addEventListener('click', stopAiVoice));
+  translateLangSelect.addEventListener('change', stopAiVoice);
+  document.getElementById('newRecordingBtn').addEventListener('click', stopAiVoice);
+
 
   translateBtn.addEventListener('click', async () => {
     if(!currentSermon) return;
