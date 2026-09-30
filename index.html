@@ -26,8 +26,8 @@
     --ember-bright:#C85F4D;
     --text:#EDE6D6;
     --text-muted:#9AA3B5;
-    --ink-on-paper:#2A2013;
-    --ink-on-paper-muted:#6B5E45;
+    --ink-on-paper:#111111;
+    --ink-on-paper-muted:#3F4A44;
     --link-warm:#D9BE83;
   }
   *{box-sizing:border-box;}
@@ -518,6 +518,19 @@
   }
   .player-row audio{ flex:1; min-width:0; }
   .player-row.wrap{ flex-wrap:wrap; row-gap:8px; }
+  .player-row.ends{ justify-content:space-between; margin-top:10px; }
+  .skip-btn.big{ font-size:14px; padding:10px 16px; }
+  /* One white player box */
+  .wplayer{ background:#FFFFFF; border:2px solid #3E9B63; border-radius:16px; padding:12px 14px 14px; color:#111; }
+  .wp-top{ display:flex; align-items:center; gap:10px; }
+  .wp-btn{ background:#F1F5F2; border:1px solid #CFE3D6; color:#111; border-radius:999px; min-width:44px; height:44px; font-size:20px; line-height:1;
+    cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:1px; padding:0 8px; }
+  .wp-btn small{ font-size:11px; font-weight:700; }
+  .wp-btn.wp-play{ background:#3E9B63; border-color:#3E9B63; color:#fff; min-width:52px; height:52px; font-size:22px; }
+  .wp-btn:hover{ border-color:#3E9B63; }
+  .wp-time{ flex:1; background:none; border:none; color:#111; font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; cursor:pointer; text-align:center; white-space:nowrap; padding:0; }
+  .wp-btn.wp-vol{ font-size:24px; background:none; border-color:transparent; }
+  .wp-seek{ width:100%; margin-top:12px; accent-color:#3E9B63; cursor:pointer; }
   .seek-bar{
     flex:1;
     min-width:60px;
@@ -622,9 +635,10 @@
     border:1px solid var(--surface-line);
     color:var(--text-muted);
     border-radius:8px;
-    width:30px;
-    height:28px;
-    font-size:16px;
+    width:44px;
+    height:38px;
+    font-size:26px;
+    font-weight:900;
     line-height:1;
     cursor:pointer;
     display:flex;
@@ -742,8 +756,9 @@
   .library-search:focus{ outline:none; border-color:var(--gold); }
 
   .paper-card{
-    background:var(--paper);
-    color:var(--ink-on-paper);
+    background:#FFFFFF;
+    border:2px solid #3E9B63;
+    color:#111111;
     border-radius:6px;
     padding:28px 26px;
     box-shadow:0 12px 30px rgba(0,0,0,0.28);
@@ -763,6 +778,17 @@
   .lib-edit .row{ display:flex; gap:8px; }
   .lib-edit button{ flex:1; padding:10px; border-radius:8px; border:1px solid var(--gold); background:transparent; color:var(--gold-bright); font-weight:600; cursor:pointer; }
   .lib-edit button.save{ background:var(--gold); color:var(--ink-deep); }
+  .details-popup{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:1000; padding:16px; }
+  .details-box{ background:#fff; color:#111; border:2px solid #3E9B63; border-radius:16px; padding:20px; width:100%; max-width:420px; display:grid; gap:10px; box-sizing:border-box; }
+  .details-box h3{ margin:0; font-size:18px; }
+  .details-box p{ margin:0 0 4px; font-size:13.5px; color:#444; }
+  .details-box input{ width:100%; box-sizing:border-box; padding:12px; border-radius:10px; border:1px solid #bcc7c0; font-size:15px; color:#111; background:#fff; }
+  .details-box .row{ display:flex; gap:10px; margin-top:4px; }
+  .details-box button{ flex:1; padding:12px; border-radius:10px; border:1px solid #3E9B63; background:#fff; color:#2F7D4F; font-weight:700; font-size:15px; cursor:pointer; }
+  .details-box button.save{ background:#3E9B63; color:#fff; }
+  .lib-sort-row{ display:flex; align-items:center; gap:10px; margin:10px 0 2px; font-size:14px; font-weight:600; }
+  .lib-sort-row select{ flex:1; }
+  .lib-group{ font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin:16px 0 6px; color:#2F7D4F; }
   .lib-chips{ display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 4px; }
   .lib-chips button{ padding:5px 11px; border-radius:999px; border:1px solid var(--surface-line); background:var(--surface); color:var(--text); font-size:12.5px; cursor:pointer; }
   .page-white .lib-details{ color:#5b6876; }
@@ -966,21 +992,23 @@
   }
   .related-topics .chip:hover{ border-color:var(--gold); color:var(--gold-bright); background:rgba(201,162,39,0.12); }
   .quiz-question{
-    border:1px solid var(--surface-line);
+    border:1px solid rgba(0,0,0,0.25);
     border-radius:12px;
     padding:14px 16px;
     margin-bottom:12px;
   }
+  .q-section{ font-weight:800; font-size:15px; color:#111; margin:14px 0 8px; }
   .quiz-question .q-num{
     font-family:'Source Serif 4',serif;
     font-weight:600;
-    color:var(--gold-bright);
+    color:#8A6A10;
     font-size:14px;
     margin-bottom:6px;
   }
   .quiz-question .q-text{
-    font-size:14px;
-    color:var(--text);
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink-on-paper);
     line-height:1.5;
     margin-bottom:8px;
   }
@@ -993,12 +1021,12 @@
     gap:4px;
   }
   .quiz-question .q-options li{
-    font-size:13px;
-    color:var(--text-muted);
+    font-size:14px;
+    color:var(--ink-on-paper);
   }
   .quiz-question .q-answer{
-    font-size:13px;
-    color:#3fbf72;
+    font-size:14px;
+    color:#1F7A44;
     font-weight:600;
   }
   .transcript-box{
@@ -1393,7 +1421,7 @@
   .page-white .lib-actions button{ color:#6B7280; }
   .page-white .lib-actions button:hover{ color:#1a73e8; }
   .page-white .lib-actions button.danger:hover{ color:#B24C3B; }
-  .page-white .lib-menu-toggle{ border-color:#DADCE0; color:#6B7280; }
+  .page-white .lib-menu-toggle{ border-color:#9AA0A6; color:#111; }
   .page-white .lib-menu-toggle:hover{ border-color:#1a73e8; color:#1a73e8; }
   .page-white .lib-menu-panel{
     background:#FFFFFF;
@@ -1435,7 +1463,7 @@
   .research-panel .concordance-result .ref{ color:#1C2331; }
   .research-panel .concordance-result .note{ color:#374151; }
   /* Voices & worldview (Bible Commentary) */
-  details.cv-fold{ margin-top:18px; border:1.5px solid #d6dbe1; border-radius:12px; background:#fff; }
+  details.cv-fold{ margin-top:18px; border:2px solid #3E9B63; border-radius:12px; background:#fff; }
   details.cv-fold > summary{ list-style:none; cursor:pointer; padding:14px 16px; font-weight:700; color:#1C2331; font-size:15.5px; position:relative; padding-right:40px; }
   details.cv-fold > summary::-webkit-details-marker{ display:none; }
   details.cv-fold > summary::after{ content:'▾'; position:absolute; right:16px; top:15px; color:#6b7684; transform:rotate(-90deg); transition:transform .15s; }
@@ -1713,22 +1741,22 @@
         <button class="new-recording-btn" id="newRecordingBtn">New recording</button>
       </div>
 
-      <div class="player-row wrap" id="customPlayerRow">
-        <button class="skip-btn" id="prevSermonBtn" aria-label="Previous recording">⏮</button>
-        <button class="skip-btn" id="playPauseBtn" aria-label="Play">▶</button>
-        <button class="skip-btn" id="nextSermonBtn" aria-label="Next recording">⏭</button>
-        <input type="range" class="seek-bar" id="seekBar" min="0" max="100" value="0" step="0.1">
-        <button class="skip-btn" id="timeToggleBtn">0:00 / 0:00</button>
-        <button class="skip-btn" id="muteBtn" aria-label="Mute">🔈</button>
-        <button class="skip-btn" id="speedBtn" aria-label="Playback speed">1x</button>
+      <div class="wplayer" id="customPlayerRow">
+        <div class="wp-top">
+          <button class="wp-btn" id="skipBackBtn" aria-label="Back 15 seconds">⟲<small>15</small></button>
+          <button class="wp-btn wp-play" id="playPauseBtn" aria-label="Play">▶</button>
+          <button class="wp-btn" id="skipFwdBtn" aria-label="Forward 15 seconds"><small>15</small>⟳</button>
+          <button class="wp-time" id="timeToggleBtn">0:00 / 0:00</button>
+          <button class="wp-btn wp-vol" id="muteBtn" aria-label="Mute">🔊</button>
+        </div>
+        <input type="range" class="wp-seek" id="seekBar" min="0" max="100" value="0" step="0.1" aria-label="Position">
+        <audio id="audioPlayback" style="display:none;"></audio>
+        <span style="display:none;"><button id="prevSermonBtn"></button><button id="nextSermonBtn"></button><button id="speedBtn">1x</button></span>
       </div>
 
-      <div class="player-row wrap">
-        <button class="skip-btn" id="skipBackBtn" aria-label="Rewind 15 seconds">⟲ 15</button>
-        <audio id="audioPlayback" style="display:none;"></audio>
-        <button class="skip-btn" id="skipFwdBtn" aria-label="Forward 15 seconds">15 ⟳</button>
-        <button class="skip-btn" id="downloadBtn" aria-label="Download recording">⬇ Save</button>
-        <button class="skip-btn" id="printTranscriptBtn" aria-label="Print full text">🖨️ Print</button>
+      <div class="player-row ends">
+        <button class="skip-btn big" id="downloadBtn" aria-label="Download recording">⬇ Save</button>
+        <button class="skip-btn big" id="printTranscriptBtn" aria-label="Print full text">🖨️ Print</button>
       </div>
 
       <button class="transcript-toggle" id="transcriptToggle">Show full transcript</button>
@@ -1737,28 +1765,59 @@
       <div class="translate-row">
         <button class="translate-btn" id="translateBtn">🌐 Translate</button>
         <select class="lang-select" id="translateLangSelect">
+          <option value="English">English</option>
           <option value="Tagalog">Tagalog</option>
           <option value="Cebuano (Bisaya)">Cebuano (Bisaya)</option>
           <option value="Ilocano">Ilocano</option>
+          <option value="Hiligaynon (Ilonggo)">Hiligaynon (Ilonggo)</option>
+          <option value="Bikol">Bikol</option>
+          <option value="Waray">Waray</option>
+          <option value="Kapampangan">Kapampangan</option>
+          <option value="Pangasinan">Pangasinan</option>
           <option value="Spanish">Spanish</option>
+          <option value="French">French</option>
+          <option value="German">German</option>
+          <option value="Italian">Italian</option>
+          <option value="Portuguese">Portuguese</option>
+          <option value="Dutch">Dutch</option>
+          <option value="Polish">Polish</option>
+          <option value="Russian">Russian</option>
+          <option value="Ukrainian">Ukrainian</option>
+          <option value="Greek">Greek</option>
+          <option value="Hebrew">Hebrew</option>
+          <option value="Arabic">Arabic</option>
+          <option value="Turkish">Turkish</option>
+          <option value="Persian (Farsi)">Persian (Farsi)</option>
+          <option value="Hindi">Hindi</option>
+          <option value="Urdu">Urdu</option>
+          <option value="Bengali">Bengali</option>
+          <option value="Tamil">Tamil</option>
+          <option value="Indonesian">Indonesian</option>
+          <option value="Malay">Malay</option>
+          <option value="Vietnamese">Vietnamese</option>
+          <option value="Thai">Thai</option>
+          <option value="Burmese">Burmese</option>
+          <option value="Khmer">Khmer</option>
           <option value="Mandarin Chinese">Mandarin Chinese</option>
-          <option value="Korean">Korean</option>
+          <option value="Chinese (Traditional)">Chinese (Traditional)</option>
           <option value="Japanese">Japanese</option>
-          <option value="English">English</option>
+          <option value="Korean">Korean</option>
         </select>
         <button class="translate-btn" id="retranslateBtn" style="display:none;" title="Ask for a fresh translation instead of the saved one">↻ Redo translation</button>
         <span class="translate-note" id="translateNote"></span>
       </div>
       <div class="premium-note" id="translatePremiumNote" style="display:none;"></div>
+      <div class="player-row wrap" id="aiVoiceRow" style="display:none; margin-top:10px;">
+        <button class="translate-btn" id="aiVoiceBtn">🔊 Hear translated highlights ⭐</button>
+        <audio id="aiVoiceAudio" style="display:none;"></audio>
+      </div>
       <details class="se-fold" id="foldListen">
-        <summary><span>🔊 Listen<small>Hear the sermon read aloud</small></span></summary>
+        <summary><span>🔊 Listen<small>Hear the full transcript read aloud</small></span></summary>
         <div class="se-fold-body">
           <div class="player-row wrap">
-            <button class="translate-btn" id="aiVoiceBtn" title="A clear AI voice reads the Takeaway and Highlights (Premium)">✨ AI voice: takeaway ⭐</button>
-            <button class="translate-btn" id="listenBtn" title="Read everything aloud with your phone's own voice (free)">🔊 Phone voice: everything</button>
+            <button class="translate-btn" id="listenBtn" title="Read the full transcript aloud">▶ Start listening</button>
           </div>
-          <div class="hint" style="margin-top:6px;">✨ AI voice: clear in Tagalog and other languages (Premium). 🔊 Phone voice: free, best for English.</div>
-          <audio id="aiVoiceAudio" controls style="display:none; width:100%; margin-top:8px;"></audio>
+          <div class="hint" style="margin-top:6px;">Tap once to start, tap again to stop.</div>
         </div>
       </details>
 
@@ -1770,7 +1829,7 @@
       </div></div></details>
 
       <details class="se-fold" id="foldTakeaway">
-        <summary><span>💡 Today's takeaway<small>One sentence to remember</small></span></summary>
+        <summary><span>💡 Today's takeaway<small>The main message in a few lines</small></span></summary>
         <div class="se-fold-body"><div class="paper-card">
         <div class="eyebrow">Today's takeaway</div>
         <div class="takeaway-text" id="takeawayText"></div>
@@ -1804,6 +1863,17 @@
         <button class="new-recording-btn" id="closeLibraryBtn">Close</button>
       </div>
       <input type="text" class="library-search" id="librarySearchInput" placeholder="Search title, speaker, topic, date…">
+      <div class="lib-sort-row">
+        <label for="librarySort">Arrange by</label>
+        <select id="librarySort" class="lang-select">
+          <option value="new">📅 Newest first</option>
+          <option value="old">📅 Oldest first</option>
+          <option value="speaker">👤 Speaker</option>
+          <option value="topic">🏷 Topic</option>
+          <option value="event">⛪ Event</option>
+          <option value="title">🔤 Title (A–Z)</option>
+        </select>
+      </div>
       <div class="lib-chips" id="libraryChips"></div>
       <div id="libraryList"></div>
       <div class="hint" id="libraryEmpty" style="display:none;">No saved sermons yet. Once you finish a recording, it'll show up here automatically.</div>
@@ -1821,17 +1891,18 @@
       <div class="paywall-hero">
         <div class="paywall-badge">⭐</div>
         <h2 class="paywall-title">Support Sermon Recorder</h2>
-        <p class="paywall-sub">Help keep this tool running and growing for churches like yours.</p>
+        <p class="paywall-sub">Help keep this tool running and growing.</p>
       </div>
 
       <div class="founding-banner">🎉 Founding Supporter Offer — be among the first to help build this ministry tool.</div>
 
       <ul class="feature-list">
-        <li><span class="check">✓</span> Unlimited recordings, transcribing &amp; translating — always</li>
+        <li><span class="check">✓</span> Recordings, transcribing &amp; translating</li>
         <li><span class="check">✓</span> Easy-to-use recording, right from your phone or laptop</li>
-        <li><span class="check">✓</span> Instant sermon translation into 7+ languages</li>
+        <li><span class="check">✓</span> Sermon translation into 37 languages</li>
         <li><span class="check">✓</span> Bible Concordance — search any topic across Scripture</li>
         <li><span class="check">✓</span> Bible Commentary — context &amp; meaning for any verse</li>
+        <li><span class="check">✓</span> Voices &amp; worldview — what theologians, philosophers &amp; scientists across the ages said, with a biblical response</li>
         <li><span class="check">✓</span> Bible Authors &amp; Their Lives — the history behind every book</li>
         <li><span class="check">✓</span> Bible Genealogy — trace the line from Adam to Jesus</li>
         <li><span class="check">✓</span> Bible &amp; Science — honest, balanced answers</li>
@@ -1850,8 +1921,8 @@
       <div class="error-box" id="paywallError" style="display:none;"></div>
 
            <p class="paywall-fine">Payments are processed securely by PayMongo. You'll be taken to their payment page and brought right back here.</p>
-           <p class="paywall-fine">After paying, your access code will show up right here — and you'll always be able to find it again under Settings → Premium status.</p>
-            <p class="paywall-fine">Didn't get your access code after paying? Email <a href="mailto:beavenbermudez@gmail.com" style="color:inherit;">beavenbermudez@gmail.com</a> and we'll sort it out.</p>
+           <p class="paywall-fine">After paying, your access code will show up under Settings → Premium status.</p>
+            <p class="paywall-fine">Didn't get your access code after paying? Email <a href="mailto:sermonrecord.support@gmail.com" style="color:inherit;">sermonrecord.support@gmail.com</a> and we'll sort it out.</p>
     </div>
   </main>
 </div>
@@ -2108,7 +2179,7 @@
 
   muteBtn.addEventListener('click', () => {
     audioPlayback.muted = !audioPlayback.muted;
-    muteBtn.textContent = audioPlayback.muted ? '🔇' : '🔈';
+    muteBtn.textContent = audioPlayback.muted ? '🔇' : '🔊';
   });
 
   speedBtn.addEventListener('click', () => {
@@ -2769,9 +2840,44 @@
       } else {
         saveSermon(fields).then(newId => {
           if(currentSermon && currentSermon.transcript === transcript) currentSermon.id = newId;
+          askRecordingDetails(newId);
         }).catch(err => console.error('Could not save sermon to library', err));
       }
+      if(pendingId) askRecordingDetails(pendingId);
     }
+  }
+
+  // ---- Pop-up: name a new recording so it's easy to find in the Library ----
+  function askRecordingDetails(id){
+    if(!id || document.getElementById('detailsPopup')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'detailsPopup'; wrap.className = 'details-popup';
+    const box = document.createElement('div'); box.className = 'details-box';
+    box.innerHTML = '<h3>Name this recording</h3><p>So you can find it easily in your Library. You can skip this and add it later.</p>';
+    const fields = [
+      ['title', 'Title (e.g. "Faith that moves mountains")'],
+      ['speaker', 'Speaker / pastor'],
+      ['event', 'Event / church (e.g. Sunday Service)'],
+      ['topic', 'Topic (e.g. faith, forgiveness)']
+    ];
+    const inputs = {};
+    fields.forEach(([k, ph]) => {
+      const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = ph; inp.maxLength = 120;
+      inp.setAttribute('aria-label', ph); inputs[k] = inp; box.appendChild(inp);
+    });
+    const row = document.createElement('div'); row.className = 'row';
+    const skip = document.createElement('button'); skip.type = 'button'; skip.textContent = 'Skip';
+    const save = document.createElement('button'); save.type = 'button'; save.className = 'save'; save.textContent = '✓ Save';
+    skip.addEventListener('click', () => wrap.remove());
+    save.addEventListener('click', async () => {
+      const upd = {}; fields.forEach(([k]) => { upd[k] = inputs[k].value.trim(); });
+      try{ await updateSermon(id, upd); }catch(e){ console.error('Could not save details', e); }
+      wrap.remove();
+      const t = document.getElementById('saveToast');
+      if(t){ t.textContent = '✅ Saved with its details'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+    });
+    row.appendChild(skip); row.appendChild(save); box.appendChild(row);
+    wrap.appendChild(box); document.body.appendChild(wrap);
   }
 
   transcriptToggle.addEventListener('click', () => {
@@ -2875,7 +2981,16 @@
     transcriptBox.textContent = data.transcript;
   }
 
+  // Shows translated highlights; the takeaway and transcript stay in the original language.
+  function showTranslatedHighlights(tr){
+    renderSermonText({ takeaway: currentSermon.takeaway, bullets: (tr && tr.bullets && tr.bullets.length) ? tr.bullets : currentSermon.bullets, transcript: currentSermon.transcript });
+    const f = document.getElementById('foldHighlights'); if(f) f.open = true;
+    const r = document.getElementById('aiVoiceRow'); if(r) r.style.display = 'flex';
+  }
+
   function resetTranslateUI(){
+    const r = document.getElementById('aiVoiceRow'); if(r) r.style.display = 'none';
+    if(typeof stopAiVoice === 'function') stopAiVoice();
     viewingTranslation = false;
     translateBtn.textContent = '🌐 Translate';
     translateBtn.disabled = false;
@@ -2927,16 +3042,30 @@
     generateQuizBtn.disabled = false;
   }
 
+  function sortQuiz(questions){
+    const mc = questions.filter(q => q.type === 'multiple_choice');
+    const sa = questions.filter(q => q.type !== 'multiple_choice');
+    return mc.concat(sa);
+  }
   function renderQuiz(questions){
+    questions = sortQuiz(questions);
     currentQuiz = questions;
     quizQuestionsList.innerHTML = '';
+    let mcN = 0, saN = 0;
     questions.forEach((q, i) => {
+      const isMC = q.type === 'multiple_choice';
+      if((isMC && mcN === 0) || (!isMC && saN === 0)){
+        const h = document.createElement('div');
+        h.className = 'q-section';
+        h.textContent = isMC ? 'Part I — Multiple Choice' : 'Part II — Short Answer';
+        quizQuestionsList.appendChild(h);
+      }
       const card = document.createElement('div');
       card.className = 'quiz-question';
 
       const num = document.createElement('div');
       num.className = 'q-num';
-      num.textContent = 'Question ' + (i + 1) + (q.type === 'multiple_choice' ? ' (Multiple Choice)' : ' (Short Answer)');
+      num.textContent = isMC ? (++mcN) + '.' : (++saN) + '.';
       card.appendChild(num);
 
       const qText = document.createElement('div');
@@ -3013,6 +3142,7 @@
       quizError.style.display = 'block';
     } finally {
       quizGenerationInFlight = false;
+      quizStatusRow.style.display = 'none';
       generateQuizBtn.disabled = false;
     }
   }
@@ -3024,7 +3154,11 @@
     const title = (resultDate.textContent || 'Sermon Recorder').trim();
     const letters = ['A','B','C','D','E','F'];
 
+    let pmc = 0, psa = 0;
     const questionsHtml = currentQuiz.map((q, i) => {
+      const isMC = q.type === 'multiple_choice';
+      const partHead = (isMC && pmc === 0) ? '<h2 class="part">Part I — Multiple Choice</h2>' : (!isMC && psa === 0) ? '<h2 class="part">Part II — Short Answer</h2>' : '';
+      const n = isMC ? ++pmc : ++psa;
       let optionsHtml = '';
       if(q.type === 'multiple_choice' && Array.isArray(q.options)){
         optionsHtml = '<ul class="opts">' + q.options.map((opt, oi) => '<li>' + letters[oi] + '. ' + escapeHtml(opt) + '</li>').join('') + '</ul>';
@@ -3032,7 +3166,7 @@
         optionsHtml = '<div class="blank-lines"><div class="line"></div><div class="line"></div></div>';
       }
       const answerHtml = includeAnswers ? '<div class="answer">Answer: ' + escapeHtml(q.answer) + '</div>' : '';
-      return '<div class="question"><div class="q-head">' + (i + 1) + '. ' + escapeHtml(q.question) + '</div>' + optionsHtml + answerHtml + '</div>';
+      return partHead + '<div class="question"><div class="q-head">' + n + '. ' + escapeHtml(q.question) + '</div>' + optionsHtml + answerHtml + '</div>';
     }).join('');
 
     const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + escapeHtml(title) + ' — Quiz</title>' +
@@ -3043,6 +3177,7 @@
       '.name-line{margin:18px 0 28px; font-size:14px;}' +
       '.name-line span{display:inline-block; border-bottom:1px solid #999; min-width:220px; margin-left:6px;}' +
       '.question{margin-bottom:22px;}' +
+      '.part{font-size:16px; margin:26px 0 12px;}' +
       '.q-head{font-weight:600; margin-bottom:8px;}' +
       '.opts{list-style:none; margin:0 0 6px; padding-left:14px;}' +
       '.opts li{margin-bottom:4px; font-size:14px;}' +
@@ -3085,8 +3220,9 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        transcript: currentSermon.transcript,
-        takeaway: currentSermon.takeaway,
+        // Only the highlights are translated (short, quick, and cheaper).
+        transcript: (currentSermon.bullets || []).join('\n'),
+        takeaway: '',
         bullets: currentSermon.bullets,
         targetLanguage: lang
       })
@@ -3100,14 +3236,15 @@
   // used by "Redo translation" when an earlier saved translation reads oddly.
   async function runTranslate(forceFresh){
     const lang = translateLangSelect.value;
+    stopListening();
 
     if(!forceFresh){
       const cached = currentSermon.translations && currentSermon.translations[lang];
-      if(cached){
-        renderSermonText(cached);
+      if(cached && Array.isArray(cached.bullets)){
+        showTranslatedHighlights(cached);
         viewingTranslation = true;
         translateBtn.textContent = 'Show original';
-        translateNote.textContent = 'Showing ' + lang + ' translation';
+        translateNote.textContent = 'Highlights shown in ' + lang;
         retranslateBtn.style.display = 'inline-block';
         return;
       }
@@ -3129,11 +3266,11 @@
       }
 
       currentSermon.translations = currentSermon.translations || {};
-      currentSermon.translations[lang] = data;
-      renderSermonText(data);
+      currentSermon.translations[lang] = { bullets: data.bullets || [] };
+      showTranslatedHighlights(data);
       viewingTranslation = true;
       translateBtn.textContent = 'Show original';
-      translateNote.textContent = 'Showing ' + lang + ' translation';
+      translateNote.textContent = 'Highlights shown in ' + lang;
       retranslateBtn.style.display = 'inline-block';
 
       if(currentSermon.id){
@@ -3151,6 +3288,9 @@
   // ---- 🔊 Listen: reads the text on screen aloud with the phone's own voice (free, no AI) ----
   const listenBtn = document.getElementById('listenBtn');
   const LISTEN_LANG = { 'Tagalog':'fil', 'Filipino':'fil', 'Cebuano (Bisaya)':'fil', 'Ilocano':'fil', 'Hiligaynon':'fil',
+    'Hiligaynon (Ilonggo)':'fil', 'Bikol':'fil', 'Waray':'fil', 'Kapampangan':'fil', 'Pangasinan':'fil',
+    'Dutch':'nl', 'Polish':'pl', 'Russian':'ru', 'Ukrainian':'uk', 'Greek':'el', 'Hebrew':'he', 'Turkish':'tr', 'Persian (Farsi)':'fa',
+    'Urdu':'ur', 'Bengali':'bn', 'Tamil':'ta', 'Malay':'ms', 'Thai':'th', 'Burmese':'my', 'Khmer':'km', 'Chinese (Traditional)':'zh',
     'English':'en', 'Spanish':'es', 'Mandarin Chinese':'zh', 'Chinese':'zh', 'Korean':'ko', 'Japanese':'ja',
     'French':'fr', 'German':'de', 'Italian':'it', 'Portuguese':'pt', 'Indonesian':'id', 'Arabic':'ar', 'Hindi':'hi', 'Vietnamese':'vi' };
   let listening = false;
@@ -3158,7 +3298,7 @@
   function stopListening(){
     if(listenSupported()) window.speechSynthesis.cancel();
     listening = false;
-    if(listenBtn) listenBtn.textContent = '🔊 Phone voice: everything';
+    if(listenBtn) listenBtn.textContent = '▶ Start listening';
   }
   // Long text is read in short pieces — phones stop reading after ~15 seconds of one long piece.
   function listenChunks(text){
@@ -3180,12 +3320,12 @@
     if(!listenSupported()) listenBtn.style.display = 'none';
     listenBtn.addEventListener('click', () => {
       if(listening){ stopListening(); return; }
-      const bullets = Array.from(bulletsList.querySelectorAll('li')).map(li => li.textContent);
-      const text = [takeawayText.textContent].concat(bullets, [transcriptBox.textContent]).map(t => (t || '').trim()).filter(Boolean).map(t => /[.!?。！？]$/.test(t) ? t : t + '.').join(' ');
-      if(!text.trim()){ translateNote.textContent = 'There is nothing to read yet.'; return; }
-      const langName = viewingTranslation ? translateLangSelect.value : null;
-      const code = langName ? (LISTEN_LANG[langName] || 'en') : null;
-      const voice = code ? pickVoice(code) : null;
+      const text = ((currentSermon && currentSermon.transcript) || transcriptBox.textContent || '').trim();
+      if(!text){ translateNote.textContent = 'There is nothing to read yet.'; return; }
+      if(typeof stopAiVoice === 'function') stopAiVoice();
+      const langName = null;
+      const code = null;
+      const voice = null;
       window.speechSynthesis.cancel();
       const chunks = listenChunks(text);
       chunks.forEach((c, i) => {
@@ -3197,7 +3337,8 @@
         window.speechSynthesis.speak(u);
       });
       listening = true;
-      listenBtn.textContent = '⏹ Stop';
+      try{ audioPlayback.pause(); }catch(e){}
+      listenBtn.textContent = '⏹ Stop listening';
       if(code && !voice){
         translateNote.textContent = 'This phone has no ' + langName + ' voice, so it may read with an accent. (Android: Settings › Text-to-speech › install the language.)';
       }
@@ -3209,32 +3350,34 @@
   document.getElementById('newRecordingBtn').addEventListener('click', stopListening);
   window.addEventListener('pagehide', stopListening);
 
-  // ---- ✨ AI voice (Premium): reads only the Takeaway + Highlights, clear in Tagalog too ----
+  // ---- 🔊 AI voice (Premium): reads only the TRANSLATED highlights, clear in local dialects ----
   const aiVoiceBtn = document.getElementById('aiVoiceBtn');
   const aiVoiceAudio = document.getElementById('aiVoiceAudio');
+  const AI_VOICE_LABEL = '🔊 Hear translated highlights ⭐';
   let aiVoiceCache = { text: null, url: null };
   let aiVoiceBusy = false;
-  if(aiVoiceBtn) aiVoiceBtn.addEventListener('click', async () => {
+  function stopAiVoice(){
+    try{ aiVoiceAudio.pause(); aiVoiceAudio.currentTime = 0; }catch(e){}
+    if(!aiVoiceBusy && aiVoiceBtn) aiVoiceBtn.textContent = AI_VOICE_LABEL;
+  }
+  aiVoiceAudio.addEventListener('ended', () => { aiVoiceBtn.textContent = AI_VOICE_LABEL; });
+  aiVoiceBtn.addEventListener('click', async () => {
     if(aiVoiceBusy) return;
+    if(!aiVoiceAudio.paused){ stopAiVoice(); return; }
     stopListening();
+    try{ audioPlayback.pause(); }catch(e){}
     const code = localStorage.getItem(PREMIUM_CODE_KEY);
     if(localStorage.getItem(PREMIUM_FLAG_KEY) !== 'true' || !code){
-      translateNote.textContent = '⭐ The AI voice is a Premium feature. Unlock it in Settings. (The phone-voice Listen button is free.)';
+      translateNote.textContent = '⭐ The clear AI voice is a Premium feature. Unlock it in Settings.';
       return;
     }
-    const bullets = Array.from(bulletsList.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean);
-    const take = (takeawayText.textContent || '').trim();
-    const text = [take].concat(bullets).filter(Boolean).map(t => /[.!?。！？]$/.test(t) ? t : t + '.').join(' ');
-    if(!text){ translateNote.textContent = 'There is no takeaway or highlights to read yet.'; return; }
-    if(aiVoiceCache.text === text && aiVoiceCache.url){
-      aiVoiceAudio.style.display = 'block'; aiVoiceAudio.currentTime = 0; aiVoiceAudio.play().catch(() => {});
-      translateNote.textContent = 'Playing again (free).';
-      return;
-    }
+    const text = Array.from(bulletsList.querySelectorAll('li')).map(li => li.textContent.trim()).filter(Boolean)
+      .map(t => /[.!?。！？]$/.test(t) ? t : t + '.').join(' ');
+    if(!text){ translateNote.textContent = 'There are no highlights to read yet.'; return; }
+    const play = () => { aiVoiceAudio.currentTime = 0; aiVoiceAudio.play().catch(() => {}); aiVoiceBtn.textContent = '⏹ Stop'; };
+    if(aiVoiceCache.text === text && aiVoiceCache.url){ play(); return; }
     aiVoiceBusy = true;
-    const label = aiVoiceBtn.textContent;
     aiVoiceBtn.textContent = '⏳ Preparing voice…'; aiVoiceBtn.disabled = true;
-    translateNote.textContent = 'Preparing the AI voice… about 5–15 seconds.';
     try{
       const res = await fetch('/.netlify/functions/narrate-summary', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, text })
@@ -3246,19 +3389,18 @@
       if(aiVoiceCache.url) URL.revokeObjectURL(aiVoiceCache.url);
       aiVoiceCache = { text, url: URL.createObjectURL(blob) };
       aiVoiceAudio.src = aiVoiceCache.url;
-      aiVoiceAudio.style.display = 'block';
-      aiVoiceAudio.play().catch(() => {});
-      translateNote.textContent = '✨ Playing the Takeaway and Highlights. Use the player to pause, replay or download (⋮).';
+      aiVoiceBusy = false; aiVoiceBtn.disabled = false;
+      play();
     }catch(err){
+      aiVoiceBusy = false; aiVoiceBtn.disabled = false; aiVoiceBtn.textContent = AI_VOICE_LABEL;
       translateNote.textContent = err.message || 'Could not prepare the AI voice right now.';
-    }finally{
-      aiVoiceBusy = false; aiVoiceBtn.textContent = label; aiVoiceBtn.disabled = false;
     }
   });
-  function stopAiVoice(){ try{ aiVoiceAudio.pause(); }catch(e){} aiVoiceAudio.style.display = 'none'; }
-  [translateBtn, retranslateBtn].forEach(b => b && b.addEventListener('click', stopAiVoice));
-  translateLangSelect.addEventListener('change', stopAiVoice);
   document.getElementById('newRecordingBtn').addEventListener('click', stopAiVoice);
+  window.addEventListener('pagehide', stopAiVoice);
+
+  // Only one voice at a time: playing the recording stops the reading voices.
+  audioPlayback.addEventListener('play', () => { stopListening(); stopAiVoice(); });
 
 
   translateBtn.addEventListener('click', async () => {
@@ -3796,7 +3938,9 @@
 
       const fields = [
         ['What Scripture says', data.claim],
-        ['Archaeological & historical findings', data.evidence],
+        ['Historical & scientific findings', data.evidence],
+        ['🏺 Biblical archaeology', data.archaeology],
+        ['🔬 Modern discoveries', data.discoveries],
         ['How scholars view it', data.perspective]
       ];
       fields.forEach(([label, text]) => {
@@ -4163,11 +4307,6 @@
         b.addEventListener('click', () => { librarySearchInput.value = v; renderLibrary(); });
         chipBox.appendChild(b);
       });
-      if(!seen.size){
-        const tip = document.createElement('span'); tip.className = 'hint';
-        tip.textContent = 'Tip: tap ⋯ → "Title & details" on a sermon to add the speaker, event and topic. They will show here as quick search buttons.';
-        chipBox.appendChild(tip);
-      }
     }
 
     const query = librarySearchInput.value.trim().toLowerCase();
@@ -4191,7 +4330,26 @@
     }
     libraryEmpty.style.display = 'none';
 
+    const sortBy = (document.getElementById('librarySort') || {}).value || 'new';
+    const keyOf = (x) => (x[sortBy] || '').trim();
+    if(sortBy === 'old') sermons.sort((a, b) => new Date(a.date) - new Date(b.date));
+    else if(sortBy === 'new') sermons.sort((a, b) => new Date(b.date) - new Date(a.date));
+    else sermons.sort((a, b) => {
+      const ka = keyOf(a).toLowerCase(), kb = keyOf(b).toLowerCase();
+      if(!ka && kb) return 1; if(ka && !kb) return -1;
+      return ka.localeCompare(kb) || (new Date(b.date) - new Date(a.date));
+    });
+    const grouped = ['speaker', 'topic', 'event'].includes(sortBy);
+    let lastGroup = null;
+
     sermons.forEach(sermon => {
+      if(grouped){
+        const g = keyOf(sermon) || 'Not yet named';
+        if(g !== lastGroup){
+          const h = document.createElement('div'); h.className = 'lib-group'; h.textContent = g;
+          libraryList.appendChild(h); lastGroup = g;
+        }
+      }
       const item = document.createElement('div');
       item.className = 'library-item';
 
@@ -4425,6 +4583,12 @@
     renderLibrary();
   });
 
+  const librarySort = document.getElementById('librarySort');
+  try{ const sv = localStorage.getItem('se_library_sort'); if(sv) librarySort.value = sv; }catch(e){}
+  librarySort.addEventListener('change', () => {
+    try{ localStorage.setItem('se_library_sort', librarySort.value); }catch(e){}
+    renderLibrary();
+  });
   librarySearchInput.addEventListener('input', () => {
     renderLibrary();
   });
@@ -4727,7 +4891,7 @@
                 navigator.clipboard.writeText(data.code).then(() => { copyBtn.textContent = 'Copied ✓'; });
               });
             } else {
-              showBanner('<span>🎉 Thank you for your support! We couldn\'t automatically confirm the payment on this device. If you completed payment, please try reopening the app in the same browser you paid in, or email beavenbermudez@gmail.com with your PayMongo receipt or reference number and we\'ll send your code.</span>');
+              showBanner('<span>🎉 Thank you for your support! We couldn\'t automatically confirm the payment on this device. If you completed payment, please try reopening the app in the same browser you paid in, or email sermonrecord.support@gmail.com with your PayMongo receipt or reference number and we\'ll send your code.</span>');
             }
           })
           .catch(() => {
@@ -4735,7 +4899,7 @@
           })
           .finally(() => sessionStorage.removeItem(CHECKOUT_SESSION_KEY));
       } else {
-        showBanner('<span>🎉 Thank you for your support! We couldn\'t find this payment session on this device (perhaps a different tab was used). If you completed payment, please email beavenbermudez@gmail.com with your PayMongo receipt or reference number and we\'ll send your code.</span>');
+        showBanner('<span>🎉 Thank you for your support! We couldn\'t find this payment session on this device (perhaps a different tab was used). If you completed payment, please email sermonrecord.support@gmail.com with your PayMongo receipt or reference number and we\'ll send your code.</span>');
       }
     } else if(paid === 'cancelled'){
       showBanner('<span>Payment was cancelled — no charge was made. You can try again anytime.</span>');
