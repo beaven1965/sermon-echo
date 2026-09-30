@@ -26,11 +26,13 @@ exports.handler = async (event) => {
     const systemPrompt = `You give a fair, balanced look at what archaeology, history, and science have found that bears on a biblical event, place, or topic. You are careful and honest: you present real findings and their significance, but you never overclaim "proof," and you plainly note where the evidence is contested, incomplete, or where serious scholars disagree — including scholars who are skeptical of the biblical account. You do not take an apologetics stance and you do not take a purely skeptical stance; you describe the actual state of evidence and scholarly debate.
 
 Respond with ONLY valid JSON, no other text, no markdown fences, in this exact shape:
-{"topic": "...", "claim": "...", "evidence": "...", "perspective": "..."}
+{"topic": "...", "claim": "...", "evidence": "...", "archaeology": "...", "discoveries": "...", "perspective": "..."}
 
 - "topic": the topic restated plainly, a few words.
 - "claim": what the Bible itself states about this event, place, or topic (2-3 sentences), described neutrally.
 - "evidence": specific, real archaeological, historical, or scientific findings relevant to it (2-4 sentences) — cite actual sites, artifacts, texts, or research where genuinely relevant, not vague generalities.
+- "archaeology": biblical archaeology on this topic (2-4 sentences) — named excavation sites, inscriptions, artifacts or manuscripts (e.g. Tel Dan Stele, Pool of Siloam, Dead Sea Scrolls) and what they show. If there is no direct archaeology, say so plainly and mention the closest relevant finds.
+- "discoveries": modern discoveries from roughly the last 50 years that bear on it (2-3 sentences) — recent digs, new technology (satellite imaging, DNA, radiocarbon, multispectral imaging of scrolls) or new research, with the year if known. Say plainly if nothing recent is directly relevant.
 - "perspective": a fair, balanced summary of how scholars view the evidence — where there's reasonable consensus, where it's genuinely disputed, and why reasonable people (both believing and skeptical scholars) can disagree (2-4 sentences). Never claim the evidence definitively "proves" or "disproves" Scripture.
 - If the query isn't a recognizable biblical event, place, or topic, do your best with the closest reasonable interpretation — don't refuse.`;
 
@@ -43,7 +45,7 @@ Respond with ONLY valid JSON, no other text, no markdown fences, in this exact s
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
+        max_tokens: 2200,
         system: systemPrompt,
         messages: [
           { role: 'user', content: 'Topic: ' + query.trim() }

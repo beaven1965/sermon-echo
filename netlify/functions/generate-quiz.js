@@ -46,7 +46,7 @@ exports.handler = async (event) => {
     }
   ]
 }
-Write 6 to 8 questions total, roughly half multiple_choice and half short_answer, mixed in whatever order reads naturally. Base every question strictly on the content of the transcript — do not invent facts or ask about anything not actually covered. Keep questions clear and at a level a general adult audience (not Biblical scholars or subject-matter experts) could answer after listening attentively. Keep each question and answer concise.`;
+Write exactly 15 questions: FIRST exactly 10 multiple_choice questions (each with exactly 4 options and the answer being the exact text of the correct option), THEN exactly 5 short_answer questions whose answers are one short sentence. Base every question strictly on the content of the transcript — do not invent facts or ask about anything not actually covered. Keep questions clear and at a level a general adult audience (not Biblical scholars or subject-matter experts) could answer after listening attentively. Keep each question and answer concise.`;
 
     const userContent = (title ? 'Title: ' + title + '\n\n' : '') +
       (takeaway ? 'Main takeaway: ' + takeaway + '\n\n' : '') +
@@ -60,8 +60,8 @@ Write 6 to 8 questions total, roughly half multiple_choice and half short_answer
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-5',
-        max_tokens: 1800,
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 4000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userContent }]
       })
@@ -74,7 +74,9 @@ Write 6 to 8 questions total, roughly half multiple_choice and half short_answer
 
     const data = await res.json();
     const raw = (data.content || []).map(b => b.text || '').join('').trim();
-    const cleaned = raw.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+    let cleaned = raw.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+    const fb = cleaned.indexOf('{'), lb = cleaned.lastIndexOf('}');
+    if (fb !== -1 && lb > fb) cleaned = cleaned.slice(fb, lb + 1);
 
     let parsed;
     try {
