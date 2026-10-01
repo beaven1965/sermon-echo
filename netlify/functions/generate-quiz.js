@@ -6,6 +6,8 @@
 // multiple-choice and short-answer questions with an answer key, meant
 // for a teacher/pastor to print and hand out to students.
 
+const { getStore, connectLambda } = require('@netlify/blobs');
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
@@ -24,6 +26,13 @@ exports.handler = async (event) => {
 
     if (!transcript) {
       return { statusCode: 400, body: JSON.stringify({ error: 'There is no transcript to build a quiz from.' }) };
+    }
+
+    // Free month: a quiz must first be reserved in free-ai.mjs (one quiz = one AI use, whatever the number of parts).
+    connectLambda(event);
+    const tokenRec = await getStore('free-usage').get('qt:' + String(body.quizToken || '').replace(/[^a-f0-9]/g, ''), { type: 'json' });
+    if (!tokenRec || Date.now() - tokenRec.at > 15 * 60 * 1000) {
+      return { statusCode: 403, body: JSON.stringify({ error: 'Please tap Generate Quiz again.' }) };
     }
 
     // Guard against extremely long transcripts blowing the request budget —
@@ -51,11 +60,11 @@ exports.handler = async (event) => {
       const t = TYPES[type];
       const n = Math.max(1, Math.min(t.max, parseInt(body.count, 10) || t.n));
       const what = type === 'matching' ? 'one matching item with exactly ' + n + ' pairs' : 'exactly ' + n + ' questions';
-      systemPrompt = `You are a careful teacher's assistant for a tool used for church sermons and classroom lectures. From the transcript, write ${what} of this type: ${type}. Respond with ONLY a JSON object (no markdown, no code fences, no extra text) in this exact shape:
+      systemPrompt = `You are a careful teacher's assistant for a tool used for classroom lectures, trainings and meetings. From the transcript, write ${what} of this type: ${type}. Respond with ONLY a JSON object (no markdown, no code fences, no extra text) in this exact shape:
 {"questions":[ ${t.shape} ]}
 Rules: ${t.rule} Base every item strictly on what the transcript actually says — never invent facts. Keep wording clear and simple for a general audience of students. Keep each item concise.`;
     } else {
-      systemPrompt = `You are a careful teacher's assistant for a tool called Sermon Recorder, which is used for both church sermons and general lectures/meetings. Given a transcript, write a short comprehension quiz suitable for a teacher or pastor to hand out to students afterward. Respond with ONLY a JSON object (no markdown, no code fences, no extra text) in this exact shape:
+      systemPrompt = `You are a careful teacher's assistant for a classroom tool called ScitechLectureTool, used for lectures, classes, trainings and meetings. Given a transcript, write a short comprehension quiz suitable for a teacher or trainer to hand out to students afterward. Respond with ONLY a JSON object (no markdown, no code fences, no extra text) in this exact shape:
 {"questions":[ ${TYPES.multiple_choice.shape}, ${TYPES.short_answer.shape} ]}
 Write exactly 15 questions: FIRST exactly 10 multiple_choice questions (each with exactly 4 options and the answer being the exact text of the correct option), THEN exactly 5 short_answer questions whose answers are one short sentence. Base every question strictly on the content of the transcript — do not invent facts. Keep each question and answer concise.`;
     }
