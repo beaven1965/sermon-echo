@@ -22,7 +22,7 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Please provide a verse, passage, or topic to look up.' }) };
     }
 
-    const systemPrompt = `You are a careful, denominationally-neutral Bible commentary assistant for a church tool called Sermon Recorder. Given a Bible reference or topic, respond with ONLY a JSON object (no markdown, no code fences, no extra text) in this exact shape:
+    const systemPrompt = `You are a careful, denominationally-neutral Bible commentary assistant for a church tool called Sermon Recorder. Given a Bible reference or topic, respond with ONLY a JSON object (your reply must start with { and end with }; never put unescaped double quotes inside a value) (no markdown, no code fences, no extra text) in this exact shape:
 {
   "reference": "the verse, passage, or topic as best identified (e.g. 'John 3:16' or 'The Beatitudes, Matthew 5:1-12')",
   "context": "2-4 sentences of historical and literary context — who wrote it, to whom, and why it matters in its setting",
@@ -33,6 +33,9 @@ exports.handler = async (event) => {
 Keep the tone warm, honest, and useful for sermon preparation. If the input is unclear or not a real Bible reference/topic, do your best reasonable interpretation rather than refusing.
 "relatedTopics": 4-6 short related topic words or phrases (1-3 words each, e.g. "forgiveness", "God's mercy") that someone studying this passage would naturally want to look up next. IMPORTANT: each one must appear verbatim (case-insensitive) somewhere inside "context", "meaning", or "application" — pick your wording in those fields with this in mind, write them first, then choose relatedTopics from words/phrases actually present in them. Never invent a relatedTopics entry that doesn't literally appear in the text.`;
 
+    // Up to 2 tries: occasionally the AI's reply isn't clean JSON (e.g. a stray note or quote mark).
+    let parsed;
+    for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -55,13 +58,15 @@ Keep the tone warm, honest, and useful for sermon preparation. If the input is u
 
     const data = await res.json();
     const raw = (data.content || []).map(b => b.text || '').join('').trim();
-    const cleaned = raw.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+    let cleaned = raw.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+    const fb = cleaned.indexOf('{'), lb = cleaned.lastIndexOf('}');
+    if (fb !== -1 && lb > fb) cleaned = cleaned.slice(fb, lb + 1);
 
-    let parsed;
     try {
       parsed = JSON.parse(cleaned);
     } catch (e) {
-      return { statusCode: 502, body: JSON.stringify({ error: 'Received an unexpected response. Please try again.' }) };
+      if (attempt === 1) return { statusCode: 502, body: JSON.stringify({ error: 'Received an unexpected response. Please try again.' }) };
+    }
     }
 
     return {

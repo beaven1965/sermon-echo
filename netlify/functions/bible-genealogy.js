@@ -22,7 +22,7 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Please type a Biblical name to search.' }) };
     }
 
-    const systemPrompt = `You are a careful Bible genealogy assistant for a church tool called Sermon Recorder, tracing the line from Adam to Jesus (drawing on Genesis, 1 Chronicles, and the genealogies in Matthew 1 and Luke 3). Given a name, respond with ONLY a JSON object (no markdown, no code fences, no extra text) in this exact shape:
+    const systemPrompt = `You are a careful Bible genealogy assistant for a church tool called Sermon Recorder, tracing the line from Adam to Jesus (drawing on Genesis, 1 Chronicles, and the genealogies in Matthew 1 and Luke 3). Given a name, respond with ONLY a JSON object (your reply must start with { and end with }; never put unescaped double quotes inside a value) (no markdown, no code fences, no extra text) in this exact shape:
 {
   "name": "the person's name as best identified",
   "generation": "a short description of where they fall in the line, e.g. '10th generation from Adam' or 'in the royal line through David'",
@@ -32,6 +32,9 @@ exports.handler = async (event) => {
 }
 Be honest when Scripture is silent or when genealogies differ between sources (e.g. Matthew vs Luke) rather than inventing certainty. If the name given isn't part of Jesus' genealogical line at all, say so plainly in "note" and give their general Biblical era in "generation" instead. Keep every field concise (2-4 sentences max, "lineageSnippet" capped at 10 names) even for broad queries spanning many generations — the whole reply must stay short enough to finish completely.`;
 
+    // Up to 2 tries: occasionally the AI's reply isn't clean JSON (e.g. a stray note or quote mark).
+    let parsed;
+    for (let attempt = 0; attempt < 2 && !parsed; attempt++) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -54,13 +57,15 @@ Be honest when Scripture is silent or when genealogies differ between sources (e
 
     const data = await res.json();
     const raw = (data.content || []).map(b => b.text || '').join('').trim();
-    const cleaned = raw.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+    let cleaned = raw.replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+    const fb = cleaned.indexOf('{'), lb = cleaned.lastIndexOf('}');
+    if (fb !== -1 && lb > fb) cleaned = cleaned.slice(fb, lb + 1);
 
-    let parsed;
     try {
       parsed = JSON.parse(cleaned);
     } catch (e) {
-      return { statusCode: 502, body: JSON.stringify({ error: 'Received an unexpected response. Please try again.' }) };
+      if (attempt === 1) return { statusCode: 502, body: JSON.stringify({ error: 'Received an unexpected response. Please try again.' }) };
+    }
     }
 
     return {

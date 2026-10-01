@@ -5,15 +5,19 @@
 // Protected by ADMIN_PASSWORD (a Netlify environment variable only you know).
 //   { password, action: 'make', days, note } -> { code, expiresAt }
 //   { password, action: 'list' }             -> { codes: [...] }   (last 50 made)
-// The code works exactly like a paid code: 30-day style expiry built in, family codes allowed.
+// The code works exactly like a paid code: expiry built in, family codes allowed.
+// Also used by the 'Code Maker' file on Beaven's laptop (one file for all his apps).
 
 import crypto from 'node:crypto';
 import { getStore } from '@netlify/blobs';
 
-const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
+// CORS: lets the Code Maker file on your laptop call this (it is still protected by ADMIN_PASSWORD).
+const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
+const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...CORS } });
 function same(a, b){ const A = Buffer.from(String(a)), B = Buffer.from(String(b)); return A.length === B.length && crypto.timingSafeEqual(A, B); }
 
 export default async (req) => {
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
   const admin = process.env.ADMIN_PASSWORD;
   const secret = process.env.ACCESS_CODE_SECRET;
