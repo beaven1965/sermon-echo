@@ -38,21 +38,36 @@ exports.handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Please type a name for this family member.' }) };
     }
 
-    const ownerMatch = cleanedOwner.match(/^SE-([0-9A-F]{10})-([0-9A-F]{6})$/);
+    // Only a paid purchase code (SE-random-expiry-signature) that is still active can make family codes.
+    const ownerMatch = cleanedOwner.match(/^SE-([0-9A-F]{10})-([0-9A-F]{8})-([0-9A-F]{6})$/);
     if (!ownerMatch) {
-      return { statusCode: 403, body: JSON.stringify({ error: 'Only your original access code can be used to create family codes.' }) };
+      return { statusCode: 403, body: JSON.stringify({ error: 'Only the access code you received after paying can create family codes.' }) };
     }
-
-    const [, ownerRandom, ownerSignature] = ownerMatch;
+    const [, ownerRandom, ownerExpiry, ownerSignature] = ownerMatch;
     const expectedOwnerSig = crypto
       .createHmac('sha256', accessSecret)
-      .update(ownerRandom)
+      .update(ownerRandom + ownerExpiry)
       .digest('hex')
       .slice(0, 6)
       .toUpperCase();
-
     if (!signaturesMatch(expectedOwnerSig, ownerSignature)) {
       return { statusCode: 403, body: JSON.stringify({ error: "That access code doesn't look right." }) };
+    }
+    if (Date.now() >= parseInt(ownerExpiry, 16) * 1000) {
+      return { statusCode: 403, body: JSON.stringify({ error: 'Your Premium code has expired. Please renew to create family codes.' }) };
+    }
+
+    // Up to 5 family codes that are turned on at the same time.
+    const MAX_FAMILY_CODES = 5;
+    const store0 = getStore('family-codes');
+    const ownIndex = (await store0.get('index:' + cleanedOwner, { type: 'json' })) || [];
+    let active = 0;
+    for (const c of ownIndex) {
+      const rec = await store0.get(c, { type: 'json' });
+      if (rec && !rec.revoked) active++;
+    }
+    if (active >= MAX_FAMILY_CODES) {
+      return { statusCode: 403, body: JSON.stringify({ error: 'You already have ' + MAX_FAMILY_CODES + ' family codes turned on. Turn one off to make a new one.' }) };
     }
 
     const newRandom = crypto.randomBytes(5).toString('hex').toUpperCase();

@@ -102,7 +102,7 @@ async function getVoices(query, deadline){
     try { parsed = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1)); } catch (e) {}
     if (!parsed) return { error: 'Received an unexpected response. Please try again.' };
     const str = (v, n) => String(v || '').replace(/[“”"]/g, '').slice(0, n);
-    const voices = (Array.isArray(parsed.voices) ? parsed.voices : []).slice(0, 10).map(v => ({
+    const voices = (Array.isArray(parsed.voices) ? parsed.voices : []).slice(0, 12).map(v => ({
       era: str(v.era, 40), name: str(v.name, 80), role: str(v.role, 80), view: str(v.view, 600), response: str(v.response, 400)
     })).filter(v => v.name && v.view);
     const scientists = (Array.isArray(parsed.scientists) ? parsed.scientists : []).slice(0, 6).map(v => ({

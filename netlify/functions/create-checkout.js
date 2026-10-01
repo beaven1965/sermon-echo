@@ -67,7 +67,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ checkout_url: checkoutUrl })
+      body: JSON.stringify({ checkout_url: checkoutUrl, session_id: data.data.id })
     };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };

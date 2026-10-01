@@ -12,6 +12,7 @@ import { getStore } from '@netlify/blobs';
 
 const MAX_CHARS = 2500;
 const DAILY_LIMIT = 30;
+const MONTHLY_LIMIT = 10;   // 5 highlight translations a month × 2 listens each
 const OLD_FORMAT_CUTOFF_MS = new Date('2026-09-30T00:00:00+08:00').getTime();
 
 const sig6 = (secret, text) => crypto.createHmac('sha256', secret).update(text).digest('hex').slice(0, 6).toUpperCase();
@@ -23,18 +24,22 @@ async function checkCode(code, secret){
   let m = c.match(/^SE-([0-9A-F]{10})-([0-9A-F]{8})-([0-9A-F]{6})$/);
   if (m) {
     if (!same(sig6(secret, m[1] + m[2]), m[3])) return { valid: false, reason: 'invalid' };
-    return Date.now() < parseInt(m[2], 16) * 1000 ? { valid: true } : { valid: false, reason: 'expired' };
+    return Date.now() < parseInt(m[2], 16) * 1000 ? { valid: true, owner: c } : { valid: false, reason: 'expired' };
   }
   m = c.match(/^SE-([0-9A-F]{10})-([0-9A-F]{6})$/);
   if (m) {
     if (!same(sig6(secret, m[1]), m[2])) return { valid: false, reason: 'invalid' };
-    return Date.now() < OLD_FORMAT_CUTOFF_MS ? { valid: true } : { valid: false, reason: 'expired' };
+    return Date.now() < OLD_FORMAT_CUTOFF_MS ? { valid: true, owner: c } : { valid: false, reason: 'expired' };
   }
   m = c.match(/^SF-([0-9A-F]{10})-([0-9A-F]{6})$/);
   if (m) {
     if (!same(sig6(secret, m[1]), m[2])) return { valid: false, reason: 'invalid' };
     const rec = await getStore('family-codes').get(c, { type: 'json' });
-    return rec && rec.revoked !== true ? { valid: true } : { valid: false, reason: 'invalid' };
+    if (!rec || rec.revoked === true) return { valid: false, reason: 'invalid' };
+    const owner = String(rec.ownerCode || '');
+    const om = owner.match(/^SE-[0-9A-F]{10}-([0-9A-F]{8})-[0-9A-F]{6}$/);
+    const ownerExpiresMs = om ? parseInt(om[1], 16) * 1000 : OLD_FORMAT_CUTOFF_MS;
+    return Date.now() < ownerExpiresMs ? { valid: true, owner } : { valid: false, reason: 'expired' };   // family shares the payer's AI uses
   }
   return { valid: false, reason: 'invalid' };
 }
@@ -60,9 +65,21 @@ export default async (req) => {
 
   const day = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);   // Philippine date
   const daily = getStore('narrate-daily');
-  const key = code + ':' + day;
+  const pool = checked.owner || code;          // family members share the payer's AI uses
+  const key = pool + ':' + day;
   const used = Number(await daily.get(key)) || 0;
   if (used >= DAILY_LIMIT) return json({ error: "You've used the AI voice " + DAILY_LIMIT + ' times today. It will be available again tomorrow. The phone-voice Listen button still works.' });
+  const monthStore = getStore('narrate-monthly');
+  const mKey = pool + ':' + day.slice(0, 7);
+  const usedMonth = Number(await monthStore.get(mKey)) || 0;
+  const aiStore = getStore('highlights-ai');
+  const bonusKey = 'listen-bonus:' + pool;
+  let useBonus = false;
+  if (usedMonth >= MONTHLY_LIMIT) {
+    const bonus = Number(await aiStore.get(bonusKey)) || 0;
+    if (bonus <= 0) return json({ error: "You've used the AI voice " + MONTHLY_LIMIT + ' times this month. It resets on the 1st of next month, or buy 5 more AI uses in the Highlights box. Replaying a voice you already heard is free.' });
+    useBonus = true;
+  }
 
   // Stream the answer: Netlify allows a streaming reply up to 60 seconds.
   const stream = new ReadableStream({
@@ -76,6 +93,8 @@ export default async (req) => {
         if (res.ok) {
           controller.enqueue(new Uint8Array(await res.arrayBuffer()));
           await daily.set(key, String(used + 1));
+          if (useBonus) await aiStore.set(bonusKey, String(Math.max(0, (Number(await aiStore.get(bonusKey)) || 0) - 1)));
+          else await monthStore.set(mKey, String(usedMonth + 1));
         } else {
           console.log('narrate-summary: voice service error', res.status);
         }
