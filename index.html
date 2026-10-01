@@ -1642,6 +1642,11 @@
         <button class="new-recording-btn" id="closeSettingsBtn">Close</button>
       </div>
       <div class="settings-list">
+        <div id="freeBox" style="border:2px solid #2A7F86; background:#F1F8F7; color:#1E2A2C; border-radius:12px; padding:12px 14px; margin-bottom:10px; font-size:14.5px; line-height:1.5;">
+          <b>🎁 Your free load</b><br>
+          <span id="freeMinutesRow">🎙 Recording: 60 free minutes</span><br>
+          <small style="color:#4A5658;">Like free load: use it any day, it doesn't expire. Your recordings are always saved, even when the free minutes are used up. Premium keeps turning recordings into text.</small>
+        </div>
         <div class="settings-item">
           <span>⭐ Premium status</span>
           <span class="premium-badge locked" id="premiumBadge">Not unlocked</span>
@@ -1980,7 +1985,7 @@
       <div class="founding-banner">🎉 Founding Supporter Offer — be among the first to help build this ministry tool.</div>
 
       <ul class="feature-list">
-        <li><span class="check">✓</span> Recordings, transcripts, highlights &amp; takeaways (free for everyone)</li>
+        <li><span class="check">✓</span> Keep turning recordings into text after your 60 free minutes — with highlights &amp; takeaways</li>
         <li><span class="check">✓</span> Covers you and up to 5 family members (family codes share your AI uses)</li>
         <li><span class="check">✓</span> Easy-to-use recording, right from your phone or laptop</li>
         <li><span class="check">✓</span> AI translation &amp; AI narration of the highlights in 37 languages — 5 times a month (need more? buy 5 more for ₱50 anytime)</li>
@@ -2185,6 +2190,37 @@
   });
   closeComicBtn.addEventListener('click', () => showView('settings'));
 
+  // ---- Free load: each phone/laptop gets 60 free recording minutes (one time). Premium is not limited. ----
+  const DEVICE_ID = (function(){
+    let d = null;
+    try{ d = localStorage.getItem('se_device'); }catch(e){}
+    if(!d || !/^d-[a-z0-9]{12,40}$/.test(d)){
+      const a = new Uint8Array(12); crypto.getRandomValues(a);
+      d = 'd-' + Array.from(a, b => b.toString(36).padStart(2, '0')).join('').slice(0, 24);
+      try{ localStorage.setItem('se_device', d); }catch(e){}
+    }
+    return d;
+  })();
+  function premiumCodeNow(){
+    try{ return localStorage.getItem('se_premium_unlocked') === 'true' ? (localStorage.getItem('se_premium_code') || '') : ''; }catch(e){ return ''; }
+  }
+  function showFreeStatus(d){
+    const row = document.getElementById('freeMinutesRow'), box = document.getElementById('freeBox');
+    if(!d || !row) return;
+    if(d.premium){ if(box) box.style.display = 'none'; return; }
+    if(box) box.style.display = '';
+    if(typeof d.minutesLeft === 'number') row.textContent = '🎙 Recording: ' + d.minutesLeft + ' of ' + (d.minutesLimit || 60) + ' free minutes left';
+  }
+  async function freeStatus(){
+    try{
+      const r = await fetch('/.netlify/functions/transcribe', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'status', device: DEVICE_ID, code: premiumCodeNow() }) });
+      const d = await r.json();
+      if(d.error) return null;
+      showFreeStatus(d);
+      return d;
+    }catch(e){ return null; }
+  }
+  setTimeout(freeStatus, 1500);
   const CHUNK_THRESHOLD_BYTES = 4 * 1024 * 1024; // ~4MB triggers splitting into chunks
   const CHUNK_SECONDS = 90; // length of each chunk once shrunk down
   const TARGET_SAMPLE_RATE = 16000; // matches what Whisper listens for anyway
@@ -2837,20 +2873,22 @@
     });
   }
 
-  async function transcribeOneChunk(blob){
+  async function transcribeOneChunk(blob, seconds){
     const audioBase64 = await blobToBase64(blob);
     const res = await fetch('/.netlify/functions/transcribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ audioBase64, mimeType: blob.type })
+      body: JSON.stringify({ audioBase64, mimeType: blob.type, device: DEVICE_ID, seconds: Math.round(seconds || 0), code: premiumCodeNow() })
     });
     if(!res.ok){
       const errData = await res.json().catch(() => ({}));
+      if(errData.limit){ const e = new Error(errData.error); e.limit = true; throw e; }
       const base = errData.error || ('Transcription failed. (' + res.status + ')');
       const detail = errData.detail ? (' Detail: ' + String(errData.detail).slice(0, 300)) : '';
       throw new Error(base + detail);
     }
     const data = await res.json();
+    if(typeof data.minutesLeft === 'number') showFreeStatus({ minutesLeft: data.minutesLeft, minutesLimit: 60 });
     return data.transcript;
   }
 
@@ -2859,20 +2897,39 @@
   // functions reject any single request over ~6MB. Short recordings are
   // sent as-is.
   async function transcribeAudio(blob, onProgress){
-    if(blob.size <= CHUNK_THRESHOLD_BYTES){
-      return await transcribeOneChunk(blob);
+    // Free load: check the minutes left first (Premium is not limited). The recording itself is always saved.
+    const st = await freeStatus();
+    if(st && !st.premium && st.minutesLeft <= 0){
+      const e = new Error("You've used your " + st.minutesLimit + ' free recording minutes. Your recording is saved in your Library. Get Premium (Settings → Premium) to keep turning recordings into text.'); e.limit = true; throw e;
+    }
+    const budgetSec = (st && !st.premium) ? st.minutesLeft * 60 + 30 : Infinity;
+
+    let decoded = null;
+    try{ decoded = await decodeBlobToAudioBuffer(blob); }catch(e){}
+    if(blob.size <= CHUNK_THRESHOLD_BYTES || !decoded){
+      return await transcribeOneChunk(blob, decoded ? decoded.duration : 0);
     }
 
-    const decoded = await decodeBlobToAudioBuffer(blob);
     const resampled = await resampleToMono(decoded, TARGET_SAMPLE_RATE);
     const pieces = sliceBufferIntoChunks(resampled, CHUNK_SECONDS);
 
     const transcripts = [];
+    let sentSec = 0, stoppedEarly = false;
     for(let i = 0; i < pieces.length; i++){
+      if(sentSec >= budgetSec){ stoppedEarly = true; break; }
       if(onProgress) onProgress(i + 1, pieces.length);
       const chunkBlob = audioBufferToWav(pieces[i]);
-      const text = await transcribeOneChunk(chunkBlob);
-      transcripts.push(text.trim());
+      try{
+        const text = await transcribeOneChunk(chunkBlob, pieces[i].duration);
+        transcripts.push(text.trim());
+      }catch(err){
+        if(err.limit && transcripts.length){ stoppedEarly = true; break; }
+        throw err;
+      }
+      sentSec += pieces[i].duration;
+    }
+    if(stoppedEarly){
+      transcripts.push('[Only the first ' + Math.round(sentSec / 60) + ' minutes were turned into text — the free minutes are used up. The full recording is saved in your Library. Premium keeps turning recordings into text.]');
     }
     return transcripts.join(' ');
   }
@@ -4930,6 +4987,7 @@
     const expiresAt = localStorage.getItem(PREMIUM_EXPIRES_KEY);
     if(unlocked){
       premiumBadge.textContent = 'Unlocked ✅';
+      try{ freeStatus(); }catch(e){}
       premiumBadge.className = 'premium-badge unlocked';
       if(savedCode){
         myCodeHint.style.display = 'block';
@@ -4944,6 +5002,7 @@
       }
     } else {
       premiumBadge.textContent = 'Not unlocked';
+      try{ freeStatus(); }catch(e){}
       premiumBadge.className = 'premium-badge locked';
       myCodeHint.style.display = 'none';
       familyCodesSection.style.display = 'none';
