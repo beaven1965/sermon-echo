@@ -997,7 +997,37 @@
     padding:14px 16px;
     margin-bottom:12px;
   }
-  .q-section{ font-weight:800; font-size:15px; color:#111; margin:14px 0 8px; }
+  .hl-tools{ margin-top:18px; padding-top:14px; border-top:1px dashed #9cc8ad; }
+  .ai-uses{ margin-top:8px; font-size:13px; font-weight:600; color:#1F6B40; background:#EEF8F1; border:1px solid #CFE3D6; border-radius:8px; padding:6px 10px; }
+  .ai-uses:empty{ display:none; }
+  .refill-btn{ width:100%; margin-top:8px; padding:11px; border-radius:10px; border:none; background:#E58A2B; color:#fff; font-weight:700; font-size:14.5px; cursor:pointer; }
+  .refill-btn:disabled{ opacity:.7; }
+  .ai-uses.none-left{ color:#8A3B12; background:#FFF4E5; border-color:#F2D3A8; }
+  .hl-tools-h{ font-weight:700; font-size:14px; color:#2F7D4F; margin-bottom:8px; }
+  .hl-tools .translate-row{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .hl-tools .lang-select{ background:#fff; color:#111; border:1px solid #9cc8ad; }
+  .hl-tools .translate-btn{ color:#1F6B40; border-color:#3E9B63; background:#fff; }
+  .hl-tools .translate-note{ display:block; margin-top:8px; font-size:13px; color:#3F4A44; }
+  .note-popup{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:1000; padding:16px; }
+  .note-pad{ background:#FFFDF2; color:#111; border:2px solid #3E9B63; border-radius:14px; padding:20px; max-width:380px; width:100%; box-sizing:border-box;
+    background-image:repeating-linear-gradient(#FFFDF2 0 27px, #E3EFE7 27px 28px); box-shadow:0 10px 30px rgba(0,0,0,.35); }
+  .note-pad h3{ margin:0 0 10px; font-size:18px; }
+  .note-pad p{ margin:0 0 14px; font-size:15px; line-height:28px; }
+  .note-pad button{ width:100%; padding:12px; border-radius:10px; border:none; background:#3E9B63; color:#fff; font-weight:700; font-size:15px; cursor:pointer; }
+  .explore-box{ margin-top:18px; }
+  .explore-links{ display:flex; flex-wrap:wrap; gap:8px; }
+  .explore-links a{ padding:8px 12px; border-radius:999px; border:1.5px solid #3E9B63; color:#1F6B40; background:#fff; text-decoration:none; font-size:13.5px; font-weight:600; }
+  .cv-link{ font-size:12.5px; color:#1a73e8; text-decoration:none; }
+  .quiz-types{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:4px 0 12px; }
+  .quiz-types .qt-head{ grid-column:1 / -1; font-size:13.5px; font-weight:600; color:#111; }
+  .quiz-types .qt{ display:flex; align-items:center; gap:8px; border:1.5px solid #cfd8d2; border-radius:12px; padding:10px; cursor:pointer; background:#fff; color:#111; font-size:14px; }
+  .quiz-types .qt input{ width:20px; height:20px; accent-color:#3E9B63; margin:0; }
+  .quiz-types .qt small{ color:#5b6b61; font-weight:600; }
+  .quiz-types .qt:has(input:checked){ border-color:#3E9B63; background:#EEF8F1; }
+  .q-match{ display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; font-size:14px; color:#111; margin:4px 0 8px; }
+  .q-match .col-h{ font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.4px; color:#2F7D4F; }
+  .q-section{ font-weight:800; font-size:15px; color:#111; margin:14px 0 2px; }
+  .q-direction{ font-size:13px; color:#3F4A44; font-style:italic; margin:0 0 8px; }
   .quiz-question .q-num{
     font-family:'Source Serif 4',serif;
     font-weight:600;
@@ -1588,7 +1618,7 @@
         <div class="error-box" id="redeemError" style="display:none;"></div>
         <div class="hint" id="myCodeHint" style="display:none;"></div>
         <div id="familyCodesSection" style="display:none;">
-          <div class="hint">Create separate access codes for family members — you can turn any of them off later.</div>
+          <div class="hint">Create up to 5 access codes for family members. They share your 5 AI uses a month and stop when your code expires. You can turn any of them off later.</div>
           <div class="redeem-row">
             <input type="text" id="familyLabelInput" placeholder="Family member's name (e.g. Mom)">
             <button id="createFamilyCodeBtn">Create code</button>
@@ -1743,9 +1773,9 @@
 
       <div class="wplayer" id="customPlayerRow">
         <div class="wp-top">
-          <button class="wp-btn" id="skipBackBtn" aria-label="Back 15 seconds">⟲<small>15</small></button>
+          <button class="wp-btn" id="skipBackBtn" aria-label="Back 15 seconds"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><small>15</small></button>
           <button class="wp-btn wp-play" id="playPauseBtn" aria-label="Play">▶</button>
-          <button class="wp-btn" id="skipFwdBtn" aria-label="Forward 15 seconds"><small>15</small>⟳</button>
+          <button class="wp-btn" id="skipFwdBtn" aria-label="Forward 15 seconds"><small>15</small><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
           <button class="wp-time" id="timeToggleBtn">0:00 / 0:00</button>
           <button class="wp-btn wp-vol" id="muteBtn" aria-label="Mute">🔊</button>
         </div>
@@ -1763,8 +1793,17 @@
       <div class="transcript-box" id="transcriptBox" style="display:none;"></div>
 
       <div class="translate-row">
-        <button class="translate-btn" id="translateBtn">🌐 Translate</button>
-        <select class="lang-select" id="translateLangSelect">
+        <button class="translate-btn" id="topTranslateBtn">🌐 Translate</button>
+      </div>
+      <details class="se-fold" id="foldHighlights">
+        <summary><span>✨ Highlights<small>Main points · AI translation &amp; AI narration here</small></span></summary>
+        <div class="se-fold-body"><div class="paper-card">
+        <div class="eyebrow">Highlights</div>
+        <ul class="bullets" id="bulletsList"></ul>
+        <div class="hl-tools">
+          <div class="hl-tools-h">🌐 AI Translation &amp; 🔊 AI Narration ⭐</div>
+          <div class="translate-row">
+            <select class="lang-select" id="translateLangSelect">
           <option value="English">English</option>
           <option value="Tagalog">Tagalog</option>
           <option value="Cebuano (Bisaya)">Cebuano (Bisaya)</option>
@@ -1803,14 +1842,20 @@
           <option value="Japanese">Japanese</option>
           <option value="Korean">Korean</option>
         </select>
-        <button class="translate-btn" id="retranslateBtn" style="display:none;" title="Ask for a fresh translation instead of the saved one">↻ Redo translation</button>
-        <span class="translate-note" id="translateNote"></span>
-      </div>
-      <div class="premium-note" id="translatePremiumNote" style="display:none;"></div>
-      <div class="player-row wrap" id="aiVoiceRow" style="display:none; margin-top:10px;">
-        <button class="translate-btn" id="aiVoiceBtn">🔊 Hear translated highlights ⭐</button>
-        <audio id="aiVoiceAudio" style="display:none;"></audio>
-      </div>
+            <button class="translate-btn" id="translateBtn">🌐 Translate highlights</button>
+            <button class="translate-btn" id="retranslateBtn" style="display:none;" title="Ask for a fresh translation instead of the saved one">↻ Redo</button>
+          </div>
+          <div class="translate-note" id="translateNote"></div>
+          <div class="ai-uses" id="aiUsesNote"></div>
+          <button class="refill-btn" id="refillBtn" style="display:none;">🎟 Buy 5 more AI uses — ₱50</button>
+          <div class="premium-note" id="translatePremiumNote" style="display:none;"></div>
+          <div class="player-row wrap" id="aiVoiceRow" style="display:none; margin-top:10px;">
+            <button class="translate-btn" id="aiVoiceBtn">🔊 Listen to translated highlights</button>
+            <audio id="aiVoiceAudio" style="display:none;"></audio>
+          </div>
+        </div>
+      </div></div></details>
+
       <details class="se-fold" id="foldListen">
         <summary><span>🔊 Listen<small>Hear the full transcript read aloud</small></span></summary>
         <div class="se-fold-body">
@@ -1820,13 +1865,6 @@
           <div class="hint" style="margin-top:6px;">Tap once to start, tap again to stop.</div>
         </div>
       </details>
-
-      <details class="se-fold" id="foldHighlights">
-        <summary><span>✨ Highlights<small>The main points</small></span></summary>
-        <div class="se-fold-body"><div class="paper-card">
-        <div class="eyebrow">Highlights</div>
-        <ul class="bullets" id="bulletsList"></ul>
-      </div></div></details>
 
       <details class="se-fold" id="foldTakeaway">
         <summary><span>💡 Today's takeaway<small>The main message in a few lines</small></span></summary>
@@ -1840,6 +1878,15 @@
         <div class="se-fold-body"><div class="paper-card">
         <div class="eyebrow">Quiz for Students</div>
         <div class="premium-note" id="quizPremiumNote" style="display:none;"></div>
+        <div class="quiz-types" id="quizTypes">
+          <div class="qt-head">Choose the test types (tap to turn on or off):</div>
+          <label class="qt"><input type="checkbox" value="multiple_choice" checked><span>Multiple choice <small>10</small></span></label>
+          <label class="qt"><input type="checkbox" value="true_false"><span>True or False <small>10</small></span></label>
+          <label class="qt"><input type="checkbox" value="fill_blank"><span>Fill in the blank <small>5</small></span></label>
+          <label class="qt"><input type="checkbox" value="matching"><span>Matching type <small>5</small></span></label>
+          <label class="qt"><input type="checkbox" value="short_answer" checked><span>Short answer <small>5</small></span></label>
+          <label class="qt"><input type="checkbox" value="essay"><span>Essay <small>2</small></span></label>
+        </div>
         <button class="translate-btn" id="generateQuizBtn">📝 Generate Quiz</button>
         <div class="status-row" id="quizStatusRow" style="display:none; margin-top:10px;">
           <div class="spinner"></div>
@@ -1851,6 +1898,7 @@
           <div class="player-row" style="margin-top:16px; flex-wrap:wrap;">
             <button class="skip-btn" id="printQuizStudentBtn">🖨️ Print (Student copy)</button>
             <button class="skip-btn" id="printQuizAnswerKeyBtn">🖨️ Print (Answer key)</button>
+            <button class="skip-btn" id="newQuizBtn">↻ New quiz</button>
           </div>
         </div>
       </div></div></details>
@@ -1897,9 +1945,10 @@
       <div class="founding-banner">🎉 Founding Supporter Offer — be among the first to help build this ministry tool.</div>
 
       <ul class="feature-list">
-        <li><span class="check">✓</span> Recordings, transcribing &amp; translating</li>
+        <li><span class="check">✓</span> Recordings, transcripts, highlights &amp; takeaways (free for everyone)</li>
+        <li><span class="check">✓</span> Covers you and up to 5 family members (family codes share your AI uses)</li>
         <li><span class="check">✓</span> Easy-to-use recording, right from your phone or laptop</li>
-        <li><span class="check">✓</span> Sermon translation into 37 languages</li>
+        <li><span class="check">✓</span> AI translation &amp; AI narration of the highlights in 37 languages — 5 times a month (need more? buy 5 more for ₱50 anytime)</li>
         <li><span class="check">✓</span> Bible Concordance — search any topic across Scripture</li>
         <li><span class="check">✓</span> Bible Commentary — context &amp; meaning for any verse</li>
         <li><span class="check">✓</span> Voices &amp; worldview — what theologians, philosophers &amp; scientists across the ages said, with a biblical response</li>
@@ -1908,8 +1957,7 @@
         <li><span class="check">✓</span> Bible &amp; Science — honest, balanced answers</li>
         <li><span class="check">✓</span> Quotable Quotes for sermon prep</li>
         <li><span class="check">✓</span> Illustrated Bible Stories — narrated, comic-style retellings</li>
-        <li><span class="check">✓</span> A founding-supporter badge on your account <span class="soon">coming soon</span></li>
-        <li><span class="check">✓</span> Longer sermon storage in your library <span class="soon">coming soon</span></li>
+        <li><span class="check">✓</span> Quiz for Students — multiple choice, true or false, fill in the blank, matching, short answer &amp; essay</li>
       </ul>
 
       <div class="price-tag">
@@ -1922,6 +1970,7 @@
 
            <p class="paywall-fine">Payments are processed securely by PayMongo. You'll be taken to their payment page and brought right back here.</p>
            <p class="paywall-fine">After paying, your access code will show up under Settings → Premium status.</p>
+            <p class="paywall-fine">By paying you agree to our <a href="/terms.html" target="_blank" style="color:inherit; font-weight:600;">Terms of Use</a> — 30 days, no automatic renewal, 5 AI uses a month, refills ₱50 for 5.</p>
             <p class="paywall-fine">Didn't get your access code after paying? Email <a href="mailto:sermonrecord.support@gmail.com" style="color:inherit;">sermonrecord.support@gmail.com</a> and we'll sort it out.</p>
     </div>
   </main>
@@ -2992,7 +3041,7 @@
     const r = document.getElementById('aiVoiceRow'); if(r) r.style.display = 'none';
     if(typeof stopAiVoice === 'function') stopAiVoice();
     viewingTranslation = false;
-    translateBtn.textContent = '🌐 Translate';
+    translateBtn.textContent = '🌐 Translate highlights';
     translateBtn.disabled = false;
     translateNote.textContent = '';
     retranslateBtn.style.display = 'none';
@@ -3038,62 +3087,97 @@
     quizStatusRow.style.display = 'none';
     hideQuizPremiumNote();
     generateQuizBtn.style.display = 'inline-block';
+    const qt = document.getElementById('quizTypes'); if(qt) qt.style.display = '';
     generateQuizBtn.textContent = '📝 Generate Quiz';
     generateQuizBtn.disabled = false;
   }
 
+  const QUIZ_PARTS = [
+    ['multiple_choice', 'Multiple Choice', 'Choose the letter of the correct answer.'],
+    ['true_false', 'True or False', 'Write True if the statement is correct, False if it is not.'],
+    ['fill_blank', 'Fill in the Blank', 'Write the missing word or phrase.'],
+    ['matching', 'Matching Type', 'Match each item in Column A with Column B.'],
+    ['short_answer', 'Short Answer', 'Answer in one sentence.'],
+    ['essay', 'Essay', 'Answer in a short paragraph.']
+  ];
+  const ROMAN = ['I','II','III','IV','V','VI'];
   function sortQuiz(questions){
-    const mc = questions.filter(q => q.type === 'multiple_choice');
-    const sa = questions.filter(q => q.type !== 'multiple_choice');
-    return mc.concat(sa);
+    const out = [];
+    QUIZ_PARTS.forEach(([t]) => questions.forEach(q => { if((q.type || 'short_answer') === t) out.push(q); }));
+    questions.forEach(q => { if(!QUIZ_PARTS.some(([t]) => t === q.type)) out.push(q); });
+    return out;
+  }
+  // Matching: letters for Column B are shuffled once and remembered, so the printout matches the screen.
+  function matchOrder(q){
+    if(!Array.isArray(q.order) || q.order.length !== q.pairs.length){
+      q.order = q.pairs.map((_, i) => i);
+      for(let i = q.order.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [q.order[i], q.order[j]] = [q.order[j], q.order[i]]; }
+    }
+    return q.order;
+  }
+  function matchKey(q){
+    const order = matchOrder(q), L = 'ABCDEFGHIJ';
+    return q.pairs.map((_, i) => (i + 1) + '–' + L[order.indexOf(i)]).join(', ');
+  }
+  function quizPartsOf(questions){
+    const parts = [];
+    sortQuiz(questions).forEach(q => {
+      const t = q.type || 'short_answer';
+      let part = parts[parts.length - 1];
+      if(!part || part.type !== t){
+        const info = QUIZ_PARTS.find(p => p[0] === t) || [t, 'Questions', ''];
+        part = { type: t, title: info[1], direction: info[2], items: [] }; parts.push(part);
+      }
+      part.items.push(q);
+    });
+    return parts;
   }
   function renderQuiz(questions){
     questions = sortQuiz(questions);
     currentQuiz = questions;
     quizQuestionsList.innerHTML = '';
-    let mcN = 0, saN = 0;
-    questions.forEach((q, i) => {
-      const isMC = q.type === 'multiple_choice';
-      if((isMC && mcN === 0) || (!isMC && saN === 0)){
-        const h = document.createElement('div');
-        h.className = 'q-section';
-        h.textContent = isMC ? 'Part I — Multiple Choice' : 'Part II — Short Answer';
-        quizQuestionsList.appendChild(h);
-      }
-      const card = document.createElement('div');
-      card.className = 'quiz-question';
-
-      const num = document.createElement('div');
-      num.className = 'q-num';
-      num.textContent = isMC ? (++mcN) + '.' : (++saN) + '.';
-      card.appendChild(num);
-
-      const qText = document.createElement('div');
-      qText.className = 'q-text';
-      qText.textContent = q.question;
-      card.appendChild(qText);
-
-      if(q.type === 'multiple_choice' && Array.isArray(q.options)){
-        const ul = document.createElement('ul');
-        ul.className = 'q-options';
-        const letters = ['A','B','C','D','E','F'];
-        q.options.forEach((opt, oi) => {
-          const li = document.createElement('li');
-          li.textContent = letters[oi] + '. ' + opt;
-          ul.appendChild(li);
-        });
-        card.appendChild(ul);
-      }
-
-      const ans = document.createElement('div');
-      ans.className = 'q-answer';
-      ans.textContent = 'Answer: ' + q.answer;
-      card.appendChild(ans);
-
-      quizQuestionsList.appendChild(card);
+    const L = 'ABCDEFGHIJ';
+    quizPartsOf(questions).forEach((part, pi) => {
+      const h = document.createElement('div');
+      h.className = 'q-section';
+      h.textContent = 'Part ' + ROMAN[pi] + ' — ' + part.title;
+      quizQuestionsList.appendChild(h);
+      if(part.direction){ const d = document.createElement('div'); d.className = 'q-direction'; d.textContent = part.direction; quizQuestionsList.appendChild(d); }
+      part.items.forEach((q, n) => {
+        const card = document.createElement('div');
+        card.className = 'quiz-question';
+        if(q.type === 'matching' && Array.isArray(q.pairs)){
+          const order = matchOrder(q);
+          const grid = document.createElement('div'); grid.className = 'q-match';
+          grid.innerHTML = '<div class="col-h">Column A</div><div class="col-h">Column B</div>';
+          q.pairs.forEach((p, i) => {
+            const a = document.createElement('div'); a.textContent = (i + 1) + '. ' + p.left;
+            const b = document.createElement('div'); b.textContent = L[i] + '. ' + q.pairs[order[i]].right;
+            grid.appendChild(a); grid.appendChild(b);
+          });
+          card.appendChild(grid);
+          const ans = document.createElement('div'); ans.className = 'q-answer'; ans.textContent = 'Answers: ' + matchKey(q);
+          card.appendChild(ans);
+        } else {
+          const num = document.createElement('div'); num.className = 'q-num'; num.textContent = (n + 1) + '.';
+          card.appendChild(num);
+          const qText = document.createElement('div'); qText.className = 'q-text'; qText.textContent = q.question;
+          card.appendChild(qText);
+          if(q.type === 'multiple_choice' && Array.isArray(q.options)){
+            const ul = document.createElement('ul'); ul.className = 'q-options';
+            q.options.forEach((opt, oi) => { const li = document.createElement('li'); li.textContent = L[oi] + '. ' + opt; ul.appendChild(li); });
+            card.appendChild(ul);
+          }
+          const ans = document.createElement('div'); ans.className = 'q-answer';
+          ans.textContent = (q.type === 'essay' ? 'Look for: ' : 'Answer: ') + q.answer;
+          card.appendChild(ans);
+        }
+        quizQuestionsList.appendChild(card);
+      });
     });
     quizContainer.style.display = 'block';
     generateQuizBtn.style.display = 'none';
+    document.getElementById('quizTypes').style.display = 'none';
   }
 
   async function generateQuiz(){
@@ -3119,18 +3203,24 @@
     generateQuizBtn.disabled = true;
 
     try {
-      const res = await fetch('/.netlify/functions/generate-quiz', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          transcript: currentSermon.transcript,
-          takeaway: currentSermon.takeaway,
-          title: resultDate.textContent || ''
-        })
-      });
-      const data = await res.json().catch(() => ({}));
-      if(!res.ok) throw new Error(data.error || ('Could not generate the quiz (' + res.status + ').'));
-      if(!Array.isArray(data.questions) || data.questions.length === 0) throw new Error('Received an unexpected response. Please try again.');
+      const types = Array.from(document.querySelectorAll('#quizTypes input:checked')).map(i => i.value);
+      if(!types.length) throw new Error('Please turn on at least one test type.');
+      const askType = async (type) => {
+        const res = await fetch('/.netlify/functions/generate-quiz', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transcript: currentSermon.transcript, takeaway: currentSermon.takeaway, title: resultDate.textContent || '', type })
+        });
+        const d = await res.json().catch(() => ({}));
+        if(!res.ok) throw new Error(d.error || ('Could not generate the quiz (' + res.status + ').'));
+        return Array.isArray(d.questions) ? d.questions : [];
+      };
+      const results = await Promise.allSettled(types.map(askType));
+      const all = []; let firstErr = null;
+      results.forEach(r => { if(r.status === 'fulfilled') all.push(...r.value); else if(!firstErr) firstErr = r.reason; });
+      if(!all.length) throw (firstErr || new Error('Received an unexpected response. Please try again.'));
+      if(firstErr) { quizError.textContent = 'Some parts could not be made this time — tap ↻ New quiz to try again.'; quizError.style.display = 'block'; }
+      const data = { questions: all };
 
       renderQuiz(data.questions);
       currentSermon.quiz = data.questions;
@@ -3148,25 +3238,37 @@
   }
 
   generateQuizBtn.addEventListener('click', generateQuiz);
+  document.getElementById('newQuizBtn').addEventListener('click', () => { resetQuizUI(); });
 
   function printQuiz(includeAnswers){
     if(!currentQuiz || currentQuiz.length === 0) return;
     const title = (resultDate.textContent || 'Sermon Recorder').trim();
     const letters = ['A','B','C','D','E','F'];
 
-    let pmc = 0, psa = 0;
-    const questionsHtml = currentQuiz.map((q, i) => {
-      const isMC = q.type === 'multiple_choice';
-      const partHead = (isMC && pmc === 0) ? '<h2 class="part">Part I — Multiple Choice</h2>' : (!isMC && psa === 0) ? '<h2 class="part">Part II — Short Answer</h2>' : '';
-      const n = isMC ? ++pmc : ++psa;
-      let optionsHtml = '';
-      if(q.type === 'multiple_choice' && Array.isArray(q.options)){
-        optionsHtml = '<ul class="opts">' + q.options.map((opt, oi) => '<li>' + letters[oi] + '. ' + escapeHtml(opt) + '</li>').join('') + '</ul>';
-      } else {
-        optionsHtml = '<div class="blank-lines"><div class="line"></div><div class="line"></div></div>';
-      }
-      const answerHtml = includeAnswers ? '<div class="answer">Answer: ' + escapeHtml(q.answer) + '</div>' : '';
-      return partHead + '<div class="question"><div class="q-head">' + n + '. ' + escapeHtml(q.question) + '</div>' + optionsHtml + answerHtml + '</div>';
+    const L = 'ABCDEFGHIJ';
+    const questionsHtml = quizPartsOf(currentQuiz).map((part, pi) => {
+      let html = '<h2 class="part">Part ' + ROMAN[pi] + ' — ' + escapeHtml(part.title) + '</h2>' + (part.direction ? '<div class="dir">' + escapeHtml(part.direction) + '</div>' : '');
+      part.items.forEach((q, n) => {
+        if(q.type === 'matching' && Array.isArray(q.pairs)){
+          const order = matchOrder(q);
+          html += '<table class="match"><tr><th>Column A</th><th>Column B</th></tr>' + q.pairs.map((p, i) =>
+            '<tr><td>' + (includeAnswers ? '' : '____ ') + (i + 1) + '. ' + escapeHtml(p.left) + '</td><td>' + L[i] + '. ' + escapeHtml(q.pairs[order[i]].right) + '</td></tr>').join('') + '</table>' +
+            (includeAnswers ? '<div class="answer">Answers: ' + escapeHtml(matchKey(q)) + '</div>' : '');
+          return;
+        }
+        let body = '';
+        if(q.type === 'multiple_choice' && Array.isArray(q.options)){
+          body = '<ul class="opts">' + q.options.map((opt, oi) => '<li>' + L[oi] + '. ' + escapeHtml(opt) + '</li>').join('') + '</ul>';
+        } else if(q.type === 'essay'){
+          body = '<div class="blank-lines">' + '<div class="line"></div>'.repeat(6) + '</div>';
+        } else if(q.type === 'short_answer'){
+          body = '<div class="blank-lines"><div class="line"></div><div class="line"></div></div>';
+        }
+        const lead = (q.type === 'true_false' || q.type === 'fill_blank') && !includeAnswers ? '______ ' : '';
+        const answerHtml = includeAnswers ? '<div class="answer">' + (q.type === 'essay' ? 'Look for: ' : 'Answer: ') + escapeHtml(q.answer) + '</div>' : '';
+        html += '<div class="question"><div class="q-head">' + lead + (n + 1) + '. ' + escapeHtml(q.question) + '</div>' + body + answerHtml + '</div>';
+      });
+      return html;
     }).join('');
 
     const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + escapeHtml(title) + ' — Quiz</title>' +
@@ -3177,7 +3279,9 @@
       '.name-line{margin:18px 0 28px; font-size:14px;}' +
       '.name-line span{display:inline-block; border-bottom:1px solid #999; min-width:220px; margin-left:6px;}' +
       '.question{margin-bottom:22px;}' +
-      '.part{font-size:16px; margin:26px 0 12px;}' +
+      '.part{font-size:16px; margin:26px 0 2px;}' +
+      '.dir{font-style:italic; font-size:13px; color:#555; margin-bottom:12px;}' +
+      'table.match{width:100%; border-collapse:collapse; font-size:14px; margin-bottom:16px;} table.match th{text-align:left; border-bottom:1px solid #999; padding:4px;} table.match td{padding:5px 4px; vertical-align:top; width:50%;}' +
       '.q-head{font-weight:600; margin-bottom:8px;}' +
       '.opts{list-style:none; margin:0 0 6px; padding-left:14px;}' +
       '.opts li{margin-bottom:4px; font-size:14px;}' +
@@ -3215,20 +3319,84 @@
     }
   });
 
+  // ---- AI uses left this month (5 highlight translations; counted on the server) ----
+  const aiUsesNote = document.getElementById('aiUsesNote');
+  const refillBtn = document.getElementById('refillBtn');
+  function showAiUses(d){
+    if(!aiUsesNote || !d || typeof d.left !== 'number') return;
+    const extra = d.extra || 0;
+    aiUsesNote.textContent = d.left > 0
+      ? '🎟 AI uses this month: ' + d.used + ' of ' + d.limit + ' used' + (extra ? ' · plus ' + extra + ' bought' : '') + ' · ' + d.left + ' left'
+      : '🎟 All ' + d.limit + ' AI uses for this month are used. They reset on the 1st — or buy 5 more below.';
+    aiUsesNote.classList.toggle('none-left', d.left <= 0);
+    refillBtn.style.display = d.left <= 1 ? 'block' : 'none';   // offer a refill when almost out
+  }
+  const REFILL_SESSION_KEY = 'se_refill_session';
+  refillBtn.addEventListener('click', async () => {
+    const code = localStorage.getItem(PREMIUM_CODE_KEY);
+    if(!code){ translateNote.textContent = 'Refills are for Premium users. Unlock Premium in Settings first.'; return; }
+    refillBtn.disabled = true; refillBtn.textContent = '⏳ Opening the payment page…';
+    try{
+      const r = await fetch('/.netlify/functions/buy-refill', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'start', code }) });
+      const d = await r.json().catch(() => ({}));
+      if(d.error || !d.checkout_url) throw new Error(d.error || 'Could not open the payment page right now.');
+      try{ sessionStorage.setItem(REFILL_SESSION_KEY, d.session_id); localStorage.setItem(REFILL_SESSION_KEY, d.session_id); }catch(e){}
+      window.location.href = d.checkout_url;
+    }catch(err){
+      translateNote.textContent = err.message;
+      refillBtn.disabled = false; refillBtn.textContent = '🎟 Buy 5 more AI uses — ₱50';
+    }
+  });
+  // Back from PayMongo after buying a refill
+  (function checkRefillReturn(){
+    const params = new URLSearchParams(window.location.search);
+    const r = params.get('refill');
+    if(!r) return;
+    params.delete('refill');
+    window.history.replaceState({}, '', window.location.pathname + (params.toString() ? '?' + params.toString() : ''));
+    const say = (msg) => {
+      const wrap = document.createElement('div'); wrap.className = 'note-popup';
+      wrap.innerHTML = '<div class="note-pad"><h3>🎟 AI uses</h3><p></p><button type="button">OK</button></div>';
+      wrap.querySelector('p').textContent = msg;
+      wrap.querySelector('button').addEventListener('click', () => wrap.remove());
+      document.body.appendChild(wrap);
+    };
+    if(r === 'cancelled'){ say('Payment was cancelled — no charge was made.'); return; }
+    let id = null; try{ id = sessionStorage.getItem(REFILL_SESSION_KEY) || localStorage.getItem(REFILL_SESSION_KEY); }catch(e){}
+    if(!id){ say('Thank you! We could not find the payment on this device. If you paid, email sermonrecord.support@gmail.com with your PayMongo receipt and we will add your uses.'); return; }
+    fetch('/.netlify/functions/buy-refill', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'confirm', session_id: id }) })
+      .then(res => res.json()).then(d => {
+        if(d.error) { say(d.error + ' If it still does not show after a few minutes, email sermonrecord.support@gmail.com with your receipt.'); return; }
+        try{ sessionStorage.removeItem(REFILL_SESSION_KEY); localStorage.removeItem(REFILL_SESSION_KEY); }catch(e){}
+        say('✅ Thank you! 5 more AI uses were added. You now have ' + d.extra + ' bought uses — they stay until your Premium code expires.');
+      }).catch(() => say('We could not confirm the payment right now. Please reopen the app in a minute.'));
+  })();
+  async function refreshAiUses(){
+    const code = localStorage.getItem(PREMIUM_CODE_KEY);
+    if(localStorage.getItem(PREMIUM_FLAG_KEY) !== 'true' || !code){ if(aiUsesNote) aiUsesNote.textContent = '⭐ Premium: 5 AI translations of highlights a month, each with AI narration.'; return; }
+    try{
+      const r = await fetch('/.netlify/functions/highlights-ai', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'status', code }) });
+      const d = JSON.parse((await r.text()).trim() || '{}');
+      if(!d.error) showAiUses(d);
+    }catch(e){}
+  }
+  document.getElementById('foldHighlights').addEventListener('toggle', (e) => { if(e.target.open) refreshAiUses(); });
+
   async function attemptTranslate(lang){
-    const res = await fetch('/.netlify/functions/translate', {
+    const code = localStorage.getItem(PREMIUM_CODE_KEY) || '';
+    const res = await fetch('/.netlify/functions/highlights-ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        // Only the highlights are translated (short, quick, and cheaper).
-        transcript: (currentSermon.bullets || []).join('\n'),
-        takeaway: '',
-        bullets: currentSermon.bullets,
-        targetLanguage: lang
-      })
+      body: JSON.stringify({ action: 'translate', code, bullets: currentSermon.bullets || [], language: lang })
     });
-    const data = await res.json().catch(() => ({}));
-    if(!res.ok) throw new Error(data.error || ('Translation failed (' + res.status + ').'));
+    let data = {};
+    try{ data = JSON.parse((await res.text()).trim() || '{}'); }catch(e){}
+    showAiUses(data);
+    if(data.error || !res.ok){
+      const err = new Error(data.error || ('Translation failed (' + res.status + ').'));
+      if(typeof data.left === 'number' || /Premium|expired/.test(data.error || '')) err.final = true;   // no point retrying
+      throw err;
+    }
     return data;
   }
 
@@ -3259,6 +3427,7 @@
       try {
         data = await attemptTranslate(lang);
       } catch (firstErr) {
+        if(firstErr.final) throw firstErr;
         // Some languages occasionally trip up the translator on the first
         // try (a malformed response) — silently retry once before giving up.
         translateNote.textContent = 'That took an extra try — still translating into ' + lang + '…';
@@ -3353,7 +3522,7 @@
   // ---- 🔊 AI voice (Premium): reads only the TRANSLATED highlights, clear in local dialects ----
   const aiVoiceBtn = document.getElementById('aiVoiceBtn');
   const aiVoiceAudio = document.getElementById('aiVoiceAudio');
-  const AI_VOICE_LABEL = '🔊 Hear translated highlights ⭐';
+  const AI_VOICE_LABEL = '🔊 Listen to translated highlights';
   let aiVoiceCache = { text: null, url: null };
   let aiVoiceBusy = false;
   function stopAiVoice(){
@@ -3402,6 +3571,20 @@
   // Only one voice at a time: playing the recording stops the reading voices.
   audioPlayback.addEventListener('play', () => { stopListening(); stopAiVoice(); });
 
+
+  document.getElementById('topTranslateBtn').addEventListener('click', () => {
+    if(document.getElementById('notePopup')) return;
+    const wrap = document.createElement('div'); wrap.id = 'notePopup'; wrap.className = 'note-popup';
+    wrap.innerHTML = '<div class="note-pad"><h3>📝 Note</h3><p>AI Translation and AI Narration are only in the <b>✨ Highlights</b> box.</p><button type="button">Open Highlights</button></div>';
+    wrap.querySelector('button').addEventListener('click', () => {
+      wrap.remove();
+      const f = document.getElementById('foldHighlights');
+      f.open = true;
+      f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    wrap.addEventListener('click', (e) => { if(e.target === wrap) wrap.remove(); });
+    document.body.appendChild(wrap);
+  });
 
   translateBtn.addEventListener('click', async () => {
     if(!currentSermon) return;
@@ -3722,7 +3905,9 @@
         commentaryResults.appendChild(card);
       });
 
-      // 🗣 Voices & worldview — loaded only when tapped (saves cost).
+      // 🔗 Free links to maps, pictures, charts and videos (no AI cost)
+      commentaryResults.appendChild(buildExploreLinks(data.reference || query));
+      // 📚 Voices across the ages — loads only when tapped (saves AI cost).
       commentaryResults.appendChild(buildVoicesFold(data.reference || query));
 
       // Clicking a linked term inline re-runs the search on that term.
@@ -3746,20 +3931,40 @@
   });
 
   function cvEl(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text !== undefined) e.textContent = text; return e; }
+  function buildExploreLinks(topic){
+    const q = encodeURIComponent(topic);
+    const box = cvEl('div', 'explore-box');
+    box.appendChild(cvEl('div', 'cv-h', '🔗 Explore more (opens in a new tab)'));
+    const row = cvEl('div', 'explore-links');
+    [
+      ['📖 Read the passage', 'https://www.biblegateway.com/quicksearch/?quicksearch=' + q],
+      ['🗺 Bible maps', 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(topic + ' Bible map')],
+      ['🖼 Pictures', 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(topic + ' Bible')],
+      ['📊 Charts & timelines', 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(topic + ' Bible chart timeline')],
+      ['▶ YouTube videos', 'https://www.youtube.com/results?search_query=' + encodeURIComponent(topic + ' Bible study')]
+    ].forEach(([label, url]) => {
+      const a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label;
+      row.appendChild(a);
+    });
+    box.appendChild(row);
+    return box;
+  }
+
   function buildVoicesFold(topic){
     const d = cvEl('details', 'cv-fold');
     const sum = cvEl('summary');
-    sum.appendChild(document.createTextNode('🗣 Voices & worldview'));
-    sum.appendChild(cvEl('small', '', 'Thinkers through the ages · scientists who believed in a Creator · creation or evolution'));
+    sum.appendChild(document.createTextNode('📚 Voices across the ages — references'));
+    sum.appendChild(cvEl('small', '', 'Tap to see theologians, philosophers, scientists, psychologists, educators & historians on this topic (about 30–40 seconds)'));
     d.appendChild(sum);
     const body = cvEl('div', 'cv-body');
     d.appendChild(body);
     let loaded = false;
-    d.addEventListener('toggle', async () => {
+    const load = async () => {
       if(!d.open || loaded) return;
       loaded = true;
       body.innerHTML = '';
-      body.appendChild(cvEl('div', 'cv-note', 'Gathering voices from across the centuries… about 15–30 seconds.'));
+      body.appendChild(cvEl('div', 'cv-note', '⏳ Gathering voices from across the centuries… this takes about 30–40 seconds, please wait.'));
       try{
         const res = await fetch('/.netlify/functions/bible-voices', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ query: topic }) });
         const raw = await res.text();
@@ -3775,6 +3980,9 @@
             const it = cvEl('div', 'cv-item');
             it.appendChild(cvEl('b', '', v.name));
             if(v.role) it.appendChild(cvEl('span', 'cv-role', ' — ' + v.role));
+            const wl = document.createElement('a'); wl.className = 'cv-link'; wl.target = '_blank'; wl.rel = 'noopener';
+            wl.href = 'https://en.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(v.name); wl.textContent = ' · about ↗';
+            it.appendChild(wl);
             it.appendChild(cvEl('div', '', v.view));
             if(v.response) it.appendChild(cvEl('div', 'cv-resp', '📖 Biblical response: ' + v.response));
             body.appendChild(it);
@@ -3787,6 +3995,9 @@
             const it = cvEl('div', 'cv-item');
             it.appendChild(cvEl('b', '', v.name));
             it.appendChild(cvEl('span', 'cv-label', v.label));
+            const sl = document.createElement('a'); sl.className = 'cv-link'; sl.target = '_blank'; sl.rel = 'noopener';
+            sl.href = 'https://en.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(v.name); sl.textContent = ' about ↗';
+            it.appendChild(sl);
             it.appendChild(cvEl('div', 'cv-role', [v.years, v.field].filter(Boolean).join(' · ')));
             it.appendChild(cvEl('div', '', v.view));
             body.appendChild(it);
@@ -3809,7 +4020,8 @@
         body.innerHTML = '';
         body.appendChild(cvEl('div', 'cv-note', (err.message || 'Could not load right now.') + ' Close and open this section to try again.'));
       }
-    });
+    };
+    d.addEventListener('toggle', load);   // loads only when tapped (saves AI cost)
     return d;
   }
 
@@ -4648,7 +4860,7 @@
       if(savedCode){
         myCodeHint.style.display = 'block';
         const expiryLine = expiresAt ? (' — active until ' + formatExpiryDate(expiresAt)) : '';
-        myCodeHint.textContent = 'Your access code (share with family to unlock their device too): ' + savedCode + expiryLine;
+        myCodeHint.textContent = 'Your access code (keep it private — make family codes below for family members): ' + savedCode + expiryLine;
       }
       if(savedCode && savedCode.startsWith('SE-')){
         familyCodesSection.style.display = 'block';
@@ -4881,7 +5093,7 @@
               const expiryLine = data.expiresAt ? ('<div style="font-size:12px; color:var(--text-muted); margin-top:8px;">Active for 30 days, until ' + formatExpiryDate(data.expiresAt) + '</div>') : '';
               showBanner(
                 '<div>🎉 Thank you for your support! Premium is unlocked on this device.' +
-                '<div class="code-box"><div class="code-label">Your access code (save this — it also unlocks Premium for family members)</div>' +
+                '<div class="code-box"><div class="code-label">Your access code (save this — you can make up to 5 family codes from it in Settings)</div>' +
                 '<div class="code-value">' + data.code + '</div>' +
                 expiryLine +
                 '<button class="copy-code-btn" id="copyCodeBtn">Copy code</button></div></div>'
