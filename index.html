@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sermon Recorder — Recorder, Transcriber &amp; Translator</title>
-<meta name="description" content="Record, transcribe, and translate sermons — built for churches.">
+<title>ScitechLectureTool — Recorder, Transcriber &amp; Translator</title>
+<meta name="description" content="Record, transcribe, and translate lectures — built for students and teachers.">
 <meta name="theme-color" content="#151B26">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
@@ -1000,6 +1000,11 @@
   .hl-tools{ margin-top:18px; padding-top:14px; border-top:1px dashed #9cc8ad; }
   .ai-uses{ margin-top:8px; font-size:13px; font-weight:600; color:#1F6B40; background:#EEF8F1; border:1px solid #CFE3D6; border-radius:8px; padding:6px 10px; }
   .ai-uses:empty{ display:none; }
+  /* Free month: Premium is hidden for now */
+  .icon-with-label:has(#paywallBtn){ display:none !important; }
+  .free-box{ margin:6px 0 14px; padding:14px 16px; border:2px solid #3E9B63; border-radius:12px; background:#F4FAF6; color:#111; }
+  .free-box b{ display:block; font-size:15px; margin-bottom:4px; }
+  .free-box .row{ font-size:14px; margin:2px 0; }
   .renew-btn{ display:inline-block; margin:8px 0 0; padding:9px 14px; border-radius:10px; border:none; background:#3E9B63; color:#fff; font-weight:700; font-size:14px; cursor:pointer; }
   .renew-steps{ margin:14px 0 4px; padding:14px 16px; border:2px solid #3E9B63; border-radius:12px; background:#F4FAF6; color:#111; }
   .renew-steps .renew-h{ font-weight:700; margin-bottom:6px; }
@@ -1535,6 +1540,101 @@
     color:#174EA6;
     background:#EAF1FE;
   }
+
+  /* LESSON PLAN GENERATOR */
+  .lesson-plan-form{ display:flex; flex-direction:column; gap:12px; margin-bottom:18px; }
+  .lesson-plan-field label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-muted);
+    margin-bottom:5px;
+  }
+  .lesson-plan-field input[type="text"],
+  .lesson-plan-field select{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    border-radius:10px;
+    padding:10px 12px;
+    color:var(--text);
+    font-size:14px;
+    font-family:'Inter',sans-serif;
+  }
+  .lesson-plan-row2{ display:flex; gap:12px; }
+  .lp-note{ margin:10px 0 14px; padding:12px 14px; border-radius:12px; background:#FFF8E6; border:1px solid #F0D9A0; color:#4A3B12; font-size:13.5px; line-height:1.5; }
+  .lesson-plan-field textarea{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid #DADCE0; font-size:15px; font-family:inherit; color:#1C2331; background:#fff; }
+  .lp-ind-box{ border:2px solid #3E9B63; border-radius:12px; padding:10px 12px; background:#fff; }
+  .lp-ind-box summary{ cursor:pointer; font-weight:700; color:#1F6B40; }
+  .lp-ind-help{ font-size:12.5px; color:#4B5563; margin:8px 0; }
+  .lp-ind{ display:flex; gap:8px; align-items:flex-start; font-size:13.5px; color:#111; margin:6px 0; line-height:1.35; }
+  .lp-ind input{ width:18px; height:18px; accent-color:#3E9B63; flex-shrink:0; margin-top:1px; }
+  .lp-card{ border:2px solid #3E9B63; border-radius:12px; padding:14px 16px; margin:12px 0; background:#fff; color:#111; }
+  .lp-card h3{ margin:0 0 8px; font-size:16px; color:#1F6B40; }
+  .lp-card .lp-sub{ font-weight:700; margin:10px 0 4px; font-size:14px; }
+  .lp-card p, .lp-card li{ font-size:14px; line-height:1.5; margin:4px 0; }
+  .lp-card ul{ margin:4px 0; padding-left:18px; }
+  .lp-step{ border-top:1px dashed #cfe3d6; padding:8px 0; }
+  .lp-step .lp-min{ display:inline-block; font-size:12px; font-weight:700; background:#EEF8F1; color:#1F6B40; border-radius:999px; padding:1px 8px; margin-left:6px; }
+  .lp-tag{ display:inline-block; font-size:11.5px; font-weight:700; background:#eef4ff; color:#1a4fb3; border-radius:999px; padding:1px 7px; margin:2px 3px 0 0; }
+  .lp-declare{ font-size:12.5px; color:#4B5563; font-style:italic; margin-top:8px; }
+  .lesson-plan-row2 .lesson-plan-field{ flex:1; min-width:0; }
+  .lesson-plan-generate-btn{
+    background:var(--gold);
+    color:var(--ink-deep);
+    border:none;
+    border-radius:10px;
+    padding:12px 16px;
+    font-weight:700;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .lesson-plan-generate-btn:disabled{ opacity:0.6; cursor:default; }
+  .lesson-plan-section{
+    padding:0 0 14px;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--surface-line);
+  }
+  .lesson-plan-section:last-child{ border-bottom:none; margin-bottom:0; }
+  .lesson-plan-section .lp-title{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    color:var(--gold-bright);
+    font-size:14px;
+    margin-bottom:5px;
+  }
+  .lesson-plan-section .lp-body{
+    font-size:13px;
+    color:var(--text);
+    line-height:1.6;
+    white-space:pre-line;
+  }
+  .lesson-plan-section .lp-body ul{ margin:4px 0 4px 18px; padding:0; }
+  .lesson-plan-print-btn{
+    display:block;
+    margin:6px auto 0;
+    background:none;
+    border:1px solid var(--gold);
+    color:var(--gold-bright);
+    border-radius:10px;
+    padding:8px 18px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .page-white .lesson-plan-field input[type="text"],
+  .page-white .lesson-plan-field select{
+    background:#fff;
+    border:1px solid #DADCE0;
+    color:#1C2331;
+  }
+  .page-white .lesson-plan-section{ border-bottom-color:#E3E5E8; }
+  .page-white .lesson-plan-section .lp-title{ color:#1C2331; }
+  .page-white .lesson-plan-section .lp-body{ color:#374151; }
+  .page-white .lesson-plan-print-btn{
+    border-color:#1a73e8;
+    color:#1a73e8;
+  }
 </style>
 </head>
 <body>
@@ -1542,7 +1642,7 @@
 <div class="shell">
   <header>
     <div class="brand">
-      Sermon Recorder
+      ScitechLectureTool
       <div class="brand-tagline">Transcriber &amp; Translator</div>
     </div>
     <div class="header-actions">
@@ -1556,7 +1656,7 @@
         <span class="icon-label">Home</span>
       </div>
       <div class="icon-with-label">
-        <button class="gear-btn" id="paywallBtn" aria-label="Go Premium">
+        <button class="gear-btn" id="paywallBtn" aria-label="Go Premium" data-premium-hidden>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M12 2l2.6 6.2L21 9l-5 4.4L17.3 21 12 17.3 6.7 21 8 13.4 3 9l6.4-0.8z" stroke-linejoin="round"/>
           </svg>
@@ -1611,7 +1711,14 @@
         <span class="date">Settings</span>
         <button class="new-recording-btn" id="closeSettingsBtn">Close</button>
       </div>
+      <div class="free-box" id="freeBox">
+        <b>🎁 Your free load</b>
+        <div class="row" id="freeMinutesRow">🎙 Recording: 60 free minutes</div>
+        <div class="row" id="freeAiRow">✨ AI uses: 5 free (lesson plans, quizzes, translations)</div>
+        <div class="row" style="color:#4B5563; font-size:12.5px; margin-top:4px;">Like free load: use it any day, it doesn't expire. Your recordings are always saved, even when the free minutes are used up.</div>
+      </div>
       <div class="settings-list">
+        <div id="premiumArea" style="display:none;">
         <div class="settings-item">
           <span>⭐ Premium status</span>
           <span class="premium-badge locked" id="premiumBadge">Not unlocked</span>
@@ -1625,121 +1732,113 @@
         <div id="familyCodesSection" style="display:none;">
           <div class="hint">Create up to 5 access codes for family members. They share your 5 AI uses a month and stop when your code expires. You can turn any of them off later.</div>
           <div class="redeem-row">
-            <input type="text" id="familyLabelInput" placeholder="Family member's name (e.g. Mom)">
+            <input type="text" id="familyLabelInput" placeholder="Student or family member's name (e.g. Juan)">
             <button id="createFamilyCodeBtn">Create code</button>
           </div>
           <div class="error-box" id="familyCodeError" style="display:none;"></div>
           <div id="familyCodesList"></div>
         </div>
-        <div class="settings-item clickable feature-row" id="concordanceRow" style="--accent:#C9A24B"><span>📖 Bible Concordance</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable feature-row" id="commentaryRow" style="--accent:#B08968"><span>📜 Bible Commentary</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable feature-row" id="authorsRow" style="--accent:#8C7853"><span>✍️ Bible Authors &amp; History</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable feature-row" id="genealogyRow" style="--accent:#6E8B5C"><span>🌳 Bible Genealogy — Adam to Jesus</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable feature-row" id="scienceRow" style="--accent:#5B8A8C"><span>🔬 Bible &amp; Science</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable feature-row" id="quotesRow" style="--accent:#A66B8E"><span>💬 Quotable Quotes</span><span class="chevron">→</span></div>
-        <div class="settings-item clickable feature-row" id="comicRow" style="--accent:#C9762E"><span>🎨 Kids Comic Bible Stories</span><span class="chevron">→</span></div>
+        </div>
+        <div class="settings-item clickable feature-row" id="lessonPlanRow" style="--accent:#2E6B8C"><span>📝 ILAW Lesson Plan helper</span><span class="chevron">→</span></div>
       </div>
-      <div class="hint">Got an access code from a payment or a family member? Enter it above to unlock Premium on this device. More features will appear here as they're built.</div>
+
     </div>
 
-    <!-- BIBLE CONCORDANCE -->
-    <div class="library page-white research-panel" id="concordanceView" style="display:none;">
+    <!-- LESSON PLAN GENERATOR -->
+    <div class="library page-white" id="lessonplanView" style="display:none;">
       <div class="result-meta">
-        <span class="date">Bible Concordance</span>
-        <button class="new-recording-btn" id="closeConcordanceBtn">Close</button>
+        <span class="date">ILAW Lesson Plan helper</span>
+        <button class="new-recording-btn" id="closeLessonPlanBtn">Close</button>
       </div>
-      <input type="text" class="library-search" id="concordanceInput" placeholder="Search a topic or word (e.g. forgiveness, worry, faith)…">
-      <div class="error-box" id="concordanceError" style="display:none;"></div>
-      <div id="concordanceResults"></div>
-    </div>
-
-    <!-- BIBLE AUTHORS & HISTORY -->
-    <div class="library" id="authorsView" style="display:none;">
-      <div class="result-meta">
-        <span class="date">Bible Authors &amp; History</span>
-        <button class="new-recording-btn" id="closeAuthorsBtn">Close</button>
+      <div class="concordance-intro">Fill in your lesson and your own ideas, and the app drafts an <b>ILAW</b> lesson plan (DepEd Order No. 016, s. 2026: Intentions, Learning Experience, Assessing Learning, Ways Forward) — with each part matched to the classroom-observation indicators and an observation-day checklist. Works for Kinder to College, and for trainings and meetings.</div>
+      <div class="lp-note">✍️ This is a <b>draft to help you</b>. DO 016 does not allow fully AI-generated lesson plans, so please read it, change it to fit your class, and make it your own. The printout says "AI-assisted, reviewed by the teacher". No plan can guarantee a rating — the observer rates your actual teaching — but a clear, well-aligned plan helps a lot.</div>
+      <div class="lesson-plan-form">
+        <div class="lesson-plan-field">
+          <label for="lpSubjectInput">Subject / learning area</label>
+          <input type="text" id="lpSubjectInput" placeholder="e.g. Science, Araling Panlipunan, Customer Service">
+        </div>
+        <div class="lesson-plan-row2">
+          <div class="lesson-plan-field">
+            <label for="lpGradeSelect">Level</label>
+            <select id="lpGradeSelect">
+              <option value="Kindergarten">Kindergarten</option>
+              <option value="Grade 1">Grade 1</option>
+              <option value="Grade 2">Grade 2</option>
+              <option value="Grade 3">Grade 3</option>
+              <option value="Grade 4">Grade 4</option>
+              <option value="Grade 5">Grade 5</option>
+              <option value="Grade 6">Grade 6</option>
+              <option value="Grade 7" selected>Grade 7</option>
+              <option value="Grade 8">Grade 8</option>
+              <option value="Grade 9">Grade 9</option>
+              <option value="Grade 10">Grade 10</option>
+              <option value="Grade 11">Grade 11</option>
+              <option value="Grade 12">Grade 12</option>
+              <option value="College">College</option>
+              <option value="Corporate training">Corporate training</option>
+              <option value="Meeting / seminar">Meeting / seminar</option>
+            </select>
+          </div>
+          <div class="lesson-plan-field">
+            <label for="lpDurationSelect">Length</label>
+            <select id="lpDurationSelect">
+              <option value="30">30 minutes</option>
+              <option value="40">40 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="50">50 minutes</option>
+              <option value="60" selected>60 minutes (1 hour)</option>
+              <option value="80">80 minutes</option>
+              <option value="90">90 minutes (1½ hours)</option>
+              <option value="120">2 hours</option>
+              <option value="180">3 hours</option>
+              <option value="240">Half day (4 hours)</option>
+              <option value="480">Whole day (8 hours)</option>
+            </select>
+          </div>
+        </div>
+        <div class="lesson-plan-field">
+          <label for="lpTopicInput">Topic or learning competency</label>
+          <input type="text" id="lpTopicInput" placeholder="e.g. Describe the process of photosynthesis">
+        </div>
+        <div class="lesson-plan-field">
+          <label for="lpCodeInput">Competency code (optional)</label>
+          <input type="text" id="lpCodeInput" placeholder="e.g. from your MATATAG curriculum guide">
+        </div>
+        <div class="lesson-plan-field">
+          <label for="lpLearnersInput">Your learners (optional)</label>
+          <input type="text" id="lpLearnersInput" placeholder="e.g. 38 learners, mixed abilities, 4 struggling readers, mostly Tagalog speakers">
+        </div>
+        <div class="lesson-plan-field">
+          <label for="lpIdeasInput">Your own ideas, activities or materials (recommended)</label>
+          <textarea id="lpIdeasInput" rows="3" placeholder="e.g. I want to use real leaves, a group experiment and a short video"></textarea>
+        </div>
+        <details class="lp-ind-box" id="lpIndBox">
+          <summary>🎯 Classroom observation indicators to show (tap to choose)</summary>
+          <div class="lp-ind-help">Tick the indicators your school will observe this year — please confirm with your principal or the latest PMES memo. Already ticked: the ones reported for SY 2026–2027.</div>
+            <label class="lp-ind"><input type="checkbox" value="1.1.2" checked> <b>1.1.2</b> Content knowledge within and across subjects</label>
+            <label class="lp-ind"><input type="checkbox" value="1.3.2"> <b>1.3.2</b> Positive use of ICT</label>
+            <label class="lp-ind"><input type="checkbox" value="1.4.2" checked> <b>1.4.2</b> Literacy and numeracy strategies</label>
+            <label class="lp-ind"><input type="checkbox" value="1.5.2" checked> <b>1.5.2</b> Critical, creative and higher-order thinking</label>
+            <label class="lp-ind"><input type="checkbox" value="1.6.2" checked> <b>1.6.2</b> Mother Tongue, Filipino and English</label>
+            <label class="lp-ind"><input type="checkbox" value="2.1.2" checked> <b>2.1.2</b> Safe and secure learning environment</label>
+            <label class="lp-ind"><input type="checkbox" value="2.2.2" checked> <b>2.2.2</b> Fairness, respect and care</label>
+            <label class="lp-ind"><input type="checkbox" value="2.3.2"> <b>2.3.2</b> Exploration, discovery and hands-on activities</label>
+            <label class="lp-ind"><input type="checkbox" value="2.6.2"> <b>2.6.2</b> Positive, non-violent discipline</label>
+            <label class="lp-ind"><input type="checkbox" value="3.1.2"> <b>3.1.2</b> Differentiated learning experiences</label>
+            <label class="lp-ind"><input type="checkbox" value="3.2.2" checked> <b>3.2.2</b> Responsive to learners' backgrounds</label>
+            <label class="lp-ind"><input type="checkbox" value="3.5.2" checked> <b>3.5.2</b> Indigenous learners (IKSP)</label>
+            <label class="lp-ind"><input type="checkbox" value="4.1.2"> <b>4.1.2</b> Developmentally sequenced lesson</label>
+            <label class="lp-ind"><input type="checkbox" value="4.5.2"> <b>4.5.2</b> Teaching resources, including ICT</label>
+            <label class="lp-ind"><input type="checkbox" value="5.3.2" checked> <b>5.3.2</b> Timely, constructive feedback</label>
+        </details>
+        <button class="lesson-plan-generate-btn" id="lpGenerateBtn">✨ Draft my ILAW lesson plan (uses 1 free AI use)</button>
       </div>
-      <input type="text" class="library-search" id="authorsInput" placeholder="Search an author (e.g. Paul, Moses, John)…">
-      <div class="error-box" id="authorsError" style="display:none;"></div>
-      <div id="authorsResults"></div>
-    </div>
-
-    <!-- BIBLE & SCIENCE -->
-    <div class="library" id="scienceView" style="display:none;">
-      <div class="result-meta">
-        <span class="date">Bible &amp; Science</span>
-        <button class="new-recording-btn" id="closeScienceBtn">Close</button>
-      </div>
-      <input type="text" class="library-search" id="scienceInput" placeholder="Search a topic or place (e.g. the Flood, Jericho, the Exodus)…">
-      <div class="error-box" id="scienceError" style="display:none;"></div>
-      <div id="scienceResults"></div>
-    </div>
-
-    <!-- BIBLE COMMENTARY -->
-    <div class="library page-white research-panel" id="commentaryView" style="display:none;">
-      <div class="result-meta">
-        <span class="date">Bible Commentary</span>
-        <button class="new-recording-btn" id="closeCommentaryBtn">Close</button>
-      </div>
-      <input type="text" class="library-search" id="commentaryInput" placeholder="Enter a verse or passage (e.g. John 3:16, Psalm 23, the Beatitudes)…">
-      <div class="error-box" id="commentaryError" style="display:none;"></div>
-      <div id="commentaryResults"></div>
-    </div>
-
-    <!-- BIBLE GENEALOGY -->
-    <div class="library" id="genealogyView" style="display:none;">
-      <div class="result-meta">
-        <span class="date">Bible Genealogy — Adam to Jesus</span>
-        <button class="new-recording-btn" id="closeGenealogyBtn">Close</button>
-      </div>
-      <input type="text" class="library-search" id="genealogyInput" placeholder="Search a name (e.g. Noah, Abraham, David, Jesus)…">
-      <div class="error-box" id="genealogyError" style="display:none;"></div>
-      <div id="genealogyResults"></div>
-    </div>
-
-    <!-- QUOTABLE QUOTES -->
-    <div class="library" id="quotesView" style="display:none;">
-      <div class="result-meta">
-        <span class="date">Quotable Quotes</span>
-        <button class="new-recording-btn" id="closeQuotesBtn">Close</button>
-      </div>
-      <input type="text" class="library-search" id="quotesInput" placeholder="Search a topic (e.g. love, patience, courage, hope)…">
-      <div class="error-box" id="quotesError" style="display:none;"></div>
-      <div id="quotesResults"></div>
-    </div>
-
-    <!-- KIDS COMIC BIBLE STORIES -->
-    <div class="library" id="comicView" style="display:none;">
-      <div class="result-meta">
-        <span class="date">Kids Comic Bible Stories</span>
-        <button class="new-recording-btn" id="closeComicBtn">Close</button>
-      </div>
-
-      <div id="comicPicker" class="comic-picker">
-        <div class="concordance-intro">Pick a story to turn into a comic:</div>
-      </div>
-
-      <div class="status-row" id="comicProgress" style="display:none;">
+      <div class="error-box" id="lpError" style="display:none;"></div>
+      <div class="status-row" id="lpStatusRow" style="display:none;">
         <div class="spinner"></div>
-        <span id="comicProgressText">Working on it…</span>
+        <span>Drafting your ILAW lesson plan… about 20–40 seconds.</span>
       </div>
-
-      <div class="error-box" id="comicError" style="display:none;"></div>
-
-      <div id="comicViewer" style="display:none;">
-        <div class="comic-panel-stage">
-          <img class="comic-panel-img" id="comicPanelImg" alt="Comic panel illustration">
-          <div class="paper-card comic-caption" id="comicPanelCaption"></div>
-        </div>
-        <audio id="comicNarrationAudio" style="display:none;"></audio>
-        <div class="comic-nav">
-          <button class="skip-btn" id="comicPrevBtn">◀ Prev</button>
-          <button class="skip-btn" id="comicPlayNarrationBtn" style="display:none;">🔊 Play</button>
-          <span class="hint" id="comicPanelCounter"></span>
-          <button class="skip-btn" id="comicNextBtn">Next ▶</button>
-        </div>
-        <button class="new-recording-btn" id="comicNewStoryBtn" style="margin-top:16px;">Choose another story</button>
-      </div>
+      <div id="lpResults"></div>
     </div>
 
     <!-- RECORD STAGE -->
@@ -1756,7 +1855,7 @@
         <button class="pause-btn" id="pauseBtn">Pause</button>
         <button class="stop-btn" id="stopBtn">Stop</button>
       </div>
-      <div class="hint" id="hint">Place the phone near the pulpit, away from speakers, and switch on airplane mode to avoid interruptions.</div>
+      <div class="hint" id="hint">Place the phone near the teacher, away from fans and speakers, and switch on airplane mode to avoid interruptions.</div>
       <button class="upload-btn" id="uploadBtn">Or upload an existing recording</button>
       <input type="file" id="fileInput" accept="audio/*,video/*" class="visually-hidden">
 
@@ -1801,12 +1900,12 @@
         <button class="translate-btn" id="topTranslateBtn">🌐 Translate</button>
       </div>
       <details class="se-fold" id="foldHighlights">
-        <summary><span>✨ Highlights<small>Main points · AI translation &amp; AI narration here</small></span></summary>
+        <summary><span>✨ Highlights<small>Main points · AI translation here</small></span></summary>
         <div class="se-fold-body"><div class="paper-card">
         <div class="eyebrow">Highlights</div>
         <ul class="bullets" id="bulletsList"></ul>
         <div class="hl-tools">
-          <div class="hl-tools-h">🌐 AI Translation &amp; 🔊 AI Narration ⭐</div>
+          <div class="hl-tools-h">🌐 AI Translation</div>
           <div class="translate-row">
             <select class="lang-select" id="translateLangSelect">
           <option value="English">English</option>
@@ -1855,7 +1954,7 @@
           <button class="refill-btn" id="refillBtn" style="display:none;">🎟 Buy 5 more AI uses — ₱50</button>
           <div class="premium-note" id="translatePremiumNote" style="display:none;"></div>
           <div class="player-row wrap" id="aiVoiceRow" style="display:none; margin-top:10px;">
-            <button class="translate-btn" id="aiVoiceBtn">🔊 Listen to translated highlights</button>
+            <button class="translate-btn" id="aiVoiceBtn" style="display:none;">🔊 Listen to translated highlights</button>
             <audio id="aiVoiceAudio" style="display:none;"></audio>
           </div>
         </div>
@@ -1872,14 +1971,14 @@
       </details>
 
       <details class="se-fold" id="foldTakeaway">
-        <summary><span>💡 Today's takeaway<small>The main message in a few lines</small></span></summary>
+        <summary><span>💡 Key takeaway<small>The main message in a few lines</small></span></summary>
         <div class="se-fold-body"><div class="paper-card">
-        <div class="eyebrow">Today's takeaway</div>
+        <div class="eyebrow">Key takeaway</div>
         <div class="takeaway-text" id="takeawayText"></div>
       </div></div></details>
 
       <details class="se-fold" id="foldQuiz">
-        <summary><span>📝 Quiz for Students<small>Questions from this sermon · Premium</small></span></summary>
+        <summary><span>📝 Quiz for Students<small>Questions from this lecture · uses 1 free AI use</small></span></summary>
         <div class="se-fold-body"><div class="paper-card">
         <div class="eyebrow">Quiz for Students</div>
         <div class="premium-note" id="quizPremiumNote" style="display:none;"></div>
@@ -1909,10 +2008,11 @@
       </div></div></details>
     </div>
 
+
     <!-- LIBRARY -->
     <div class="library page-white" id="libraryView" style="display:none;">
       <div class="result-meta">
-        <span class="date">Past sermons</span>
+        <span class="date">Past lectures</span>
         <button class="new-recording-btn" id="closeLibraryBtn">Close</button>
       </div>
       <input type="text" class="library-search" id="librarySearchInput" placeholder="Search title, speaker, topic, date…">
@@ -1921,21 +2021,21 @@
         <select id="librarySort" class="lang-select">
           <option value="new">📅 Newest first</option>
           <option value="old">📅 Oldest first</option>
-          <option value="speaker">👤 Speaker</option>
-          <option value="topic">🏷 Topic</option>
-          <option value="event">⛪ Event</option>
+          <option value="speaker">👤 Teacher / speaker</option>
+          <option value="topic">🏷 Subject / topic</option>
+          <option value="event">🏫 Class / event</option>
           <option value="title">🔤 Title (A–Z)</option>
         </select>
       </div>
       <div class="lib-chips" id="libraryChips"></div>
       <div id="libraryList"></div>
-      <div class="hint" id="libraryEmpty" style="display:none;">No saved sermons yet. Once you finish a recording, it'll show up here automatically.</div>
+      <div class="hint" id="libraryEmpty" style="display:none;">No saved lectures yet. Once you finish a recording, it'll show up here automatically.</div>
     </div>
 
     <!-- PAYWALL -->
     <div class="paywall page-white" id="paywallView" style="display:none;">
       <div class="result-meta">
-        <span class="date">Sermon Recorder Premium</span>
+        <span class="date">ScitechLectureTool Premium</span>
         <button class="new-recording-btn" id="closePaywallBtn">Close</button>
       </div>
 
@@ -1943,26 +2043,19 @@
 
       <div class="paywall-hero">
         <div class="paywall-badge">⭐</div>
-        <h2 class="paywall-title">Support Sermon Recorder</h2>
+        <h2 class="paywall-title">Support ScitechLectureTool</h2>
         <p class="paywall-sub">Help keep this tool running and growing.</p>
       </div>
 
-      <div class="founding-banner">🎉 Founding Supporter Offer — be among the first to help build this ministry tool.</div>
+      <div class="founding-banner">🎉 Founding Supporter Offer — be among the first to help build this classroom tool.</div>
 
       <ul class="feature-list">
         <li><span class="check">✓</span> Recordings, transcripts, highlights &amp; takeaways (free for everyone)</li>
         <li><span class="check">✓</span> Covers you and up to 5 family members (family codes share your AI uses)</li>
         <li><span class="check">✓</span> Easy-to-use recording, right from your phone or laptop</li>
-        <li><span class="check">✓</span> AI translation &amp; AI narration of the highlights in 37 languages — 5 times a month (need more? buy 5 more for ₱50 anytime)</li>
-        <li><span class="check">✓</span> Bible Concordance — search any topic across Scripture</li>
-        <li><span class="check">✓</span> Bible Commentary — context &amp; meaning for any verse</li>
-        <li><span class="check">✓</span> Voices &amp; worldview — what theologians, philosophers &amp; scientists across the ages said, with a biblical response</li>
-        <li><span class="check">✓</span> Bible Authors &amp; Their Lives — the history behind every book</li>
-        <li><span class="check">✓</span> Bible Genealogy — trace the line from Adam to Jesus</li>
-        <li><span class="check">✓</span> Bible &amp; Science — honest, balanced answers</li>
-        <li><span class="check">✓</span> Quotable Quotes for sermon prep</li>
-        <li><span class="check">✓</span> Illustrated Bible Stories — narrated, comic-style retellings</li>
+        <li><span class="check">✓</span> AI translation of the highlights in 37 languages</li>
         <li><span class="check">✓</span> Quiz for Students — multiple choice, true or false, fill in the blank, matching, short answer &amp; essay</li>
+        <li><span class="check">✓</span> ILAW Lesson Plan helper for teachers</li>
       </ul>
 
       <div class="price-tag">
@@ -2038,58 +2131,20 @@
   const settingsBtn = document.getElementById('settingsBtn');
   const settingsView = document.getElementById('settingsView');
   const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-  const concordanceView = document.getElementById('concordanceView');
-  const closeConcordanceBtn = document.getElementById('closeConcordanceBtn');
-  const concordanceRow = document.getElementById('concordanceRow');
-  const concordanceInput = document.getElementById('concordanceInput');
-  const concordanceError = document.getElementById('concordanceError');
-  const concordanceResults = document.getElementById('concordanceResults');
-  const authorsView = document.getElementById('authorsView');
-  const closeAuthorsBtn = document.getElementById('closeAuthorsBtn');
-  const authorsRow = document.getElementById('authorsRow');
-  const authorsInput = document.getElementById('authorsInput');
-  const authorsError = document.getElementById('authorsError');
-  const authorsResults = document.getElementById('authorsResults');
-  const commentaryView = document.getElementById('commentaryView');
-  const closeCommentaryBtn = document.getElementById('closeCommentaryBtn');
-  const commentaryRow = document.getElementById('commentaryRow');
-  const commentaryInput = document.getElementById('commentaryInput');
-  const commentaryError = document.getElementById('commentaryError');
-  const commentaryResults = document.getElementById('commentaryResults');
-  const genealogyView = document.getElementById('genealogyView');
-  const closeGenealogyBtn = document.getElementById('closeGenealogyBtn');
-  const genealogyRow = document.getElementById('genealogyRow');
-  const genealogyInput = document.getElementById('genealogyInput');
-  const genealogyError = document.getElementById('genealogyError');
-  const genealogyResults = document.getElementById('genealogyResults');
-  const scienceView = document.getElementById('scienceView');
-  const closeScienceBtn = document.getElementById('closeScienceBtn');
-  const scienceRow = document.getElementById('scienceRow');
-  const scienceInput = document.getElementById('scienceInput');
-  const scienceError = document.getElementById('scienceError');
-  const scienceResults = document.getElementById('scienceResults');
-  const quotesView = document.getElementById('quotesView');
-  const closeQuotesBtn = document.getElementById('closeQuotesBtn');
-  const quotesRow = document.getElementById('quotesRow');
-  const quotesInput = document.getElementById('quotesInput');
-  const quotesError = document.getElementById('quotesError');
-  const quotesResults = document.getElementById('quotesResults');
-  const comicView = document.getElementById('comicView');
-  const closeComicBtn = document.getElementById('closeComicBtn');
-  const comicRow = document.getElementById('comicRow');
-  const comicPicker = document.getElementById('comicPicker');
-  const comicProgress = document.getElementById('comicProgress');
-  const comicProgressText = document.getElementById('comicProgressText');
-  const comicError = document.getElementById('comicError');
-  const comicViewer = document.getElementById('comicViewer');
-  const comicPanelImg = document.getElementById('comicPanelImg');
-  const comicPanelCaption = document.getElementById('comicPanelCaption');
-  const comicPanelCounter = document.getElementById('comicPanelCounter');
-  const comicPrevBtn = document.getElementById('comicPrevBtn');
-  const comicNextBtn = document.getElementById('comicNextBtn');
-  const comicNewStoryBtn = document.getElementById('comicNewStoryBtn');
-  const comicNarrationAudio = document.getElementById('comicNarrationAudio');
-  const comicPlayNarrationBtn = document.getElementById('comicPlayNarrationBtn');
+  const lessonplanView = document.getElementById('lessonplanView');
+  const closeLessonPlanBtn = document.getElementById('closeLessonPlanBtn');
+  const lessonPlanRow = document.getElementById('lessonPlanRow');
+  const lpSubjectInput = document.getElementById('lpSubjectInput');
+  const lpGradeSelect = document.getElementById('lpGradeSelect');
+  const lpDurationSelect = document.getElementById('lpDurationSelect');
+  const lpTopicInput = document.getElementById('lpTopicInput');
+  const lpCodeInput = document.getElementById('lpCodeInput');
+  const lpLearnersInput = document.getElementById('lpLearnersInput');
+  const lpIdeasInput = document.getElementById('lpIdeasInput');
+  const lpGenerateBtn = document.getElementById('lpGenerateBtn');
+  const lpError = document.getElementById('lpError');
+  const lpStatusRow = document.getElementById('lpStatusRow');
+  const lpResults = document.getElementById('lpResults');
   const equalizer = document.getElementById('equalizer');
   const pauseStopRow = document.getElementById('pauseStopRow');
   const stopBtn = document.getElementById('stopBtn');
@@ -2113,48 +2168,39 @@
   });
   closeSettingsBtn.addEventListener('click', () => showView(screenBeforeSettings));
 
-  concordanceRow.addEventListener('click', () => {
-    showView('concordance');
-    concordanceError.style.display = 'none';
+  lessonPlanRow.addEventListener('click', () => {
+    showView('lessonplan');
+    lpError.style.display = 'none';
   });
-  closeConcordanceBtn.addEventListener('click', () => showView('settings'));
+  closeLessonPlanBtn.addEventListener('click', () => showView('settings'));
 
-  authorsRow.addEventListener('click', () => {
-    showView('authors');
-    authorsError.style.display = 'none';
-  });
-  closeAuthorsBtn.addEventListener('click', () => showView('settings'));
-
-  commentaryRow.addEventListener('click', () => {
-    showView('commentary');
-    commentaryError.style.display = 'none';
-  });
-  closeCommentaryBtn.addEventListener('click', () => showView('settings'));
-
-  genealogyRow.addEventListener('click', () => {
-    showView('genealogy');
-    genealogyError.style.display = 'none';
-  });
-  closeGenealogyBtn.addEventListener('click', () => showView('settings'));
-
-  scienceRow.addEventListener('click', () => {
-    showView('science');
-    scienceError.style.display = 'none';
-  });
-  closeScienceBtn.addEventListener('click', () => showView('settings'));
-
-  quotesRow.addEventListener('click', () => {
-    showView('quotes');
-    quotesError.style.display = 'none';
-  });
-  closeQuotesBtn.addEventListener('click', () => showView('settings'));
-
-  comicRow.addEventListener('click', () => {
-    showView('comic');
-    showComicPicker();
-  });
-  closeComicBtn.addEventListener('click', () => showView('settings'));
-
+  // ---- Free month: each phone/laptop has its own ID for the free minutes and AI uses ----
+  const FREE_MODE = true;   // Premium is hidden; everyone gets the free monthly allowance
+  const DEVICE_ID = (function(){
+    let d = null;
+    try{ d = localStorage.getItem('st_device'); }catch(e){}
+    if(!d || !/^d-[a-z0-9]{12,40}$/.test(d)){
+      const a = new Uint8Array(12); crypto.getRandomValues(a);
+      d = 'd-' + Array.from(a, b => b.toString(36).padStart(2, '0')).join('').slice(0, 24);
+      try{ localStorage.setItem('st_device', d); }catch(e){}
+    }
+    return d;
+  })();
+  async function freeStatus(){
+    try{
+      const r = await fetch('/.netlify/functions/free-ai', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'status', device: DEVICE_ID }) });
+      const d = JSON.parse((await r.text()).trim() || '{}');
+      if(d.error) return null;
+      showFreeStatus(d);
+      return d;
+    }catch(e){ return null; }
+  }
+  function showFreeStatus(d){
+    if(!d) return;
+    const m = document.getElementById('freeMinutesRow'), a = document.getElementById('freeAiRow');
+    if(m && typeof d.minutesLeft === 'number') m.textContent = '🎙 Recording: ' + d.minutesLeft + ' of ' + d.minutesLimit + ' free minutes left';
+    if(a && typeof d.left === 'number') a.textContent = '✨ AI uses: ' + d.left + ' of ' + d.limit + ' left (lesson plans, quizzes, translations)';
+  }
   const CHUNK_THRESHOLD_BYTES = 4 * 1024 * 1024; // ~4MB triggers splitting into chunks
   const CHUNK_SECONDS = 90; // length of each chunk once shrunk down
   const TARGET_SAMPLE_RATE = 16000; // matches what Whisper listens for anyway
@@ -2173,7 +2219,7 @@
     const d = new Date();
     const stamp = d.toISOString().slice(0,10) + '-' + String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0');
     const ext = (blob && blob.type && blob.type.includes('wav')) ? 'wav' : 'webm';
-    return 'sermon-echo-' + stamp + '.' + ext;
+    return 'lecture-' + stamp + '.' + ext;
   }
   downloadBtn.addEventListener('click', () => {
     if(currentAudioBlob) downloadBlob(currentAudioBlob, makeFileName(currentAudioBlob));
@@ -2329,13 +2375,7 @@
     results: results,
     library: libraryView,
     settings: settingsView,
-    concordance: concordanceView,
-    commentary: commentaryView,
-    authors: authorsView,
-    genealogy: genealogyView,
-    science: scienceView,
-    quotes: quotesView,
-    comic: comicView,
+    lessonplan: lessonplanView,
     paywall: paywallView
   };
   function showView(name){
@@ -2807,20 +2847,22 @@
     });
   }
 
-  async function transcribeOneChunk(blob){
+  async function transcribeOneChunk(blob, seconds){
     const audioBase64 = await blobToBase64(blob);
     const res = await fetch('/.netlify/functions/transcribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ audioBase64, mimeType: blob.type })
+      body: JSON.stringify({ audioBase64, mimeType: blob.type, device: DEVICE_ID, seconds: Math.round(seconds || 0) })
     });
     if(!res.ok){
       const errData = await res.json().catch(() => ({}));
+      if(errData.limit){ const e = new Error(errData.error); e.limit = true; throw e; }
       const base = errData.error || ('Transcription failed. (' + res.status + ')');
       const detail = errData.detail ? (' Detail: ' + String(errData.detail).slice(0, 300)) : '';
       throw new Error(base + detail);
     }
     const data = await res.json();
+    if(typeof data.minutesLeft === 'number') showFreeStatus({ minutesLeft: data.minutesLeft, minutesLimit: 60 });
     return data.transcript;
   }
 
@@ -2829,20 +2871,39 @@
   // functions reject any single request over ~6MB. Short recordings are
   // sent as-is.
   async function transcribeAudio(blob, onProgress){
-    if(blob.size <= CHUNK_THRESHOLD_BYTES){
-      return await transcribeOneChunk(blob);
+    // Free month: check the minutes left first. The recording itself is always saved.
+    const st = await freeStatus();
+    if(st && st.minutesLeft <= 0){
+      throw new Error("You've used your " + st.minutesLimit + ' free recording minutes. Your recording is saved in the Library.');
+    }
+    const budgetSec = st ? st.minutesLeft * 60 + 30 : Infinity;
+
+    let decoded = null;
+    try{ decoded = await decodeBlobToAudioBuffer(blob); }catch(e){}
+    if(blob.size <= CHUNK_THRESHOLD_BYTES || !decoded){
+      return await transcribeOneChunk(blob, decoded ? decoded.duration : 0);
     }
 
-    const decoded = await decodeBlobToAudioBuffer(blob);
     const resampled = await resampleToMono(decoded, TARGET_SAMPLE_RATE);
     const pieces = sliceBufferIntoChunks(resampled, CHUNK_SECONDS);
 
     const transcripts = [];
+    let sentSec = 0, stoppedEarly = false;
     for(let i = 0; i < pieces.length; i++){
+      if(sentSec >= budgetSec){ stoppedEarly = true; break; }
       if(onProgress) onProgress(i + 1, pieces.length);
       const chunkBlob = audioBufferToWav(pieces[i]);
-      const text = await transcribeOneChunk(chunkBlob);
-      transcripts.push(text.trim());
+      try{
+        const text = await transcribeOneChunk(chunkBlob, pieces[i].duration);
+        transcripts.push(text.trim());
+      }catch(err){
+        if(err.limit && transcripts.length){ stoppedEarly = true; break; }
+        throw err;
+      }
+      sentSec += pieces[i].duration;
+    }
+    if(stoppedEarly){
+      transcripts.push('[Only the first ' + Math.round(sentSec / 60) + ' minutes were turned into text — the free minutes are used up. The full recording is saved in your Library.]');
     }
     return transcripts.join(' ');
   }
@@ -2920,9 +2981,9 @@
     box.innerHTML = '<h3>Name this recording</h3><p>So you can find it easily in your Library. You can skip this and add it later.</p>';
     const fields = [
       ['title', 'Title (e.g. "Faith that moves mountains")'],
-      ['speaker', 'Speaker / pastor'],
-      ['event', 'Event / church (e.g. Sunday Service)'],
-      ['topic', 'Topic (e.g. faith, forgiveness)']
+      ['speaker', 'Teacher / speaker'],
+      ['event', 'Class, section or event (e.g. Grade 10 – Rizal)'],
+      ['topic', 'Subject / topic (e.g. Science – Photosynthesis)']
     ];
     const inputs = {};
     fields.forEach(([k, ph]) => {
@@ -2961,7 +3022,7 @@
   }
 
   function printSermonText(){
-    const title = (resultDate.textContent || 'Sermon Recorder').trim();
+    const title = (resultDate.textContent || 'ScitechLectureTool').trim();
     const takeaway = takeawayText.textContent.trim();
     const bullets = Array.from(bulletsList.children).map(li => li.textContent.trim()).filter(Boolean);
     const transcript = transcriptBox.textContent.trim();
@@ -2985,7 +3046,7 @@
       '@media print{ body{margin:0; padding:24px;} }' +
       '</style></head><body>' +
       '<h1>' + escapeHtml(title) + '</h1>' +
-      '<div class="meta">Sermon Recorder — Transcriber &amp; Translator</div>' +
+      '<div class="meta">ScitechLectureTool — Transcriber &amp; Translator</div>' +
       (takeaway ? '<h2>Takeaway</h2><div class="takeaway">' + escapeHtml(takeaway) + '</div>' : '') +
       (bulletsHtml ? '<h2>Highlights</h2><ul>' + bulletsHtml + '</ul>' : '') +
       (transcript ? '<h2>Full Transcript</h2><div class="transcript">' + escapeHtml(transcript) + '</div>' : '') +
@@ -3198,7 +3259,7 @@
   async function generateQuiz(){
     if(!currentSermon) return;
 
-    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    const premium = FREE_MODE || localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
     if(!premium){
       showQuizPremiumNote();
       return;
@@ -3220,11 +3281,17 @@
     try {
       const types = Array.from(document.querySelectorAll('#quizTypes input:checked')).map(i => i.value);
       if(!types.length) throw new Error('Please turn on at least one test type.');
+      // Free month: one quiz (all its parts) = one AI use.
+      const rs = await fetch('/.netlify/functions/free-ai', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'reserve', device: DEVICE_ID, kind:'quiz' }) });
+      const rd = JSON.parse((await rs.text()).trim() || '{}');
+      showFreeStatus(rd);
+      if(rd.error || !rd.token) throw new Error(rd.error || 'Could not start the quiz right now. Please try again.');
+      const quizToken = rd.token;
       const askType = async (type) => {
         const res = await fetch('/.netlify/functions/generate-quiz', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ transcript: currentSermon.transcript, takeaway: currentSermon.takeaway, title: resultDate.textContent || '', type })
+          body: JSON.stringify({ transcript: currentSermon.transcript, takeaway: currentSermon.takeaway, title: resultDate.textContent || '', type, quizToken })
         });
         const d = await res.json().catch(() => ({}));
         if(!res.ok) throw new Error(d.error || ('Could not generate the quiz (' + res.status + ').'));
@@ -3257,7 +3324,7 @@
 
   function printQuiz(includeAnswers){
     if(!currentQuiz || currentQuiz.length === 0) return;
-    const title = (resultDate.textContent || 'Sermon Recorder').trim();
+    const title = (resultDate.textContent || 'ScitechLectureTool').trim();
     const letters = ['A','B','C','D','E','F'];
 
     const L = 'ABCDEFGHIJ';
@@ -3305,7 +3372,7 @@
       '@media print{ body{margin:0; padding:24px;} }' +
       '</style></head><body>' +
       '<h1>' + escapeHtml(title) + ' — Quiz' + (includeAnswers ? ' (Answer Key)' : '') + '</h1>' +
-      '<div class="meta">Sermon Recorder — Transcriber &amp; Translator</div>' +
+      '<div class="meta">ScitechLectureTool — Transcriber &amp; Translator</div>' +
       (includeAnswers ? '' : '<div class="name-line">Name:<span></span> &nbsp;&nbsp; Date:<span></span></div>') +
       questionsHtml +
       '</body></html>';
@@ -3326,6 +3393,129 @@
   printQuizStudentBtn.addEventListener('click', () => printQuiz(false));
   printQuizAnswerKeyBtn.addEventListener('click', () => printQuiz(true));
 
+  // LESSON PLAN GENERATOR
+  let currentLessonPlan = null;
+
+  function lpSection(title, bodyHtml){
+    if(!bodyHtml) return '';
+    return '<div class="lesson-plan-section"><div class="lp-title">' + escapeHtml(title) + '</div><div class="lp-body">' + bodyHtml + '</div></div>';
+  }
+  function lpText(val){
+    return val ? escapeHtml(String(val)) : '';
+  }
+  function lpList(arr){
+    if(!Array.isArray(arr) || arr.length === 0) return '';
+    return '<ul>' + arr.map(item => '<li>' + escapeHtml(String(item)) + '</li>').join('') + '</ul>';
+  }
+
+  const esc = (t) => escapeHtml(String(t == null ? '' : t));
+  const lpLevelIsSchool = () => !/corporate|meeting/i.test(lpGradeSelect.value);
+  function lpPlanHtml(lp, forPrint){
+    const I = lp.intentions || {}, L = lp.learningExperience || {}, A = lp.assessingLearning || {}, W = lp.waysForward || {};
+    const school = lpLevelIsSchool();
+    const card = (title, body) => body ? '<div class="lp-card"><h3>' + title + '</h3>' + body + '</div>' : '';
+    const sub = (t, body) => body ? '<div class="lp-sub">' + t + '</div>' + body : '';
+    const para = (t) => t ? '<p>' + esc(t).replace(/\n/g, '<br>') + '</p>' : '';
+    const list = (arr) => (Array.isArray(arr) && arr.length) ? '<ul>' + arr.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '';
+    const tags = (arr) => (Array.isArray(arr) && arr.length && school) ? '<div>' + arr.map(x => '<span class="lp-tag">' + esc(x) + '</span>').join('') + '</div>' : '';
+    const objectives = (I.objectives || []).map(o => '<li><b>' + esc(o.domain) + ':</b> ' + esc(o.text) + '</li>').join('');
+    const steps = (L.steps || []).map(st =>
+      '<div class="lp-step"><b>' + esc(st.phase) + '</b><span class="lp-min">' + esc(st.minutes) + ' min</span>' +
+      '<p><b>' + (school ? 'Teacher' : 'Facilitator') + ':</b> ' + esc(st.teacher) + '</p>' +
+      '<p><b>' + (school ? 'Learners' : 'Participants') + ':</b> ' + esc(st.learners) + '</p>' +
+      (st.differentiation ? '<p><b>Differentiation:</b> ' + esc(st.differentiation) + '</p>' : '') + tags(st.indicators) + '</div>').join('');
+    const checks = (A.checks || []).map(c => '<li><b>' + esc(c.when) + ':</b> ' + esc(c.how) + '</li>').join('');
+    const cot = (lp.cot || []).map(c => '<li><b>' + esc(c.indicator) + ' ' + esc(c.name || '') + '</b><br>Where: ' + esc(c.where) + '<br>Level 7 looks like: ' + esc(c.lookFor) + '</li>').join('');
+    return (forPrint ? '' : '') +
+      card('I — Intentions',
+        sub('Content standard', para(I.contentStandard)) + sub('Performance standard', para(I.performanceStandard)) +
+        sub(school ? 'Learning competency' : 'Session goal', para(I.competency)) + sub('Objectives', objectives ? '<ul>' + objectives + '</ul>' : '')) +
+      card('L — Learning Experience', sub('Resources', list(L.resources)) + sub('Lesson flow', steps) + sub('Integration', para(L.integration)) + sub('Values', para(L.values))) +
+      card('A — Assessing Learning', sub('Checks for understanding', checks ? '<ul>' + checks + '</ul>' : '') + sub('Exit task', para(A.exitTask)) + sub('Rubric', para(A.rubric))) +
+      card('W — Ways Forward', sub('Reteach', para(W.reteach)) + sub('Remediation', para(W.remediation)) + sub('Enrichment', para(W.enrichment)) + sub('Reflection questions', list(W.reflection))) +
+      (school ? card('🎯 Classroom observation (COT) alignment', cot ? '<ul>' + cot + '</ul>' : '') : '') +
+      card(school ? '✅ Observation-day checklist' : '✅ Facilitation checklist', list(lp.checklist)) +
+      '<div class="lp-declare">AI-assisted draft (ScitechLectureTool), reviewed and adapted by the teacher.</div>';
+  }
+  function renderLessonPlan(lp){
+    lpResults.innerHTML = lpPlanHtml(lp, false) + '<button class="lesson-plan-print-btn" id="lpPrintBtn">🖨️ Print / Save as PDF</button>';
+    const printBtn = document.getElementById('lpPrintBtn');
+    if(printBtn) printBtn.addEventListener('click', printLessonPlan);
+  }
+
+  async function generateLessonPlan(){
+    const subject = lpSubjectInput.value.trim();
+    const topic = lpTopicInput.value.trim();
+    if(!subject || !topic){
+      lpError.textContent = 'Please enter both a subject and a topic.';
+      lpError.style.display = 'block';
+      return;
+    }
+    lpError.style.display = 'none';
+    lpResults.innerHTML = '';
+    lpGenerateBtn.disabled = true;
+    lpStatusRow.style.display = 'flex';
+    try {
+      const sel = lpDurationSelect.options[lpDurationSelect.selectedIndex];
+      const res = await fetch('/.netlify/functions/ilaw-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          device: DEVICE_ID, subject, topic,
+          level: lpGradeSelect.value, duration: sel ? sel.textContent : '', minutes: lpDurationSelect.value,
+          code: lpCodeInput.value.trim(), learners: lpLearnersInput.value.trim(), ideas: lpIdeasInput.value.trim(),
+          indicators: Array.from(document.querySelectorAll('#lpIndBox input:checked')).map(i => i.value)
+        })
+      });
+      let data = null;
+      try{ data = JSON.parse((await res.text()).trim()); }catch(e){}
+      if(!data) throw new Error('This took too long this time. Please try again.');
+      if(typeof data.left === 'number') showFreeStatus(data);
+      if(data.error || !data.plan) throw new Error(data.error || 'Could not make the lesson plan right now. Please try again.');
+      currentLessonPlan = data.plan;
+      renderLessonPlan(data.plan);
+    } catch (err) {
+      lpError.textContent = err.message || 'Could not make the lesson plan right now. Please try again.';
+      lpError.style.display = 'block';
+    } finally {
+      lpGenerateBtn.disabled = false;
+      lpStatusRow.style.display = 'none';
+    }
+  }
+
+  function printLessonPlan(){
+    if(!currentLessonPlan) return;
+    const lp = currentLessonPlan;
+    const sel = lpDurationSelect.options[lpDurationSelect.selectedIndex];
+    const title = lp.title || ((lpSubjectInput.value.trim() || 'Lesson Plan') + ' — ' + (lpTopicInput.value.trim() || ''));
+    const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + esc(title) + '</title>' +
+      '<style>' +
+      'body{font-family: Arial, Helvetica, sans-serif; color:#111; max-width:780px; margin:30px auto; padding:0 18px; line-height:1.45;}' +
+      'h1{font-size:18px; margin:0 0 2px;} .meta{color:#444; font-size:12.5px; margin-bottom:12px;}' +
+      '.lp-card{border:1px solid #999; border-radius:6px; padding:10px 14px; margin:10px 0; page-break-inside:avoid;}' +
+      '.lp-card h3{margin:0 0 6px; font-size:15px;} .lp-sub{font-weight:700; margin:8px 0 2px; font-size:13px;}' +
+      'p, li{font-size:13px; margin:3px 0;} ul{margin:3px 0; padding-left:18px;}' +
+      '.lp-step{border-top:1px dashed #bbb; padding:6px 0;} .lp-min{font-size:11px; font-weight:700; margin-left:6px;}' +
+      '.lp-tag{display:inline-block; font-size:10.5px; border:1px solid #888; border-radius:8px; padding:0 5px; margin:2px 3px 0 0;}' +
+      '.lp-declare{font-size:11.5px; font-style:italic; color:#444; margin-top:10px;}' +
+      '.sign{margin-top:26px; font-size:12.5px;} .sign span{display:inline-block; min-width:220px; border-top:1px solid #333; margin-top:28px; padding-top:2px;}' +
+      '@media print{ body{margin:0; padding:14px;} }' +
+      '</style></head><body>' +
+      '<h1>' + esc(title) + '</h1>' +
+      '<div class="meta">' + esc(lpSubjectInput.value.trim()) + ' · ' + esc(lpGradeSelect.value) + ' · ' + esc(sel ? sel.textContent : '') + (lpCodeInput.value.trim() ? ' · ' + esc(lpCodeInput.value.trim()) : '') + '</div>' +
+      lpPlanHtml(lp, true) +
+      '<div class="sign"><span>Prepared by (teacher)</span> &nbsp;&nbsp;&nbsp; <span>Checked by</span></div>' +
+      '</body></html>';
+    const win = window.open('', '_blank');
+    if(!win){ alert('Please allow pop-ups for this site so the print page can open.'); return; }
+    win.document.open(); win.document.write(html); win.document.close();
+    const triggerPrint = () => { win.focus(); win.print(); };
+    win.onload = triggerPrint;
+    setTimeout(triggerPrint, 400);
+  }
+
+  lpGenerateBtn.addEventListener('click', generateLessonPlan);
+
   translateLangSelect.addEventListener('change', () => {
     localStorage.setItem(TRANSLATE_LANG_KEY, translateLangSelect.value);
     if(viewingTranslation && currentSermon){
@@ -3341,10 +3531,11 @@
     if(!aiUsesNote || !d || typeof d.left !== 'number') return;
     const extra = d.extra || 0;
     aiUsesNote.textContent = d.left > 0
-      ? '🎟 AI uses this month: ' + d.used + ' of ' + d.limit + ' used' + (extra ? ' · plus ' + extra + ' bought' : '') + ' · ' + d.left + ' left'
-      : '🎟 All ' + d.limit + ' AI uses for this month are used. They reset on the 1st — or buy 5 more below.';
+      ? '🎁 Free AI uses: ' + d.left + ' of ' + d.limit + ' left (lesson plans, quizzes, translations)'
+      : '🎁 All ' + d.limit + ' free AI uses are used. Thank you for trying the app!';
     aiUsesNote.classList.toggle('none-left', d.left <= 0);
-    refillBtn.style.display = d.left <= 1 ? 'block' : 'none';   // offer a refill when almost out
+    refillBtn.style.display = 'none';   // no refills while Premium is hidden
+    showFreeStatus(d);
   }
   const REFILL_SESSION_KEY = 'se_refill_session';
   refillBtn.addEventListener('click', async () => {
@@ -3387,29 +3578,23 @@
       }).catch(() => say('We could not confirm the payment right now. Please reopen the app in a minute.'));
   })();
   async function refreshAiUses(){
-    const code = localStorage.getItem(PREMIUM_CODE_KEY);
-    if(localStorage.getItem(PREMIUM_FLAG_KEY) !== 'true' || !code){ if(aiUsesNote) aiUsesNote.textContent = '⭐ Premium: 5 AI translations of highlights a month, each with AI narration.'; return; }
-    try{
-      const r = await fetch('/.netlify/functions/highlights-ai', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'status', code }) });
-      const d = JSON.parse((await r.text()).trim() || '{}');
-      if(!d.error) showAiUses(d);
-    }catch(e){}
+    const d = await freeStatus();
+    if(d) showAiUses(d);
   }
   document.getElementById('foldHighlights').addEventListener('toggle', (e) => { if(e.target.open) refreshAiUses(); });
 
   async function attemptTranslate(lang){
-    const code = localStorage.getItem(PREMIUM_CODE_KEY) || '';
-    const res = await fetch('/.netlify/functions/highlights-ai', {
+    const res = await fetch('/.netlify/functions/free-ai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'translate', code, bullets: currentSermon.bullets || [], language: lang })
+      body: JSON.stringify({ action: 'translate', device: DEVICE_ID, bullets: currentSermon.bullets || [], language: lang })
     });
     let data = {};
     try{ data = JSON.parse((await res.text()).trim() || '{}'); }catch(e){}
     showAiUses(data);
     if(data.error || !res.ok){
       const err = new Error(data.error || ('Translation failed (' + res.status + ').'));
-      if(typeof data.left === 'number' || /Premium|expired/.test(data.error || '')) err.final = true;   // no point retrying
+      if(typeof data.left === 'number') err.final = true;
       throw err;
     }
     return data;
@@ -3590,7 +3775,7 @@
   document.getElementById('topTranslateBtn').addEventListener('click', () => {
     if(document.getElementById('notePopup')) return;
     const wrap = document.createElement('div'); wrap.id = 'notePopup'; wrap.className = 'note-popup';
-    wrap.innerHTML = '<div class="note-pad"><h3>📝 Note</h3><p>AI Translation and AI Narration are only in the <b>✨ Highlights</b> box.</p><button type="button">Open Highlights</button></div>';
+    wrap.innerHTML = '<div class="note-pad"><h3>📝 Note</h3><p>AI Translation is only in the <b>✨ Highlights</b> box.</p><button type="button">Open Highlights</button></div>';
     wrap.querySelector('button').addEventListener('click', () => {
       wrap.remove();
       const f = document.getElementById('foldHighlights');
@@ -3611,7 +3796,7 @@
       return;
     }
 
-    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
+    const premium = FREE_MODE || localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
     if(!premium){
       showTranslatePremiumNote();
       return;
@@ -3654,785 +3839,6 @@
     const re = new RegExp('(' + pattern + ')', 'gi');
     return escaped.replace(re, '<span class="linked-term">$1</span>');
   }
-
-  // ---- Bible Concordance (Premium feature) ----
-  let concordanceSearchInFlight = false;
-
-  async function runConcordanceSearch(){
-    const query = concordanceInput.value.trim();
-    concordanceError.style.display = 'none';
-
-    if(!query){
-      return;
-    }
-
-    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
-    if(!premium){
-      concordanceResults.innerHTML = '';
-      concordanceError.textContent = 'Bible Concordance is a Premium feature — unlock it in Settings ⭐';
-      concordanceError.style.display = 'block';
-      return;
-    }
-
-    if(concordanceSearchInFlight) return;
-    concordanceSearchInFlight = true;
-    concordanceResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
-
-    try {
-      const res = await fetch('/.netlify/functions/concordance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
-      });
-      const data = await res.json().catch(() => ({}));
-      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
-
-      concordanceResults.innerHTML = '';
-      const relatedTopics = Array.isArray(data.relatedTopics) ? data.relatedTopics.filter(t => t && t.trim()) : [];
-
-      if(data.intro){
-        const intro = document.createElement('div');
-        intro.className = 'concordance-intro';
-        intro.innerHTML = highlightTerms(data.intro, relatedTopics);
-        concordanceResults.appendChild(intro);
-      }
-
-      // Related topics sit right under the intro (not after all the results),
-      // so they're visible without scrolling past a long results list.
-      if(relatedTopics.length){
-        const wrap = document.createElement('div');
-        wrap.className = 'related-topics related-topics-top';
-        const label = document.createElement('div');
-        label.className = 'label';
-        label.textContent = 'Go deeper — related topics';
-        const chips = document.createElement('div');
-        chips.className = 'chips';
-        relatedTopics.forEach(topic => {
-          const chip = document.createElement('span');
-          chip.className = 'chip';
-          chip.textContent = topic;
-          chip.addEventListener('click', () => {
-            concordanceInput.value = topic;
-            runConcordanceSearch();
-          });
-          chips.appendChild(chip);
-        });
-        wrap.appendChild(label);
-        wrap.appendChild(chips);
-        concordanceResults.appendChild(wrap);
-      }
-
-      (data.passages || []).forEach((p, i) => {
-        const card = document.createElement('div');
-        card.className = 'concordance-result';
-        const num = document.createElement('div');
-        num.className = 'num';
-        num.textContent = (i + 1) + '.';
-        const body = document.createElement('div');
-        body.className = 'body';
-        const ref = document.createElement('div');
-        ref.className = 'ref';
-        ref.textContent = p.reference;
-        const note = document.createElement('div');
-        note.className = 'note';
-        note.innerHTML = highlightTerms(p.note || '', relatedTopics);
-        body.appendChild(ref);
-        body.appendChild(note);
-        card.appendChild(num);
-        card.appendChild(body);
-        concordanceResults.appendChild(card);
-      });
-
-      // Clicking a linked term inline re-runs the search on that term.
-      concordanceResults.querySelectorAll('.linked-term').forEach(el => {
-        el.addEventListener('click', () => {
-          concordanceInput.value = el.textContent;
-          runConcordanceSearch();
-        });
-      });
-    } catch (err) {
-      concordanceResults.innerHTML = '';
-      concordanceError.textContent = err.message || 'Could not search right now. Please try again.';
-      concordanceError.style.display = 'block';
-    } finally {
-      concordanceSearchInFlight = false;
-    }
-  }
-
-  concordanceInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') runConcordanceSearch();
-  });
-
-  // ---- Bible Authors & History (Premium feature) ----
-  let authorsSearchInFlight = false;
-
-  async function runAuthorsSearch(){
-    const query = authorsInput.value.trim();
-    authorsError.style.display = 'none';
-
-    if(!query){
-      return;
-    }
-
-    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
-    if(!premium){
-      authorsResults.innerHTML = '';
-      authorsError.textContent = 'Bible Authors & History is a Premium feature — unlock it in Settings ⭐';
-      authorsError.style.display = 'block';
-      return;
-    }
-
-    if(authorsSearchInFlight) return;
-    authorsSearchInFlight = true;
-    authorsResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
-
-    try {
-      const res = await fetch('/.netlify/functions/bible-authors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
-      });
-      const data = await res.json().catch(() => ({}));
-      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
-
-      authorsResults.innerHTML = '';
-
-      const header = document.createElement('div');
-      header.className = 'concordance-intro';
-      header.textContent = (data.name || query) + (data.testament ? ' — ' + data.testament : '') + (data.books ? ' (' + data.books + ')' : '');
-      authorsResults.appendChild(header);
-
-      const fields = [
-        ['Occupation', data.occupation],
-        ['Family', data.family],
-        ['Why included in Scripture', data.highlights],
-        ['Death', data.death]
-      ];
-      fields.forEach(([label, text]) => {
-        if(!text) return;
-        const card = document.createElement('div');
-        card.className = 'concordance-result';
-        const ref = document.createElement('div');
-        ref.className = 'ref';
-        ref.textContent = label;
-        const note = document.createElement('div');
-        note.className = 'note';
-        note.textContent = text;
-        card.appendChild(ref);
-        card.appendChild(note);
-        authorsResults.appendChild(card);
-      });
-    } catch (err) {
-      authorsResults.innerHTML = '';
-      authorsError.textContent = err.message || 'Could not search right now. Please try again.';
-      authorsError.style.display = 'block';
-    } finally {
-      authorsSearchInFlight = false;
-    }
-  }
-
-  authorsInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') runAuthorsSearch();
-  });
-
-  // ---- Bible Commentary (Premium feature) ----
-  let commentarySearchInFlight = false;
-
-  async function runCommentarySearch(){
-    const query = commentaryInput.value.trim();
-    commentaryError.style.display = 'none';
-
-    if(!query){
-      return;
-    }
-
-    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
-    if(!premium){
-      commentaryResults.innerHTML = '';
-      commentaryError.textContent = 'Bible Commentary is a Premium feature — unlock it in Settings ⭐';
-      commentaryError.style.display = 'block';
-      return;
-    }
-
-    if(commentarySearchInFlight) return;
-    commentarySearchInFlight = true;
-    commentaryResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
-
-    try {
-      const res = await fetch('/.netlify/functions/bible-commentary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
-      });
-      const data = await res.json().catch(() => ({}));
-      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
-
-      commentaryResults.innerHTML = '';
-      const relatedTopics = Array.isArray(data.relatedTopics) ? data.relatedTopics.filter(t => t && t.trim()) : [];
-
-      const header = document.createElement('div');
-      header.className = 'concordance-intro';
-      header.innerHTML = highlightTerms(data.reference || query, relatedTopics);
-      commentaryResults.appendChild(header);
-
-      // Related topics sit right under the header, so they're visible
-      // without scrolling past the context/meaning/application cards.
-      if(relatedTopics.length){
-        const wrap = document.createElement('div');
-        wrap.className = 'related-topics related-topics-top';
-        const label = document.createElement('div');
-        label.className = 'label';
-        label.textContent = 'Go deeper — related topics';
-        const chips = document.createElement('div');
-        chips.className = 'chips';
-        relatedTopics.forEach(topic => {
-          const chip = document.createElement('span');
-          chip.className = 'chip';
-          chip.textContent = topic;
-          chip.addEventListener('click', () => {
-            commentaryInput.value = topic;
-            runCommentarySearch();
-          });
-          chips.appendChild(chip);
-        });
-        wrap.appendChild(label);
-        wrap.appendChild(chips);
-        commentaryResults.appendChild(wrap);
-      }
-
-      const fields = [
-        ['Context', data.context],
-        ['What it means', data.meaning],
-        ['How to apply it', data.application]
-      ];
-      fields.forEach(([label, text]) => {
-        if(!text) return;
-        const card = document.createElement('div');
-        card.className = 'concordance-result';
-        const ref = document.createElement('div');
-        ref.className = 'ref';
-        ref.textContent = label;
-        const note = document.createElement('div');
-        note.className = 'note';
-        note.innerHTML = highlightTerms(text, relatedTopics);
-        card.appendChild(ref);
-        card.appendChild(note);
-        commentaryResults.appendChild(card);
-      });
-
-      // 🔗 Free links to maps, pictures, charts and videos (no AI cost)
-      commentaryResults.appendChild(buildExploreLinks(data.reference || query));
-      // 📚 Voices across the ages — loads only when tapped (saves AI cost).
-      commentaryResults.appendChild(buildVoicesFold(data.reference || query));
-
-      // Clicking a linked term inline re-runs the search on that term.
-      commentaryResults.querySelectorAll('.linked-term').forEach(el => {
-        el.addEventListener('click', () => {
-          commentaryInput.value = el.textContent;
-          runCommentarySearch();
-        });
-      });
-    } catch (err) {
-      commentaryResults.innerHTML = '';
-      commentaryError.textContent = err.message || 'Could not search right now. Please try again.';
-      commentaryError.style.display = 'block';
-    } finally {
-      commentarySearchInFlight = false;
-    }
-  }
-
-  commentaryInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') runCommentarySearch();
-  });
-
-  function cvEl(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text !== undefined) e.textContent = text; return e; }
-  function buildExploreLinks(topic){
-    const q = encodeURIComponent(topic);
-    const box = cvEl('div', 'explore-box');
-    box.appendChild(cvEl('div', 'cv-h', '🔗 Explore more (opens in a new tab)'));
-    const row = cvEl('div', 'explore-links');
-    [
-      ['📖 Read the passage', 'https://www.biblegateway.com/quicksearch/?quicksearch=' + q],
-      ['🗺 Bible maps', 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(topic + ' Bible map')],
-      ['🖼 Pictures', 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(topic + ' Bible')],
-      ['📊 Charts & timelines', 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(topic + ' Bible chart timeline')],
-      ['▶ YouTube videos', 'https://www.youtube.com/results?search_query=' + encodeURIComponent(topic + ' Bible study')],
-      ['📘 SDA Bible Commentary', 'https://www.google.com/search?q=' + encodeURIComponent('site:egwwritings.org "SDA Bible Commentary" ' + topic)],
-      ['📜 Ethiopian Bible', 'https://www.google.com/search?q=' + encodeURIComponent('"Ethiopian Bible" ' + topic)]
-    ].forEach(([label, url]) => {
-      const a = document.createElement('a');
-      a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label;
-      row.appendChild(a);
-    });
-    box.appendChild(row);
-    return box;
-  }
-
-  function buildVoicesFold(topic){
-    const d = cvEl('details', 'cv-fold');
-    const sum = cvEl('summary');
-    sum.appendChild(document.createTextNode('📚 Voices across the ages — references'));
-    sum.appendChild(cvEl('small', '', 'Tap to see theologians, philosophers, scientists, psychologists, educators & historians on this topic, with links to look each one up'));
-    d.appendChild(sum);
-    const body = cvEl('div', 'cv-body');
-    d.appendChild(body);
-    let loaded = false;
-    const load = async () => {
-      if(!d.open || loaded) return;
-      loaded = true;
-      body.innerHTML = '';
-      body.appendChild(cvEl('div', 'cv-note', '⏳ Gathering voices from across the centuries… about 10–20 seconds.'));
-      try{
-        const res = await fetch('/.netlify/functions/bible-voices', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ query: topic }) });
-        const raw = await res.text();
-        let data = null; try{ data = JSON.parse(raw.trim()); }catch(e){}
-        if(!data) throw new Error('This took too long this time.');
-        if(data.error || !res.ok) throw new Error(data.error || 'Could not load right now. Please try again.');
-        if(!(data.voices || []).length && !(data.scientists || []).length) throw new Error('No voices were found for this search.');
-        body.innerHTML = '';
-        // Thinkers by era
-        if((data.voices || []).length){
-          body.appendChild(cvEl('div', 'cv-h', '🗣 Voices through the ages'));
-          let lastEra = '';
-          data.voices.forEach(v => {
-            if(v.era && v.era !== lastEra){ body.appendChild(cvEl('div', 'cv-era', v.era)); lastEra = v.era; }
-            const it = cvEl('div', 'cv-item');
-            it.appendChild(cvEl('b', '', v.name));
-            if(v.role) it.appendChild(cvEl('span', 'cv-role', ' — ' + v.role));
-            const wl = document.createElement('a'); wl.className = 'cv-link'; wl.target = '_blank'; wl.rel = 'noopener';
-            wl.href = 'https://en.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(v.name); wl.textContent = ' · about ↗';
-            it.appendChild(wl);
-            const sl2 = document.createElement('a'); sl2.className = 'cv-link'; sl2.target = '_blank'; sl2.rel = 'noopener';
-            sl2.href = 'https://www.google.com/search?q=' + encodeURIComponent(v.name + ' ' + topic); sl2.textContent = ' · 🔍 search ↗';
-            it.appendChild(sl2);
-            it.appendChild(cvEl('div', '', v.view));
-            if(v.response) it.appendChild(cvEl('div', 'cv-resp', '📖 Biblical response: ' + v.response));
-            body.appendChild(it);
-          });
-        }
-        // Scientists who believed in a Creator
-        if((data.scientists || []).length){
-          body.appendChild(cvEl('div', 'cv-h', '🔬 Scientists who believed in a Creator'));
-          data.scientists.forEach(v => {
-            const it = cvEl('div', 'cv-item');
-            it.appendChild(cvEl('b', '', v.name));
-            it.appendChild(cvEl('span', 'cv-label', v.label));
-            const sl = document.createElement('a'); sl.className = 'cv-link'; sl.target = '_blank'; sl.rel = 'noopener';
-            sl.href = 'https://en.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(v.name); sl.textContent = ' about ↗';
-            it.appendChild(sl);
-            it.appendChild(cvEl('div', 'cv-role', [v.years, v.field].filter(Boolean).join(' · ')));
-            it.appendChild(cvEl('div', '', v.view));
-            body.appendChild(it);
-          });
-        }
-        // Creation or evolution?
-        if(data.creation && data.creation.relevant){
-          body.appendChild(cvEl('div', 'cv-h', '🌍 Creation or evolution?'));
-          [['What evolution teaches', data.creation.evolution], ['The creationist answer', data.creation.creationist], ['Why it matters', data.creation.matters]].forEach(([h, t]) => {
-            if(!t) return;
-            const it = cvEl('div', 'cv-item');
-            it.appendChild(cvEl('b', '', h));
-            it.appendChild(cvEl('div', '', t));
-            body.appendChild(it);
-          });
-        }
-        body.appendChild(cvEl('div', 'cv-note', 'Each line is a short summary in our own words — not a direct quote. Tap 🔍 search or about ↗ to read more about each person. This app presents a biblical, creationist worldview.'));
-      }catch(err){
-        loaded = false;
-        body.innerHTML = '';
-        body.appendChild(cvEl('div', 'cv-note', (err.message || 'Could not load right now.') + ' Tap the title to close it, then tap again to try once more.'));
-      }
-    };
-    d.addEventListener('toggle', load);   // loads only when tapped (saves AI cost)
-    return d;
-  }
-
-  // ---- Bible Genealogy — Adam to Jesus (Premium feature) ----
-  let genealogySearchInFlight = false;
-
-  async function runGenealogySearch(){
-    const query = genealogyInput.value.trim();
-    genealogyError.style.display = 'none';
-
-    if(!query){
-      return;
-    }
-
-    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
-    if(!premium){
-      genealogyResults.innerHTML = '';
-      genealogyError.textContent = 'Bible Genealogy is a Premium feature — unlock it in Settings ⭐';
-      genealogyError.style.display = 'block';
-      return;
-    }
-
-    if(genealogySearchInFlight) return;
-    genealogySearchInFlight = true;
-    genealogyResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
-
-    try {
-      const res = await fetch('/.netlify/functions/bible-genealogy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
-      });
-      const data = await res.json().catch(() => ({}));
-      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
-
-      genealogyResults.innerHTML = '';
-
-      const header = document.createElement('div');
-      header.className = 'concordance-intro';
-      header.textContent = (data.name || query) + (data.generation ? ' — ' + data.generation : '');
-      genealogyResults.appendChild(header);
-
-      const fields = [
-        ['Father', data.father],
-        ['Connection to Jesus\' line', data.note]
-      ];
-      fields.forEach(([label, text]) => {
-        if(!text) return;
-        const card = document.createElement('div');
-        card.className = 'concordance-result';
-        const ref = document.createElement('div');
-        ref.className = 'ref';
-        ref.textContent = label;
-        const note = document.createElement('div');
-        note.className = 'note';
-        note.textContent = text;
-        card.appendChild(ref);
-        card.appendChild(note);
-        genealogyResults.appendChild(card);
-      });
-
-      if(Array.isArray(data.lineageSnippet) && data.lineageSnippet.length){
-        const card = document.createElement('div');
-        card.className = 'concordance-result';
-        const ref = document.createElement('div');
-        ref.className = 'ref';
-        ref.textContent = 'Nearby in the line';
-        const note = document.createElement('div');
-        note.className = 'note';
-        note.textContent = data.lineageSnippet.join('  →  ');
-        card.appendChild(ref);
-        card.appendChild(note);
-        genealogyResults.appendChild(card);
-      }
-    } catch (err) {
-      genealogyResults.innerHTML = '';
-      genealogyError.textContent = err.message || 'Could not search right now. Please try again.';
-      genealogyError.style.display = 'block';
-    } finally {
-      genealogySearchInFlight = false;
-    }
-  }
-
-  genealogyInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') runGenealogySearch();
-  });
-
-  // ---- Bible & Science (Premium feature) ----
-  let scienceSearchInFlight = false;
-
-  async function runScienceSearch(){
-    const query = scienceInput.value.trim();
-    scienceError.style.display = 'none';
-
-    if(!query){
-      return;
-    }
-
-    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
-    if(!premium){
-      scienceResults.innerHTML = '';
-      scienceError.textContent = 'Bible & Science is a Premium feature — unlock it in Settings ⭐';
-      scienceError.style.display = 'block';
-      return;
-    }
-
-    if(scienceSearchInFlight) return;
-    scienceSearchInFlight = true;
-    scienceResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
-
-    try {
-      const res = await fetch('/.netlify/functions/bible-science', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
-      });
-      const data = await res.json().catch(() => ({}));
-      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
-
-      scienceResults.innerHTML = '';
-
-      const header = document.createElement('div');
-      header.className = 'concordance-intro';
-      header.textContent = data.topic || query;
-      scienceResults.appendChild(header);
-
-      const fields = [
-        ['What Scripture says', data.claim],
-        ['Historical & scientific findings', data.evidence],
-        ['🏺 Biblical archaeology', data.archaeology],
-        ['🔬 Modern discoveries', data.discoveries],
-        ['How scholars view it', data.perspective]
-      ];
-      fields.forEach(([label, text]) => {
-        if(!text) return;
-        const card = document.createElement('div');
-        card.className = 'concordance-result';
-        const ref = document.createElement('div');
-        ref.className = 'ref';
-        ref.textContent = label;
-        const note = document.createElement('div');
-        note.className = 'note';
-        note.textContent = text;
-        card.appendChild(ref);
-        card.appendChild(note);
-        scienceResults.appendChild(card);
-      });
-    } catch (err) {
-      scienceResults.innerHTML = '';
-      scienceError.textContent = err.message || 'Could not search right now. Please try again.';
-      scienceError.style.display = 'block';
-    } finally {
-      scienceSearchInFlight = false;
-    }
-  }
-
-  scienceInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') runScienceSearch();
-  });
-
-  // ---- Quotable Quotes (Premium feature) ----
-  let quotesSearchInFlight = false;
-
-  async function runQuotesSearch(){
-    const query = quotesInput.value.trim();
-    quotesError.style.display = 'none';
-
-    if(!query){
-      return;
-    }
-
-    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
-    if(!premium){
-      quotesResults.innerHTML = '';
-      quotesError.textContent = 'Quotable Quotes is a Premium feature — unlock it in Settings ⭐';
-      quotesError.style.display = 'block';
-      return;
-    }
-
-    if(quotesSearchInFlight) return;
-    quotesSearchInFlight = true;
-    quotesResults.innerHTML = '<div class="concordance-intro">Searching…</div>';
-
-    try {
-      const res = await fetch('/.netlify/functions/quotes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
-      });
-      const data = await res.json().catch(() => ({}));
-      if(!res.ok) throw new Error(data.error || ('Search failed (' + res.status + ').'));
-
-      quotesResults.innerHTML = '';
-      if(data.intro){
-        const intro = document.createElement('div');
-        intro.className = 'concordance-intro';
-        intro.textContent = data.intro;
-        quotesResults.appendChild(intro);
-      }
-      (data.quotes || []).forEach(q => {
-        const card = document.createElement('div');
-        card.className = 'concordance-result';
-        const note = document.createElement('div');
-        note.className = 'note';
-        note.style.fontStyle = 'italic';
-        note.textContent = '"' + q.quote + '"';
-        const ref = document.createElement('div');
-        ref.className = 'ref';
-        ref.style.marginTop = '6px';
-        ref.style.marginBottom = '0';
-        ref.textContent = '— ' + q.source;
-        card.appendChild(note);
-        card.appendChild(ref);
-        quotesResults.appendChild(card);
-      });
-    } catch (err) {
-      quotesResults.innerHTML = '';
-      quotesError.textContent = err.message || 'Could not search right now. Please try again.';
-      quotesError.style.display = 'block';
-    } finally {
-      quotesSearchInFlight = false;
-    }
-  }
-
-  quotesInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') runQuotesSearch();
-  });
-
-  // ---- Kids Comic Bible Stories (Premium feature) ----
-  const COMIC_STORIES = [
-    { key: 'Noah\'s Ark', emoji: '🌈' },
-    { key: 'Baby Moses in the Basket', emoji: '🧺' },
-    { key: 'David and Goliath', emoji: '🪨' },
-    { key: 'Daniel in the Lions\' Den', emoji: '🦁' },
-    { key: 'Jonah and the Big Fish', emoji: '🐋' },
-    { key: 'The Birth of Jesus', emoji: '⭐' },
-    { key: 'Jesus Feeds the 5,000', emoji: '🍞' },
-    { key: 'The Good Samaritan', emoji: '🤝' },
-    { key: 'The Prodigal Son', emoji: '🏡' },
-    { key: 'Joseph and His Colorful Coat', emoji: '🧥' }
-  ];
-
-  let comicPanels = [];
-  let comicIndex = 0;
-  let comicGenerationInFlight = false;
-
-  function showComicPicker(){
-    comicError.style.display = 'none';
-    comicProgress.style.display = 'none';
-    comicViewer.style.display = 'none';
-    comicPicker.style.display = 'flex';
-    if(comicPicker.dataset.built === 'true') return;
-    COMIC_STORIES.forEach(story => {
-      const btn = document.createElement('button');
-      btn.className = 'comic-story-btn';
-      btn.textContent = story.emoji + '  ' + story.key;
-      btn.addEventListener('click', () => generateComicStory(story.key));
-      comicPicker.appendChild(btn);
-    });
-    comicPicker.dataset.built = 'true';
-  }
-
-  async function generateComicStory(storyKey){
-    if(comicGenerationInFlight) return;
-
-    const premium = localStorage.getItem(PREMIUM_FLAG_KEY) === 'true';
-    if(!premium){
-      comicError.textContent = 'Kids Comic Bible Stories is a Premium feature — unlock it in Settings ⭐';
-      comicError.style.display = 'block';
-      return;
-    }
-
-    comicGenerationInFlight = true;
-    comicError.style.display = 'none';
-    comicPicker.style.display = 'none';
-    comicViewer.style.display = 'none';
-    comicProgress.style.display = 'flex';
-    comicProgressText.textContent = 'Writing the story…';
-
-    try {
-      const storyRes = await fetch('/.netlify/functions/comic-story', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ story: storyKey })
-      });
-      const storyData = await storyRes.json().catch(() => ({}));
-      if(!storyRes.ok) throw new Error(storyData.error || ('Story request failed (' + storyRes.status + ').'));
-      if(!Array.isArray(storyData.panels) || storyData.panels.length === 0) throw new Error('Received an unexpected response. Please try again.');
-
-      const panels = storyData.panels;
-
-      for(let i = 0; i < panels.length; i++){
-        comicProgressText.textContent = 'Illustrating panel ' + (i + 1) + ' of ' + panels.length + '…';
-        const imgRes = await fetch('/.netlify/functions/comic-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scene: panels[i].scene })
-      });
-        const imgData = await imgRes.json().catch(() => ({}));
-        if(!imgRes.ok || !imgData.image){
-          const base = imgData.error || ('Could not illustrate panel ' + (i + 1) + '. Please try again.');
-          const detail = imgData.detail ? ' — ' + String(imgData.detail).slice(0, 300) : '';
-          throw new Error(base + detail);
-        }
-        panels[i].image = imgData.image;
-
-        comicProgressText.textContent = 'Recording narration for panel ' + (i + 1) + ' of ' + panels.length + '…';
-        try {
-          const audioRes = await fetch('/.netlify/functions/comic-narrate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: (i === panels.length - 1 && storyData.lesson) ? 'Lesson of the story. ' + storyData.lesson : panels[i].caption })
-          });
-          const audioData = await audioRes.json().catch(() => ({}));
-          if(audioRes.ok && audioData.audio){
-            panels[i].audio = audioData.audio;
-          }
-        } catch (narrationErr) {
-          // Narration is a nice-to-have — if it fails, the comic still works without it.
-        }
-      }
-
-      comicPanels = panels;
-      comicPanels.lesson = storyData.lesson || '';
-      comicIndex = 0;
-      comicProgress.style.display = 'none';
-      comicViewer.style.display = 'block';
-      showComicPanel(0);
-    } catch (err) {
-      comicProgress.style.display = 'none';
-      comicPicker.style.display = 'flex';
-      comicError.textContent = err.message || 'Could not create the comic right now. Please try again.';
-      comicError.style.display = 'block';
-    } finally {
-      comicGenerationInFlight = false;
-    }
-  }
-
-  function showComicPanel(i){
-    const panel = comicPanels[i];
-    if(!panel) return;
-    comicIndex = i;
-
-    comicNarrationAudio.pause();
-    comicNarrationAudio.currentTime = 0;
-
-    comicPanelImg.classList.remove('loaded');
-    comicPanelCaption.classList.remove('loaded');
-
-    comicPanelImg.src = panel.image;
-    comicPanelImg.onload = () => comicPanelImg.classList.add('loaded');
-
-    const isLast = i === comicPanels.length - 1;
-    comicPanelCaption.textContent = (isLast && comicPanels.lesson) ? 'Lesson of the Story\n\n' + comicPanels.lesson : panel.caption;
-    comicPanelCaption.style.whiteSpace = 'pre-line';
-
-    requestAnimationFrame(() => comicPanelCaption.classList.add('loaded'));
-
-    if(panel.audio){
-      comicNarrationAudio.src = panel.audio;
-      comicPlayNarrationBtn.style.display = 'inline-block';
-      comicPlayNarrationBtn.textContent = '🔊 Play';
-    } else {
-      comicNarrationAudio.removeAttribute('src');
-      comicPlayNarrationBtn.style.display = 'none';
-    }
-
-    comicPanelCounter.textContent = 'Panel ' + (i + 1) + ' of ' + comicPanels.length;
-    comicPrevBtn.disabled = i === 0;
-    comicNextBtn.disabled = i === comicPanels.length - 1;
-    comicPrevBtn.style.opacity = comicPrevBtn.disabled ? '0.4' : '1';
-    comicNextBtn.style.opacity = comicNextBtn.disabled ? '0.4' : '1';
-  }
-
-  comicPlayNarrationBtn.addEventListener('click', () => {
-    if(comicNarrationAudio.paused){
-      comicNarrationAudio.currentTime = 0;
-      comicNarrationAudio.play();
-    } else {
-      comicNarrationAudio.pause();
-    }
-  });
-  comicNarrationAudio.addEventListener('play', () => { comicPlayNarrationBtn.textContent = '⏸ Pause'; });
-  comicNarrationAudio.addEventListener('pause', () => { comicPlayNarrationBtn.textContent = '🔊 Play'; });
-  comicNarrationAudio.addEventListener('ended', () => { comicPlayNarrationBtn.textContent = '🔊 Play'; });
-
-  comicPrevBtn.addEventListener('click', () => { if(comicIndex > 0) showComicPanel(comicIndex - 1); });
-  comicNextBtn.addEventListener('click', () => { if(comicIndex < comicPanels.length - 1) showComicPanel(comicIndex + 1); });
-  comicNewStoryBtn.addEventListener('click', () => showComicPicker());
 
   newRecordingBtn.addEventListener('click', () => {
     timerEl.textContent = '00:00';
@@ -4521,7 +3927,7 @@
     sermons.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     if(sermons.length === 0){
-      libraryEmpty.textContent = 'No saved sermons yet. Once you finish a recording, it\'ll show up here automatically.';
+      libraryEmpty.textContent = 'No saved lectures yet. Once you finish a recording, it\'ll show up here automatically.';
       libraryEmpty.style.display = 'block';
       return;
     }
@@ -4533,7 +3939,7 @@
       sermons.forEach(x => ['speaker','event','topic'].forEach(k => {
         const v = (x[k] || '').trim(); if(v && !seen.has(v.toLowerCase())) seen.set(v.toLowerCase(), { v, k });
       }));
-      const icon = { speaker:'👤', event:'⛪', topic:'🏷' };
+      const icon = { speaker:'👤', event:'🏫', topic:'🏷' };
       chipBox.innerHTML = '';
       Array.from(seen.values()).slice(0, 10).forEach(({ v, k }) => {
         const b = document.createElement('button'); b.type = 'button';
@@ -4558,7 +3964,7 @@
     }
 
     if(sermons.length === 0){
-      libraryEmpty.textContent = 'No saved sermons match "' + librarySearchInput.value.trim() + '".';
+      libraryEmpty.textContent = 'No saved lectures match "' + librarySearchInput.value.trim() + '".';
       libraryEmpty.style.display = 'block';
       return;
     }
@@ -4618,9 +4024,9 @@
         form.addEventListener('click', ev => ev.stopPropagation());
         const fields = [
           ['title', 'Title (e.g. "Faith that moves mountains")'],
-          ['speaker', 'Speaker / pastor (e.g. Ptr. Juan Santos)'],
-          ['event', 'Event / church (e.g. Sunday Service, Youth Camp)'],
-          ['topic', 'Topic (e.g. faith, forgiveness)']
+          ['speaker', 'Teacher / speaker (e.g. Mr. Juan Santos)'],
+          ['event', 'Class, section or event (e.g. Grade 10 – Rizal)'],
+          ['topic', 'Subject / topic (e.g. Science – Photosynthesis)']
         ];
         const inputs = {};
         fields.forEach(([k, ph]) => {
@@ -4677,7 +4083,7 @@
       del.addEventListener('click', async (e) => {
         e.stopPropagation();
         closeThisMenu();
-        if(!confirm('Delete this saved sermon? This cannot be undone.')) return;
+        if(!confirm('Delete this saved recording? This cannot be undone.')) return;
         await deleteSermon(sermon.id);
         renderLibrary();
       });
@@ -4739,7 +4145,7 @@
     const stamp = d.toISOString().slice(0,10);
     const cleanTitle = (sermon.title && sermon.title.trim())
       ? sermon.title.trim().replace(/[^a-z0-9\-_ ]/gi, '').replace(/\s+/g, '-')
-      : ('sermon-echo-' + stamp);
+      : ('lecture-' + stamp);
     const ext = (sermon.audioBlob && sermon.audioBlob.type && sermon.audioBlob.type.includes('wav')) ? 'wav' : 'webm';
     return cleanTitle + '.' + ext;
   }
@@ -4756,7 +4162,7 @@
       try{
         await navigator.share({
           files: [file],
-          title: sermon.title && sermon.title.trim() ? sermon.title.trim() : 'Sermon Recorder recording'
+          title: sermon.title && sermon.title.trim() ? sermon.title.trim() : 'ScitechLectureTool recording'
         });
       }catch(err){
         // User cancelled the share sheet, or the browser blocked it — nothing to do here.
@@ -4831,7 +4237,7 @@
     showView(screenBeforeLibrary);
   });
 
-  // ---- Paywall (Sermon Recorder Premium) ----
+  // ---- Paywall (ScitechLectureTool Premium) ----
   let screenBeforePaywall = 'home';
 
   function openPaywall(){
@@ -4860,7 +4266,7 @@
         b.addEventListener('click', (e) => { e.stopPropagation(); openPaywall(); setTimeout(() => { const r = document.getElementById('renewSteps'); if(r) r.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 150); });
         el.appendChild(document.createElement('br'));
         el.appendChild(b);
-        if(id !== 'redeemError' && localStorage.getItem(PREMIUM_FLAG_KEY) === 'true'){
+        if(!FREE_MODE && id !== 'redeemError' && localStorage.getItem(PREMIUM_FLAG_KEY) === 'true'){
           localStorage.removeItem(PREMIUM_FLAG_KEY);
           try{ refreshPremiumUI(); }catch(err){}
         }
