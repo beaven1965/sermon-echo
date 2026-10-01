@@ -3972,7 +3972,7 @@
     const d = cvEl('details', 'cv-fold');
     const sum = cvEl('summary');
     sum.appendChild(document.createTextNode('📚 Voices across the ages — references'));
-    sum.appendChild(cvEl('small', '', 'Tap to see theologians, philosophers, scientists, psychologists, educators & historians on this topic (about 30–40 seconds)'));
+    sum.appendChild(cvEl('small', '', 'Tap to see theologians, philosophers, scientists, psychologists, educators & historians on this topic, with links to look each one up'));
     d.appendChild(sum);
     const body = cvEl('div', 'cv-body');
     d.appendChild(body);
@@ -3981,12 +3981,14 @@
       if(!d.open || loaded) return;
       loaded = true;
       body.innerHTML = '';
-      body.appendChild(cvEl('div', 'cv-note', '⏳ Gathering voices from across the centuries… this takes about 30–40 seconds, please wait.'));
+      body.appendChild(cvEl('div', 'cv-note', '⏳ Gathering voices from across the centuries… about 10–20 seconds.'));
       try{
         const res = await fetch('/.netlify/functions/bible-voices', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ query: topic }) });
         const raw = await res.text();
-        let data = {}; try{ data = JSON.parse(raw.trim() || '{}'); }catch(e){}
+        let data = null; try{ data = JSON.parse(raw.trim()); }catch(e){}
+        if(!data) throw new Error('This took too long this time.');
         if(data.error || !res.ok) throw new Error(data.error || 'Could not load right now. Please try again.');
+        if(!(data.voices || []).length && !(data.scientists || []).length) throw new Error('No voices were found for this search.');
         body.innerHTML = '';
         // Thinkers by era
         if((data.voices || []).length){
@@ -4000,6 +4002,9 @@
             const wl = document.createElement('a'); wl.className = 'cv-link'; wl.target = '_blank'; wl.rel = 'noopener';
             wl.href = 'https://en.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(v.name); wl.textContent = ' · about ↗';
             it.appendChild(wl);
+            const sl2 = document.createElement('a'); sl2.className = 'cv-link'; sl2.target = '_blank'; sl2.rel = 'noopener';
+            sl2.href = 'https://www.google.com/search?q=' + encodeURIComponent(v.name + ' ' + topic); sl2.textContent = ' · 🔍 search ↗';
+            it.appendChild(sl2);
             it.appendChild(cvEl('div', '', v.view));
             if(v.response) it.appendChild(cvEl('div', 'cv-resp', '📖 Biblical response: ' + v.response));
             body.appendChild(it);
@@ -4031,11 +4036,11 @@
             body.appendChild(it);
           });
         }
-        body.appendChild(cvEl('div', 'cv-note', 'Each view is a short summary of what that person is known to have taught, in our own words — not a direct quote. This app presents a biblical, creationist worldview.'));
+        body.appendChild(cvEl('div', 'cv-note', 'Each line is a short summary in our own words — not a direct quote. Tap 🔍 search or about ↗ to read more about each person. This app presents a biblical, creationist worldview.'));
       }catch(err){
         loaded = false;
         body.innerHTML = '';
-        body.appendChild(cvEl('div', 'cv-note', (err.message || 'Could not load right now.') + ' Close and open this section to try again.'));
+        body.appendChild(cvEl('div', 'cv-note', (err.message || 'Could not load right now.') + ' Tap the title to close it, then tap again to try once more.'));
       }
     };
     d.addEventListener('toggle', load);   // loads only when tapped (saves AI cost)
